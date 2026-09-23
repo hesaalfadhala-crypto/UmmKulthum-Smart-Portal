@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>توثيق جديد | بوابة أم كلثوم الذكية</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    font-family:Tahoma,Arial,sans-serif;
+    background:#f4f8f7;
+    color:#29413f;
+}
+
+.topbar{
+    background:#174f4b;
+    color:white;
+    padding:18px 5%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.brand h2{font-size:21px}
+.brand p{font-size:12px;color:#c8dcda;margin-top:5px}
+
+.back{
+    text-decoration:none;
+    color:#174f4b;
+    background:white;
+    padding:10px 18px;
+    border-radius:10px;
+    font-size:14px;
+}
+
+.page{
+    max-width:1400px;
+    margin:auto;
+    padding:35px 4%;
+}
+
+.heading{
+    margin-bottom:25px;
+}
+
+.heading span{
+    color:#b59646;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.heading h1{
+    font-size:28px;
+    margin:8px 0;
+    color:#174f4b;
+}
+
+.heading p{
+    color:#839592;
+    line-height:1.8;
+}
+
+.workspace{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+    align-items:start;
+}
+
+.panel{
+    background:white;
+    border:1px solid #dfe9e7;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.panel-title{
+    padding:20px 25px;
+    border-bottom:1px solid #e7eeed;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.panel-title h3{
+    color:#174f4b;
+}
+
+.panel-title span{
+    font-size:12px;
+    color:#8a9b99;
+}
+
+.form{
+    padding:25px;
+}
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.field{
+    margin-bottom:18px;
+}
+
+label{
+    display:block;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:8px;
+    color:#355552;
+}
+
+.required{color:#b58b36}
+
+input,select,textarea{
+    width:100%;
+    border:1px solid #d7e2e0;
+    border-radius:10px;
+    padding:12px;
+    font-family:inherit;
+    font-size:14px;
+    outline:none;
+    background:#fff;
+}
+
+input:focus,select:focus,textarea:focus{
+    border-color:#2a8279;
+    box-shadow:0 0 0 3px #edf7f5;
+}
+
+textarea{
+    min-height:100px;
+    resize:vertical;
+}
+
+.check-title{
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.checks{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+.check{
+    border:1px solid #dce6e4;
+    padding:8px 11px;
+    border-radius:20px;
+    font-size:12px;
+    cursor:pointer;
+    background:#fafcfc;
+}
+
+.check input{
+    width:auto;
+    margin-left:5px;
+}
+
+.upload{
+    border:2px dashed #cbdad7;
+    border-radius:13px;
+    padding:25px;
+    text-align:center;
+    color:#7c908d;
+    background:#fafdfc;
+}
+
+.upload input{
+    border:0;
+    margin-top:10px;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+button{
+    border:0;
+    padding:13px 22px;
+    border-radius:10px;
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:bold;
+}
+
+.primary{
+    background:#174f4b;
+    color:white;
+}
+
+.secondary{
+    background:#edf3f2;
+    color:#174f4b;
+}
+
+/* التقرير */
+.preview-wrap{
+    padding:25px;
+    background:#eef3f2;
+}
+
+.report{
+    background:white;
+    min-height:850px;
+    padding:35px;
+    border-radius:5px;
+    box-shadow:0 5px 25px rgba(40,70,65,.08);
+}
+
+.report-head{
+    text-align:center;
+    border-bottom:3px solid #174f4b;
+    padding-bottom:20px;
+    margin-bottom:25px;
+}
+
+.report-logo{
+    width:55px;
+    height:55px;
+    margin:auto auto 12px;
+    border-radius:15px;
+    background:#174f4b;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+}
+
+.report-head small{
+    color:#8d9b99;
+}
+
+.report-head h2{
+    color:#174f4b;
+    margin:8px 0;
+}
+
+.report-title{
+    background:#174f4b;
+    color:white;
+    text-align:center;
+    padding:13px;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+
+.info{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.info div{
+    border:1px solid #e0e7e6;
+    padding:11px;
+    border-radius:7px;
+    font-size:12px;
+}
+
+.info strong{
+    color:#174f4b;
+}
+
+.report-section{
+    margin:17px 0;
+}
+
+.report-section h4{
+    color:#b08b3e;
+    border-bottom:1px solid #e7eceb;
+    padding-bottom:7px;
+    margin-bottom:8px;
+}
+
+.report-section p{
+    font-size:13px;
+    line-height:1.9;
+    color:#526663;
+    min-height:20px;
+}
+
+.empty{
+    color:#b3bfbd !important;
+}
+
+.note{
+    margin-top:20px;
+    padding:12px;
+    background:#fff9e8;
+    border-radius:8px;
+    color:#887036;
+    font-size:11px;
+    line-height:1.7;
+}
+
+@media(max-width:950px){
+    .workspace{grid-template-columns:1fr}
+}
+
+@media print{
+    .topbar,.heading,.form-panel{display:none}
+    body{background:white}
+    .page{padding:0}
+    .workspace{display:block}
+    .preview-panel{border:0}
+    .panel-title{display:none}
+    .preview-wrap{padding:0;background:white}
+    .report{box-shadow:none}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <h2>بوابة أم كلثوم الذكية</h2>
+        <p>مدرسة أم كلثوم الابتدائية الإعدادية للبنات</p>
+    </div>
+
+    <a class="back" href="index.html">← العودة للرئيسية</a>
+</header>
+
+<main class="page">
+
+    <div class="heading">
+        <span>SMART DOCUMENTATION</span>
+        <h1>توثيق فعالية أو نشاط</h1>
+        <p>
+            أدخلي بيانات الفعالية، وستظهر معاينة التقرير تلقائيًا
+            في الجانب الآخر.
+        </p>
+    </div>
+
+    <div class="workspace">
+
+        <section class="panel form-panel">
+            <div class="panel-title">
+                <h3>بيانات التوثيق</h3>
+                <span>الحقول الأساسية</span>
+            </div>
+
+            <div class="form">
+
+                <div class="field">
+                    <label>اسم الفعالية أو النشاط <span class="required">*</span></label>
+                    <input id="activity" type="text" placeholder="مثال: أسبوع القراءة">
+                </div>
+
+                <div class="row">
+                    <div class="field">
+                        <label>نوع الفعالية</label>
+                        <select id="type">
+                            <option value="">اختاري النوع</option>
+                            <option>فعالية</option>
+                            <option>نشاط</option>
+                            <option>مبادرة</option>
+                            <option>مسابقة</option>
+                            <option>ورشة تدريبية</option>
+                            <option>لقاء توعوي</option>
+                            <option>زيارة</option>
+                            <option>أخرى</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>القسم</label>
+                        <select id="department">
+                            <option value="">اختاري القسم</option>
+                            <option>اللغة العربية</option>
+                            <option>اللغة الإنجليزية</option>
+                            <option>الرياضيات</option>
+                            <option>العلوم</option>
+                            <option>الاجتماعيات</option>
+                            <option>التربية الإسلامية</option>
+                            <option>الحاسوب</option>
+                            <option>التربية الأسرية</option>
+                            <option>التربية الرياضية</option>
+                            <option>المجالات</option>
+                            <option>الإدارة المدرسية</option>
+                            <option>أخرى</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="field">
+                        <label>منفذة الفعالية</label>
+                        <input id="executor" type="text" placeholder="اسم المعلمة / المنفذة">
+                    </div>
+
+                    <div class="field">
+                        <label>التاريخ</label>
+                        <input id="date" type="date">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>مكان التنفيذ</label>
+                    <input id="location" type="text" placeholder="مثال: مركز مصادر التعلم">
+                </div>
+
+                <div class="field">
+                    <div class="check-title">المشروع أو المبادرة المرتبطة</div>
+
+                    <div class="checks">
+                        <label class="check"><input type="checkbox" value="التعليم الأخضر"> التعليم الأخضر</label>
+                        <label class="check"><input type="checkbox" value="اليونسكو"> اليونسكو</label>
+                        <label class="check"><input type="checkbox" value="الصحة والسلامة"> الصحة والسلامة</label>
+                        <label class="check"><input type="checkbox" value="TIMSS"> TIMSS</label>
+                        <label class="check"><input type="checkbox" value="PIRLS"> PIRLS</label>
+                        <label class="check"><input type="checkbox" value="تحدي القراءة"> تحدي القراءة</label>
+                        <label class="check"><input type="checkbox" value="أخرى"> أخرى</label>
+                        <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>الفئة المستهدفة</label>
+                    <input id="target" type="text" placeholder="مثال: طالبات الصف الأول الإعدادي">
+                </div>
+
+                <div class="field">
+                    <label>الهدف من الفعالية</label>
+                    <textarea id="goal" placeholder="اكتبي الهدف بشكل مختصر وواضح"></textarea>
+                </div>
+
+                <div class="field">
+                    <label>وصف التنفيذ</label>
+                    <textarea id="implementation" placeholder="كيف تم تنفيذ الفعالية؟"></textarea>
+                </div>
+
+                <div class="field">
+                    <label>النتائج والأثر</label>
+                    <textarea id="impact" placeholder="ما أبرز النتائج والأثر الذي تحقق؟"></textarea>
+                </div>
+
+                <div class="field">
+                    <label>التوصيات</label>
+                    <textarea id="recommendations" placeholder="التوصيات أو الخطوات المستقبلية"></textarea>
+                </div>
+
+                <div class="field">
+                    <label>صور التوثيق</label>
+                    <div class="upload">
+                        📷<br>
+                        إرفاق صور الفعالية
+                        <input type="file" multiple accept="image/*">
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="primary" type="button" onclick="window.print()">طباعة التقرير</button>
+                    <button class="secondary" type="button" onclick="clearForm()">مسح البيانات</button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <section class="panel preview-panel">
+
+            <div class="panel-title">
+                <h3>معاينة التقرير</h3>
+                <span>تتحدث تلقائيًا</span>
+            </div>
+
+            <div class="preview-wrap">
+
+                <article class="report">
+
+                    <div class="report-head">
+                        <div class="report-logo">✦</div>
+                        <small>مملكة البحرين</small>
+                        <h2>مدرسة أم كلثوم الابتدائية الإعدادية للبنات</h2>
+                        <small>العام الدراسي 2026 - 2027</small>
+                    </div>
+
+                    <div class="report-title">
+                        تقرير فعالية / نشاط
+                    </div>
+
+                    <div class="info">
+                        <div><strong>اسم الفعالية:</strong> <span id="pActivity">—</span></div>
+                        <div><strong>النوع:</strong> <span id="pType">—</span></div>
+                        <div><strong>القسم:</strong> <span id="pDepartment">—</span></div>
+                        <div><strong>المنفذة:</strong> <span id="pExecutor">—</span></div>
+                        <div><strong>التاريخ:</strong> <span id="pDate">—</span></div>
+                        <div><strong>المكان:</strong> <span id="pLocation">—</span></div>
+                    </div>
+
+                    <div class="report-section">
+                        <h4>المشروع / المبادرة المرتبطة</h4>
+                        <p id="pProjects" class="empty">لم يتم التحديد</p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4>الفئة المستهدفة</h4>
+                        <p id="pTarget" class="empty">لم تتم الإضافة بعد</p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4>الهدف</h4>
+                        <p id="pGoal" class="empty">لم تتم الإضافة بعد</p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4>وصف التنفيذ</h4>
+                        <p id="pImplementation" class="empty">لم تتم الإضافة بعد</p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4>النتائج والأثر</h4>
+                        <p id="pImpact" class="empty">لم تتم الإضافة بعد</p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4>التوصيات</h4>
+                        <p id="pRecommendations" class="empty">لم تتم الإضافة بعد</p>
+                    </div>
+
+                    <div class="note">
+                        بوابة أم كلثوم الذكية • نموذج توثيق إلكتروني
+                    </div>
+
+                </article>
+
+            </div>
+        </section>
+
+    </div>
+</main>
+
+
+<script>
+const links = [
+    ["activity","pActivity"],
+    ["type","pType"],
+    ["department","pDepartment"],
+    ["executor","pExecutor"],
+    ["date","pDate"],
+    ["location","pLocation"],
+    ["target","pTarget"],
+    ["goal","pGoal"],
+    ["implementation","pImplementation"],
+    ["impact","pImpact"],
+    ["recommendations","pRecommendations"]
+];
+
+links.forEach(([inputId,previewId])=>{
+    const input=document.getElementById(inputId);
+    const preview=document.getElementById(previewId);
+
+    function update(){
+        const value=input.value.trim();
+        preview.textContent=value || "—";
+        preview.classList.toggle("empty",!value);
+    }
+
+    input.addEventListener("input",update);
+    input.addEventListener("change",update);
+});
+
+const projectChecks=document.querySelectorAll(".check input");
+
+projectChecks.forEach(check=>{
+    check.addEventListener("change",()=>{
+        const selected=[...projectChecks]
+            .filter(c=>c.checked)
+            .map(c=>c.value);
+
+        const output=document.getElementById("pProjects");
+
+        output.textContent=selected.length
+            ? selected.join(" • ")
+            : "لم يتم التحديد";
+
+        output.classList.toggle("empty",!selected.length);
+    });
+});
+
+function clearForm(){
+    if(!confirm("هل تريدين مسح جميع البيانات المدخلة؟")) return;
+
+    document.querySelectorAll("input[type=text], input[type=date], textarea")
+        .forEach(el=>el.value="");
+
+    document.querySelectorAll("select")
+        .forEach(el=>el.selectedIndex=0);
+
+    document.querySelectorAll("input[type=checkbox]")
+        .forEach(el=>el.checked=false);
+
+    location.reload();
+}
+</script>
+
+</body>
+</html>
