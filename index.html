@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>بوابة أم كلثوم الذكية</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family: Tahoma, Arial, sans-serif;
+    background:#f5f8f7;
+    color:#263b3a;
+}
+
+/* الشريط الجانبي */
+.sidebar{
+    position:fixed;
+    right:0;
+    top:0;
+    width:285px;
+    height:100vh;
+    background:linear-gradient(180deg,#174f4b,#0e3937);
+    color:white;
+    padding:32px 22px;
+    overflow-y:auto;
+}
+
+.brand{
+    text-align:center;
+    padding-bottom:25px;
+    border-bottom:1px solid rgba(255,255,255,.15);
+}
+
+.logo{
+    width:70px;
+    height:70px;
+    margin:auto;
+    border-radius:20px;
+    background:white;
+    color:#174f4b;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    margin-bottom:15px;
+}
+
+.brand h2{
+    font-size:22px;
+    margin-bottom:8px;
+}
+
+.brand p{
+    font-size:13px;
+    color:#c8dcda;
+}
+
+.year{
+    margin:22px 0;
+    background:rgba(255,255,255,.09);
+    border-radius:15px;
+    padding:14px;
+    text-align:center;
+}
+
+.year small{
+    display:block;
+    color:#bcd2d0;
+    margin-bottom:5px;
+}
+
+.year strong{
+    color:#e8d49b;
+    font-size:18px;
+}
+
+.menu-title{
+    color:#dbc788;
+    font-size:12px;
+    margin:22px 8px 10px;
+}
+
+.menu-item{
+    padding:14px 15px;
+    margin:6px 0;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:15px;
+    transition:.2s;
+}
+
+.menu-item:hover,
+.menu-item.active{
+    background:white;
+    color:#174f4b;
+}
+
+.user{
+    margin-top:30px;
+    padding-top:20px;
+    border-top:1px solid rgba(255,255,255,.15);
+    font-size:13px;
+    color:#d7e5e4;
+}
+
+/* المحتوى */
+.main{
+    margin-right:285px;
+    min-height:100vh;
+}
+
+.topbar{
+    background:white;
+    padding:25px 40px;
+    border-bottom:1px solid #e4eceb;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.topbar h1{
+    font-size:25px;
+    color:#174f4b;
+}
+
+.topbar p{
+    color:#899b99;
+    font-size:13px;
+    margin-top:5px;
+}
+
+.status{
+    background:#eef8f4;
+    color:#397866;
+    padding:10px 15px;
+    border-radius:20px;
+    font-size:13px;
+}
+
+.content{
+    padding:35px 40px;
+}
+
+.welcome{
+    background:linear-gradient(120deg,#174f4b,#168078);
+    border-radius:24px;
+    padding:35px;
+    color:white;
+    position:relative;
+    overflow:hidden;
+}
+
+.welcome:after{
+    content:"";
+    position:absolute;
+    width:240px;
+    height:240px;
+    border-radius:50%;
+    background:rgba(255,255,255,.06);
+    left:-60px;
+    top:-90px;
+}
+
+.label{
+    color:#e7d39a;
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+
+.welcome h2{
+    font-size:29px;
+    margin:12px 0;
+}
+
+.welcome p{
+    color:#d6e7e5;
+    line-height:1.8;
+    max-width:750px;
+}
+
+.section-title{
+    margin:32px 0 17px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.section-title h3{
+    color:#174f4b;
+    font-size:20px;
+}
+
+.section-title span{
+    color:#91a09f;
+    font-size:13px;
+}
+
+/* المؤشرات */
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:17px;
+}
+
+.stat{
+    background:white;
+    padding:22px;
+    border-radius:17px;
+    border:1px solid #e4eceb;
+}
+
+.stat-icon{
+    font-size:24px;
+    margin-bottom:15px;
+}
+
+.stat small{
+    color:#899997;
+}
+
+.stat strong{
+    display:block;
+    font-size:27px;
+    color:#174f4b;
+    margin-top:8px;
+}
+
+/* الخدمات */
+.cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.card{
+    background:white;
+    border:1px solid #e3ebea;
+    border-radius:18px;
+    padding:24px;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 10px 30px rgba(30,70,65,.08);
+}
+
+.card .icon{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    background:#edf7f5;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:22px;
+    margin-bottom:18px;
+}
+
+.card h4{
+    color:#174f4b;
+    margin-bottom:9px;
+    font-size:17px;
+}
+
+.card p{
+    color:#879694;
+    font-size:13px;
+    line-height:1.7;
+}
+
+.secure{
+    border:1px solid #dbc98f;
+    background:#fffdf6;
+}
+
+.secure .icon{
+    background:#f7f0d9;
+}
+
+/* الجوال */
+@media(max-width:1000px){
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .cards{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:750px){
+    .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+    }
+
+    .main{
+        margin-right:0;
+    }
+
+    .topbar,
+    .content{
+        padding:22px;
+    }
+
+    .stats,
+    .cards{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="brand">
+        <div class="logo">✦</div>
+        <h2>بوابة أم كلثوم الذكية</h2>
+        <p>متابعة • توثيق • تطوير</p>
+    </div>
+
+    <div class="year">
+        <small>العام الدراسي</small>
+        <strong>2026 - 2027</strong>
+    </div>
+
+    <div class="menu-title">القائمة الرئيسية</div>
+
+    <div class="menu-item active">⌂ &nbsp; لوحة التحكم</div>
+    <div class="menu-item">✎ &nbsp; التوثيقات والفعاليات</div>
+    <div class="menu-item">▣ &nbsp; الاجتماعات</div>
+    <div class="menu-item">◎ &nbsp; المبادرات والمشاريع</div>
+    <div class="menu-item">♢ &nbsp; مركز الدعم والتطوير المهني</div>
+    <div class="menu-item">▤ &nbsp; الخطط والمتابعة</div>
+    <div class="menu-item">☆ &nbsp; الشهادات والتكريم</div>
+    <div class="menu-item">▰ &nbsp; الأرشيف الذكي</div>
+
+    <div class="menu-title">صلاحيات خاصة</div>
+
+    <div class="menu-item">◉ &nbsp; منظومة الزيارات الصفية</div>
+
+    <div class="user">
+        👤 مستخدم تجريبي<br>
+        <small>سيتم ربط الحساب والصلاحيات لاحقًا</small>
+    </div>
+
+</aside>
+
+
+<main class="main">
+
+    <header class="topbar">
+        <div>
+            <h1>الرئيسية</h1>
+            <p>مدرسة أم كلثوم الابتدائية الإعدادية للبنات</p>
+        </div>
+
+        <div class="status">
+            ● النظام يعمل
+        </div>
+    </header>
+
+
+    <div class="content">
+
+        <section class="welcome">
+
+            <div class="label">UMM KULTHUM SMART PORTAL</div>
+
+            <h2>مرحبًا بكِ في بوابة أم كلثوم الذكية</h2>
+
+            <p>
+                بيئة مدرسية موحدة للتوثيق والمتابعة والتطوير،
+                تجمع الأعمال والمبادرات والفعاليات في مكان واحد،
+                وتدعم القيادة في قراءة المؤشرات واتخاذ القرارات.
+            </p>
+
+        </section>
+
+
+        <div class="section-title">
+            <h3>مؤشرات المدرسة</h3>
+            <span>نظرة سريعة</span>
+        </div>
+
+
+        <section class="stats">
+
+            <div class="stat">
+                <div class="stat-icon">🎯</div>
+                <small>الفعاليات والتوثيقات</small>
+                <strong>0</strong>
+            </div>
+
+            <div class="stat">
+                <div class="stat-icon">💡</div>
+                <small>المبادرات والمشاريع</small>
+                <strong>0</strong>
+            </div>
+
+            <div class="stat">
+                <div class="stat-icon">🎓</div>
+                <small>برامج التطوير المهني</small>
+                <strong>0</strong>
+            </div>
+
+            <div class="stat">
+                <div class="stat-icon">✓</div>
+                <small>التوثيقات المكتملة</small>
+                <strong>0</strong>
+            </div>
+
+        </section>
+
+
+        <div class="section-title">
+            <h3>الخدمات الذكية</h3>
+            <span>اختاري الخدمة المطلوبة</span>
+        </div>
+
+
+        <section class="cards">
+
+            <div class="card">
+                <div class="icon">✎</div>
+                <h4>توثيق جديد</h4>
+                <p>
+                    تسجيل فعالية أو نشاط وإضافة الهدف والتنفيذ
+                    والنتائج والأثر والصور.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="icon">🎯</div>
+                <h4>المبادرات والمشاريع</h4>
+                <p>
+                    متابعة مبادرات المدرسة والمشاريع المرتبطة
+                    بالتوثيقات والفعاليات.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="icon">🎓</div>
+                <h4>مركز الدعم والتطوير</h4>
+                <p>
+                    الاحتياجات التدريبية والورش والبرامج
+                    المهنية وقياس أثر التدريب.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="icon">📁</div>
+                <h4>الأرشيف الذكي</h4>
+                <p>
+                    الوصول إلى التوثيقات والتقارير السابقة
+                    بطريقة منظمة وسريعة.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="icon">📊</div>
+                <h4>الخطط والمتابعة</h4>
+                <p>
+                    متابعة الخطط المدرسية ومؤشرات التنفيذ
+                    ونسب الإنجاز.
+                </p>
+            </div>
+
+            <div class="card secure">
+                <div class="icon">🔐</div>
+                <h4>منظومة الزيارات الصفية</h4>
+                <p>
+                    مساحة خاصة بالقيادة والمنسقات والمعلمات
+                    الأوائل وفق صلاحيات الدخول.
+                </p>
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+</body>
+</html>
