@@ -412,21 +412,79 @@ button{
                     <input id="location" type="text" placeholder="مثال: مركز مصادر التعلم">
                 </div>
 
-                <div class="field">
-                    <div class="check-title">المشروع أو المبادرة المرتبطة</div>
+   <!-- المجالات المرتبطة -->
+<div class="field">
+    <div class="check-title">المجال المرتبط بالتوثيق <span class="required">*</span></div>
 
-                    <div class="checks">
-                        <label class="check"><input type="checkbox" value="التعليم الأخضر"> التعليم الأخضر</label>
-                        <label class="check"><input type="checkbox" value="اليونسكو"> اليونسكو</label>
-                        <label class="check"><input type="checkbox" value="الصحة والسلامة"> الصحة والسلامة</label>
-                        <label class="check"><input type="checkbox" value="TIMSS"> TIMSS</label>
-                        <label class="check"><input type="checkbox" value="PIRLS"> PIRLS</label>
-                        <label class="check"><input type="checkbox" value="تحدي القراءة"> تحدي القراءة</label>
-                        <label class="check"><input type="checkbox" value="أخرى"> أخرى</label>
-                        <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
-                    </div>
-                </div>
+    <div class="checks areas-checks">
+        <label class="check">
+            <input type="checkbox" value="التعليم والتعلم والتقويم">
+            التعليم والتعلم والتقويم
+        </label>
 
+        <label class="check">
+            <input type="checkbox" value="الإنجاز الأكاديمي">
+            الإنجاز الأكاديمي
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="التطور الشخصي والمسئولية الاجتماعية">
+            التطور الشخصي والمسئولية الاجتماعية
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="القيادة والإدارة">
+            القيادة والإدارة
+        </label>
+    </div>
+</div>
+
+
+<!-- المشاريع والمبادرات -->
+<div class="field">
+    <div class="check-title">المشروع أو المبادرة المرتبطة</div>
+
+    <div class="checks project-checks">
+        <label class="check"><input type="checkbox" value="التعليم الأخضر"> التعليم الأخضر</label>
+        <label class="check"><input type="checkbox" value="اليونسكو"> اليونسكو</label>
+        <label class="check"><input type="checkbox" value="غرس"> غرس</label>
+        <label class="check"><input type="checkbox" value="English and Beyond"> English and Beyond</label>
+        <label class="check"><input type="checkbox" value="لغتي هويتي"> لغتي هويتي</label>
+        <label class="check"><input type="checkbox" value="الخوارزمي"> الخوارزمي</label>
+        <label class="check"><input type="checkbox" value="أصيل"> أصيل</label>
+        <label class="check"><input type="checkbox" value="حاملات المسك"> حاملات المسك</label>
+        <label class="check"><input type="checkbox" value="Fitness Queen"> Fitness Queen</label>
+        <label class="check"><input type="checkbox" value="بمهاراتي أرتقي"> بمهاراتي أرتقي</label>
+        <label class="check"><input type="checkbox" value="تحدي القراءة العربي"> تحدي القراءة العربي</label>
+        <label class="check"><input type="checkbox" value="TIMSS"> TIMSS</label>
+        <label class="check"><input type="checkbox" value="أخرى"> أخرى</label>
+        <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
+    </div>
+</div>
+<!-- المديرات المساعدات المشرفات -->
+<div class="field">
+    <div class="check-title">
+        المديرة/المديرات المساعدات المشرفات
+        <span style="font-weight:normal;color:#8a9b99;">(اختياري)</span>
+    </div>
+
+    <div class="checks assistant-checks">
+        <label class="check">
+            <input type="checkbox" value="أ. حصه سند الفضاله">
+            أ. حصه سند الفضاله
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="أ. عايشة محمد يعقوب">
+            أ. عايشة محمد يعقوب
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="أ. هبة علي حسين">
+            أ. هبة علي حسين
+        </label>
+    </div>
+</div>
                 <div class="field">
                     <label>الفئة المستهدفة</label>
                     <input id="target" type="text" placeholder="مثال: طالبات الصف الأول الإعدادي">
@@ -501,11 +559,18 @@ button{
                         <div><strong>المكان:</strong> <span id="pLocation">—</span></div>
                     </div>
 
+ <div class="report-section">
+    <h4>المجال المرتبط بالتوثيق</h4>
+    <p id="pAreas" class="empty">لم يتم التحديد</p>
+</div>
                     <div class="report-section">
                         <h4>المشروع / المبادرة المرتبطة</h4>
                         <p id="pProjects" class="empty">لم يتم التحديد</p>
                     </div>
-
+<div class="report-section" id="assistantsReport" style="display:none;">
+    <h4>الإشراف</h4>
+    <p id="pAssistants"></p>
+</div>
                     <div class="report-section">
                         <h4>الفئة المستهدفة</h4>
                         <p id="pTarget" class="empty">لم تتم الإضافة بعد</p>
@@ -535,7 +600,12 @@ button{
                         بوابة أم كلثوم الذكية • نموذج توثيق إلكتروني
                     </div>
 
-                </article>
+    <div style="margin-top:45px; text-align:left; direction:rtl; padding-left:25px;">
+    <div style="display:inline-block; text-align:center; min-width:220px;">
+        <strong>مديرة المدرسة</strong>
+        <div style="margin-top:8px;">أ. هيا محمد النعيمي</div>
+    </div>
+</div>            </article>
 
             </div>
         </section>
@@ -590,7 +660,51 @@ projectChecks.forEach(check=>{
         output.classList.toggle("empty",!selected.length);
     });
 });
+// تحديث المجالات في التقرير
+const areaChecks = document.querySelectorAll(".areas-checks input[type=checkbox]");
 
+areaChecks.forEach(check => {
+    check.addEventListener("change", () => {
+        const selected = [...areaChecks]
+            .filter(c => c.checked)
+            .map(c => c.value);
+
+        const output = document.getElementById("pAreas");
+
+        output.textContent = selected.length
+            ? selected.join(" • ")
+            : "لم يتم التحديد";
+
+        output.classList.toggle("empty", !selected.length);
+    });
+});
+
+
+// تحديث المديرات المساعدات في التقرير
+const assistantChecks = document.querySelectorAll(".assistant-checks input[type=checkbox]");
+
+assistantChecks.forEach(check => {
+    check.addEventListener("change", () => {
+        const selected = [...assistantChecks]
+            .filter(c => c.checked)
+            .map(c => c.value);
+
+        const report = document.getElementById("assistantsReport");
+        const output = document.getElementById("pAssistants");
+
+        if (selected.length) {
+            const title = selected.length === 1
+                ? "المديرة المساعدة المشرفة: "
+                : "المديرات المساعدات المشرفات: ";
+
+            output.textContent = title + selected.join(" • ");
+            report.style.display = "block";
+        } else {
+            output.textContent = "";
+            report.style.display = "none";
+        }
+    });
+});
 function clearForm(){
     if(!confirm("هل تريدين مسح جميع البيانات المدخلة؟")) return;
 
