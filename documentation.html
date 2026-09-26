@@ -369,7 +369,13 @@ button{
                     <label>اسم الفعالية أو النشاط <span class="required">*</span></label>
                     <input id="activity" type="text" placeholder="مثال: أسبوع القراءة">
                 </div>
-
+<div class="field">
+    <label>الفصل الدراسي</label>
+    <select id="semester">
+        <option value="الفصل الدراسي الأول" selected>الفصل الدراسي الأول</option>
+        <option value="الفصل الدراسي الثاني">الفصل الدراسي الثاني</option>
+    </select>
+</div>
                 <div class="row">
                     <div class="field">
                         <label>نوع الفعالية</label>
@@ -469,13 +475,57 @@ button{
         <label class="check"><input type="checkbox" value="بمهاراتي أرتقي"> بمهاراتي أرتقي</label>
         <label class="check"><input type="checkbox" value="تحدي القراءة العربي"> تحدي القراءة العربي</label>
         <label class="check"><input type="checkbox" value="TIMSS"> TIMSS</label>
-        <label class="check"><input type="checkbox" value="دانة أم كلثوم"> دانة أم كلثوم</label>
-<label class="check"><input type="checkbox" value="حصادي"> حصادي</label>
-<label class="check"><input type="checkbox" value="خذ بيدي"> خذ بيدي</label>
-<label class="check"><input type="checkbox" value="نعم أستطيع"> نعم أستطيع</label>
-<label class="check"><input type="checkbox" value="الموهوبات"> الموهوبات</label>
         <label class="check"><input type="checkbox" value="أخرى"> أخرى</label>
         <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
+    </div>
+</div>
+                <!-- الفئات المستهدفة من الطالبات -->
+<div class="field">
+    <div class="check-title">
+        الفئات المستهدفة من الطالبات
+        <span style="font-weight:normal;color:#8a9b99;">(يمكن اختيار أكثر من فئة)</span>
+    </div>
+
+    <div class="checks target-checks">
+        <label class="check">
+            <input type="checkbox" value="المتفوقات (دانة أم كلثوم)">
+            المتفوقات (دانة أم كلثوم)
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="متوسطات التحصيل (حصادي)">
+            متوسطات التحصيل (حصادي)
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="منخفضات التحصيل (خذ بيدي)">
+            منخفضات التحصيل (خذ بيدي)
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="صعوبات التعلم والحالات الخاصة (نعم نستطيع)">
+            صعوبات التعلم والحالات الخاصة (نعم نستطيع)
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="الموهوبات">
+            الموهوبات
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="جميع الطالبات">
+            جميع الطالبات
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="طالبات محددات">
+            طالبات محددات
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="أخرى">
+            أخرى
+        </label>
     </div>
 </div>
 <!-- المديرات المساعدات المشرفات -->
@@ -528,16 +578,16 @@ button{
                 </div>
 
                 <div class="field">
-                    <label>صور التوثيق</label>
+<label>صور التوثيق (حتى 10 صور)</label>
                     <div class="upload">
                         📷<br>
                         إرفاق صور الفعالية
-                        <input type="file" multiple accept="image/*">
-                    </div>
+<input id="images" type="file" multiple accept="image/*">                    </div>
                 </div>
 
                 <div class="actions">
                     <button class="primary" type="button" onclick="window.print()">طباعة التقرير</button>
+                    <button class="primary" type="button" onclick="smartSave()">💾 حفظ ذكي</button>
                     <button class="secondary" type="button" onclick="clearForm()">مسح البيانات</button>
                 </div>
 
@@ -571,6 +621,7 @@ button{
 
                     <div class="info">
                         <div><strong>اسم الفعالية:</strong> <span id="pActivity">—</span></div>
+                        <div><strong>الفصل الدراسي:</strong> <span id="pSemester">الفصل الدراسي الأول</span></div>  
                         <div><strong>النوع:</strong> <span id="pType">—</span></div>
                         <div><strong>القسم:</strong> <span id="pDepartment">—</span></div>
                         <div><strong>المنفذة:</strong> <span id="pExecutor">—</span></div>
@@ -636,12 +687,12 @@ button{
 <script>
 const links = [
     ["activity","pActivity"],
+    ["semester","pSemester"],
     ["type","pType"],
     ["department","pDepartment"],
     ["executor","pExecutor"],
     ["date","pDate"],
     ["location","pLocation"],
-    ["target","pTarget"],
     ["goal","pGoal"],
     ["implementation","pImplementation"],
     ["impact","pImpact"],
@@ -662,8 +713,7 @@ links.forEach(([inputId,previewId])=>{
     input.addEventListener("change",update);
 });
 
-const projectChecks=document.querySelectorAll(".check input");
-
+const projectChecks=document.querySelectorAll(".project-checks input[type=checkbox]");
 projectChecks.forEach(check=>{
     check.addEventListener("change",()=>{
         const selected=[...projectChecks]
@@ -697,7 +747,34 @@ areaChecks.forEach(check => {
         output.classList.toggle("empty", !selected.length);
     });
 });
+    // تحديث الفئات المستهدفة في التقرير
+const targetChecks = document.querySelectorAll(".target-checks input[type=checkbox]");
 
+targetChecks.forEach(check => {
+    check.addEventListener("change", () => {
+        const selected = [...targetChecks]
+            .filter(c => c.checked)
+            .map(c => c.value);
+
+        const output = document.getElementById("pTarget");
+
+        output.textContent = selected.length
+            ? selected.join(" • ")
+            : "لم يتم التحديد";
+
+        output.classList.toggle("empty", !selected.length);
+    });
+});
+
+    // تحديد الصور بحد أقصى 10 صور
+const imagesInput = document.getElementById("images");
+
+imagesInput.addEventListener("change", () => {
+    if (imagesInput.files.length > 10) {
+        alert("يمكن إرفاق 10 صور كحد أقصى.");
+        imagesInput.value = "";
+    }
+});
 
 // تحديث المديرات المساعدات في التقرير
 const assistantChecks = document.querySelectorAll(".assistant-checks input[type=checkbox]");
@@ -738,6 +815,46 @@ function clearForm(){
 
     location.reload();
 }
+    function smartSave(){
+    const data = {};
+
+    document.querySelectorAll("input[type=text], input[type=date], textarea, select").forEach(el => {
+        if(el.id) data[el.id] = el.value;
+    });
+
+    document.querySelectorAll("input[type=checkbox]").forEach(el => {
+        if(el.value) data["check_" + el.value] = el.checked;
+    });
+
+    localStorage.setItem("ummKulthumDocumentation", JSON.stringify(data));
+
+    alert("تم حفظ بيانات التوثيق بنجاح ✓");
+}
+
+    function loadSavedData(){
+    const saved = localStorage.getItem("ummKulthumDocumentation");
+    if(!saved) return;
+
+    const data = JSON.parse(saved);
+
+    document.querySelectorAll("input[type=text], input[type=date], textarea, select").forEach(el => {
+        if(el.id && data[el.id] !== undefined){
+            el.value = data[el.id];
+            el.dispatchEvent(new Event("input"));
+            el.dispatchEvent(new Event("change"));
+        }
+    });
+
+    document.querySelectorAll("input[type=checkbox]").forEach(el => {
+        const key = "check_" + el.value;
+        if(data[key] !== undefined){
+            el.checked = data[key];
+            el.dispatchEvent(new Event("change"));
+        }
+    });
+}
+
+window.addEventListener("DOMContentLoaded", loadSavedData);
 </script>
 
 </body>
