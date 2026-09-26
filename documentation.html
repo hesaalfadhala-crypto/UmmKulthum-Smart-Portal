@@ -665,7 +665,10 @@ button{
                         <h4>التوصيات</h4>
                         <p id="pRecommendations" class="empty">لم تتم الإضافة بعد</p>
                     </div>
-
+<div class="report-section" id="photosReport" style="display:none;">
+    <h4>صور التوثيق</h4>
+    <div id="reportImages"></div>
+</div>
                     <div class="note">
                         بوابة أم كلثوم الذكية • نموذج توثيق إلكتروني
                     </div>
@@ -768,7 +771,41 @@ targetChecks.forEach(check => {
 
     // تحديد الصور بحد أقصى 10 صور
 const imagesInput = document.getElementById("images");
+imagesInput.addEventListener("change", () => {
 
+    const files = [...imagesInput.files];
+
+    if (files.length > 10) {
+        alert("يمكن إرفاق 10 صور كحد أقصى.");
+        imagesInput.value = "";
+        return;
+    }
+
+    const reportImages = document.getElementById("reportImages");
+    const photosReport = document.getElementById("photosReport");
+
+    reportImages.innerHTML = "";
+
+    if (files.length === 0) {
+        photosReport.style.display = "none";
+        return;
+    }
+
+    photosReport.style.display = "block";
+
+    files.forEach(file => {
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+
+        img.style.width = "150px";
+        img.style.height = "110px";
+        img.style.objectFit = "cover";
+        img.style.borderRadius = "8px";
+        img.style.margin = "5px";
+
+        reportImages.appendChild(img);
+    });
+});
 imagesInput.addEventListener("change", () => {
     if (imagesInput.files.length > 10) {
         alert("يمكن إرفاق 10 صور كحد أقصى.");
