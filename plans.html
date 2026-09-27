@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الخطط والمتابعة | بوابة أم كلثوم الذكية</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    font-family:Tahoma,Arial,sans-serif;
+    background:#f5f8f7;
+    color:#263b3a;
+}
+
+.topbar{
+    background:white;
+    min-height:105px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 5%;
+    border-bottom:1px solid #e2e9e7;
+}
+
+.topbar img{
+    max-width:620px;
+    width:55%;
+    max-height:65px;
+    object-fit:contain;
+}
+
+.back{
+    text-decoration:none;
+    color:#17544f;
+    font-weight:bold;
+    border:1px solid #d9e5e2;
+    padding:11px 18px;
+    border-radius:12px;
+}
+
+.page{
+    max-width:1200px;
+    margin:auto;
+    padding:38px 25px;
+}
+
+.heading{margin-bottom:28px}
+
+.heading h1{
+    color:#17544f;
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.heading p{
+    color:#7c8d8a;
+    line-height:1.8;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:32px;
+}
+
+.stat{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:16px;
+    padding:20px;
+}
+
+.stat span{
+    display:block;
+    color:#8a9997;
+    font-size:13px;
+    margin-bottom:8px;
+}
+
+.stat strong{
+    color:#17544f;
+    font-size:25px;
+}
+
+.section-title{
+    color:#17544f;
+    font-size:21px;
+    margin-bottom:16px;
+}
+
+.follow-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+    margin-bottom:35px;
+}
+
+.card{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:18px;
+    padding:23px;
+}
+
+.card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:15px;
+}
+
+.card-title{
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+
+.icon{
+    width:44px;
+    height:44px;
+    background:#edf6f3;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:21px;
+}
+
+.card h3{color:#174f4b}
+
+.status{
+    background:#f1f6f5;
+    color:#64807b;
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:11px;
+}
+
+.card p{
+    color:#81918e;
+    font-size:13px;
+    line-height:1.8;
+    margin-bottom:17px;
+}
+
+.progress{
+    height:8px;
+    background:#edf1f0;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress span{
+    display:block;
+    height:100%;
+    width:0%;
+    background:#1d746a;
+}
+
+.progress-info{
+    display:flex;
+    justify-content:space-between;
+    margin-top:8px;
+    color:#94a29f;
+    font-size:12px;
+}
+
+.departments{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.row{
+    display:grid;
+    grid-template-columns:1.5fr repeat(4,1fr);
+    gap:10px;
+    align-items:center;
+    padding:16px 18px;
+    border-bottom:1px solid #edf1f0;
+}
+
+.row:last-child{border-bottom:0}
+
+.row.header{
+    background:#eef5f3;
+    color:#17544f;
+    font-weight:bold;
+}
+
+.row span{
+    font-size:13px;
+    color:#667b77;
+    text-align:center;
+}
+
+.row span:first-child{
+    text-align:right;
+    font-weight:bold;
+    color:#365c57;
+}
+
+.pending{
+    color:#a7843d !important;
+}
+
+footer{
+    text-align:center;
+    color:#9aa8a5;
+    font-size:12px;
+    padding:30px;
+}
+
+@media(max-width:800px){
+    .stats,.follow-grid{grid-template-columns:1fr}
+    .row{grid-template-columns:1fr}
+    .row.header{display:none}
+    .row span{text-align:right}
+    .topbar{flex-direction:column;gap:15px}
+    .topbar img{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <img src="school-logo.png" alt="شعارات المدرسة">
+    <a href="index.html" class="back">← العودة للرئيسية</a>
+</header>
+
+<main class="page">
+
+    <div class="heading">
+        <h1>الخطط والمتابعة</h1>
+        <p>
+            لوحة موحدة لمتابعة الخطط والملفات ومتطلبات الأقسام
+            ورصد مستوى الإنجاز والتسليم خلال العام الدراسي 2026 - 2027.
+        </p>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <span>نسبة الإنجاز العامة</span>
+            <strong>—</strong>
+        </div>
+        <div class="stat">
+            <span>المهام المكتملة</span>
+            <strong>—</strong>
+        </div>
+        <div class="stat">
+            <span>قيد المتابعة</span>
+            <strong>—</strong>
+        </div>
+        <div class="stat">
+            <span>الأقسام</span>
+            <strong>—</strong>
+        </div>
+    </div>
+
+    <h2 class="section-title">متابعة المتطلبات</h2>
+
+    <div class="follow-grid">
+
+        <div class="card">
+            <div class="card-head">
+                <div class="card-title">
+                    <div class="icon">📘</div>
+                    <h3>الخطط الفصلية</h3>
+                </div>
+                <span class="status">متابعة</span>
+            </div>
+            <p>متابعة تسليم واعتماد الخطط الفصلية للأقسام.</p>
+            <div class="progress"><span></span></div>
+            <div class="progress-info">
+                <span>نسبة التسليم</span><span>—</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-head">
+                <div class="card-title">
+                    <div class="icon">🗓️</div>
+                    <h3>الخطط الأسبوعية</h3>
+                </div>
+                <span class="status">أسبوعي</span>
+            </div>
+            <p>متابعة رفع الخطط الأسبوعية للأقسام في الموعد المحدد.</p>
+            <div class="progress"><span></span></div>
+            <div class="progress-info">
+                <span>نسبة التسليم</span><span>—</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-head">
+                <div class="card-title">
+                    <div class="icon">📂</div>
+                    <h3>ملفات التحضير</h3>
+                </div>
+                <span class="status">دوري</span>
+            </div>
+            <p>متابعة ملفات التحضير وفق جدول المتابعة المعتمد.</p>
+            <div class="progress"><span></span></div>
+            <div class="progress-info">
+                <span>نسبة المتابعة</span><span>—</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-head">
+                <div class="card-title">
+                    <div class="icon">👥</div>
+                    <h3>الزيارات التبادلية</h3>
+                </div>
+                <span class="status">متابعة</span>
+            </div>
+            <p>متابعة إعداد وتنفيذ جداول الزيارات التبادلية لمعلمات الأقسام.</p>
+            <div class="progress"><span></span></div>
+            <div class="progress-info">
+                <span>نسبة الإنجاز</span><span>—</span>
+            </div>
+        </div>
+
+    </div>
+
+    <h2 class="section-title">متابعة الأقسام</h2>
+
+    <div class="departments">
+
+        <div class="row header">
+            <span>القسم</span>
+            <span>الخطة الفصلية</span>
+            <span>الخطة الأسبوعية</span>
+            <span>ملفات التحضير</span>
+            <span>الزيارات التبادلية</span>
+        </div>
+
+        <div class="row">
+            <span>الرياضيات</span>
+            <span class="pending">بانتظار البيانات</span>
+            <span>—</span><span>—</span><span>—</span>
+        </div>
+
+        <div class="row">
+            <span>العلوم</span>
+            <span class="pending">بانتظار البيانات</span>
+            <span>—</span><span>—</span><span>—</span>
+        </div>
+
+        <div class="row">
+            <span>الاجتماعيات</span>
+            <span class="pending">بانتظار البيانات</span>
+            <span>—</span><span>—</span><span>—</span>
+        </div>
+
+        <div class="row">
+            <span>اللغة العربية</span>
+            <span class="pending">بانتظار البيانات</span>
+            <span>—</span><span>—</span><span>—</span>
+        </div>
+
+        <div class="row">
+            <span>اللغة الإنجليزية</span>
+            <span class="pending">بانتظار البيانات</span>
+            <span>—</span><span>—</span><span>—</span>
+        </div>
+
+    </div>
+
+</main>
+
+<footer>
+    بوابة أم كلثوم الذكية • مدرسة أم كلثوم الابتدائية الإعدادية للبنات
+</footer>
+
+</body>
+</html>
