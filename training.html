@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مركز الدعم والتطوير المهني | بوابة أم كلثوم الذكية</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    font-family:Tahoma,Arial,sans-serif;
+    background:#f5f8f7;
+    color:#263b3a;
+}
+
+.topbar{
+    background:white;
+    min-height:105px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 5%;
+    border-bottom:1px solid #e2e9e7;
+}
+
+.topbar img{
+    max-width:620px;
+    width:55%;
+    max-height:65px;
+    object-fit:contain;
+}
+
+.back{
+    text-decoration:none;
+    color:#17544f;
+    font-weight:bold;
+    border:1px solid #d9e5e2;
+    padding:11px 18px;
+    border-radius:12px;
+}
+
+.page{
+    max-width:1200px;
+    margin:auto;
+    padding:38px 25px;
+}
+
+.heading{margin-bottom:28px}
+
+.heading h1{
+    color:#17544f;
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.heading p{
+    color:#7c8d8a;
+    line-height:1.8;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:30px;
+}
+
+.stat{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:16px;
+    padding:20px;
+}
+
+.stat span{
+    display:block;
+    color:#8a9997;
+    font-size:13px;
+    margin-bottom:8px;
+}
+
+.stat strong{
+    color:#17544f;
+    font-size:25px;
+}
+
+.section-title{
+    color:#17544f;
+    font-size:21px;
+    margin-bottom:16px;
+}
+
+.services{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:35px;
+}
+
+.card{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:18px;
+    padding:23px;
+    transition:.2s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 25px rgba(23,84,79,.08);
+}
+
+.icon{
+    width:48px;
+    height:48px;
+    border-radius:13px;
+    background:#edf6f3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:23px;
+    margin-bottom:16px;
+}
+
+.card h3{
+    color:#174f4b;
+    margin-bottom:9px;
+}
+
+.card p{
+    color:#81918e;
+    font-size:13px;
+    line-height:1.8;
+    min-height:45px;
+}
+
+.card button{
+    margin-top:17px;
+    border:0;
+    background:#17544f;
+    color:white;
+    padding:10px 15px;
+    border-radius:9px;
+    font-family:inherit;
+    cursor:pointer;
+}
+
+.workshops{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.workshop{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr 1fr;
+    gap:15px;
+    align-items:center;
+    padding:18px 20px;
+    border-bottom:1px solid #edf1f0;
+}
+
+.workshop:last-child{border-bottom:0}
+
+.workshop.header{
+    background:#f0f6f4;
+    color:#17544f;
+    font-weight:bold;
+    font-size:13px;
+}
+
+.workshop span{
+    font-size:13px;
+    color:#667b77;
+}
+
+.empty{
+    text-align:center;
+    padding:35px;
+    color:#93a19f;
+}
+
+footer{
+    text-align:center;
+    color:#9aa8a5;
+    font-size:12px;
+    padding:30px;
+}
+
+@media(max-width:800px){
+    .stats,.services{grid-template-columns:1fr}
+    .workshop{grid-template-columns:1fr}
+    .workshop.header{display:none}
+    .topbar{flex-direction:column;gap:15px}
+    .topbar img{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <img src="school-logo.png" alt="شعارات المدرسة">
+    <a href="index.html" class="back">← العودة للرئيسية</a>
+</header>
+
+<main class="page">
+
+    <div class="heading">
+        <h1>مركز الدعم والتطوير المهني</h1>
+        <p>
+            منظومة موحدة لحصر الاحتياجات التدريبية وتنظيم البرامج والورش
+            ومتابعة التقارير وقياس أثر التطوير المهني.
+        </p>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <span>الاحتياجات التدريبية</span>
+            <strong>—</strong>
+        </div>
+
+        <div class="stat">
+            <span>الورش المنفذة</span>
+            <strong>—</strong>
+        </div>
+
+        <div class="stat">
+            <span>المستفيدات</span>
+            <strong>—</strong>
+        </div>
+
+        <div class="stat">
+            <span>تقارير قياس الأثر</span>
+            <strong>—</strong>
+        </div>
+    </div>
+
+    <h2 class="section-title">خدمات المركز</h2>
+
+    <div class="services">
+
+        <div class="card">
+            <div class="icon">📋</div>
+            <h3>الاحتياجات التدريبية</h3>
+            <p>حصر ومتابعة الاحتياجات التدريبية للهيئتين التعليمية والإدارية.</p>
+            <button>عرض الاحتياجات</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">🎓</div>
+            <h3>البرامج والورش</h3>
+            <p>متابعة الورش والبرامج التطويرية المقدمة داخل المدرسة.</p>
+            <button>عرض الورش</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">➕</div>
+            <h3>تقديم ورشة</h3>
+            <p>تسجيل طلب تقديم ورشة أو برنامج تدريبي ضمن خطة المركز.</p>
+            <button>تسجيل ورشة</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">🗓️</div>
+            <h3>حجز موعد</h3>
+            <p>تنظيم مواعيد البرامج والورش والتنسيق المسبق مع المركز.</p>
+            <button>الحجز المسبق</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">📄</div>
+            <h3>تقارير الورش</h3>
+            <p>حفظ تقارير البرامج المنفذة والتوثيقات المرتبطة بها.</p>
+            <button>عرض التقارير</button>
+        </div>
+
+        <div class="card">
+            <div class="icon">📈</div>
+            <h3>قياس الأثر</h3>
+            <p>متابعة أثر التدريب وانعكاسه على الممارسات المهنية.</p>
+            <button>قياس الأثر</button>
+        </div>
+
+    </div>
+
+    <h2 class="section-title">الورش والبرامج الأخيرة</h2>
+
+    <div class="workshops">
+        <div class="workshop header">
+            <span>البرنامج / الورشة</span>
+            <span>الفئة المستهدفة</span>
+            <span>التاريخ</span>
+            <span>الحالة</span>
+        </div>
+
+        <div class="empty">
+            ستظهر هنا الورش والبرامج المسجلة في مركز الدعم والتطوير المهني.
+        </div>
+    </div>
+
+</main>
+
+<footer>
+    بوابة أم كلثوم الذكية • مدرسة أم كلثوم الابتدائية الإعدادية للبنات
+</footer>
+
+</body>
+</html>
