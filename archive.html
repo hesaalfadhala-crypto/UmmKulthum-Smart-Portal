@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التوثيقات والفعاليات | بوابة أم كلثوم الذكية</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Tahoma, Arial, sans-serif;
+    background:#f5f8f7;
+    color:#263b3a;
+}
+
+.topbar{
+    background:white;
+    min-height:105px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 5%;
+    border-bottom:1px solid #e2e9e7;
+}
+
+.topbar img{
+    max-width:620px;
+    width:55%;
+    max-height:65px;
+    object-fit:contain;
+}
+
+.back{
+    text-decoration:none;
+    color:#17544f;
+    font-weight:bold;
+    border:1px solid #d9e5e2;
+    padding:11px 18px;
+    border-radius:12px;
+}
+
+.page{
+    max-width:1200px;
+    margin:auto;
+    padding:38px 25px;
+}
+
+.heading{
+    margin-bottom:28px;
+}
+
+.heading h1{
+    color:#17544f;
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.heading p{
+    color:#7c8d8a;
+    line-height:1.8;
+}
+
+.actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:25px;
+}
+
+.new-btn{
+    background:#17544f;
+    color:white;
+    text-decoration:none;
+    padding:13px 22px;
+    border-radius:12px;
+    font-weight:bold;
+}
+
+.search{
+    flex:1;
+    min-width:260px;
+    padding:13px 16px;
+    border:1px solid #d9e5e2;
+    border-radius:12px;
+    background:white;
+    font-family:inherit;
+}
+
+.filters{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-bottom:30px;
+}
+
+.filters select{
+    padding:12px;
+    border:1px solid #d9e5e2;
+    border-radius:10px;
+    background:white;
+    font-family:inherit;
+    color:#425b58;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:28px;
+}
+
+.stat{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:16px;
+    padding:20px;
+}
+
+.stat span{
+    display:block;
+    color:#8a9997;
+    font-size:13px;
+    margin-bottom:8px;
+}
+
+.stat strong{
+    color:#17544f;
+    font-size:26px;
+}
+
+.section-title{
+    color:#17544f;
+    font-size:21px;
+    margin-bottom:16px;
+}
+
+.archive-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.card{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:17px;
+    padding:22px;
+    min-height:210px;
+}
+
+.badge{
+    display:inline-block;
+    background:#edf6f3;
+    color:#17635a;
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:12px;
+    margin-bottom:15px;
+}
+
+.card h3{
+    color:#174f4b;
+    margin-bottom:12px;
+}
+
+.card p{
+    color:#7b8d89;
+    font-size:14px;
+    line-height:1.8;
+    margin-bottom:18px;
+}
+
+.meta{
+    border-top:1px solid #edf1f0;
+    padding-top:13px;
+    color:#9aa6a4;
+    font-size:12px;
+}
+
+.empty-state{
+    grid-column:1/-1;
+    background:white;
+    border:1px dashed #ccd9d6;
+    border-radius:18px;
+    padding:55px 20px;
+    text-align:center;
+    color:#849592;
+}
+
+.empty-state .icon{
+    font-size:38px;
+    margin-bottom:12px;
+}
+
+.empty-state h3{
+    color:#17544f;
+    margin-bottom:8px;
+}
+
+footer{
+    text-align:center;
+    color:#9aa8a5;
+    font-size:12px;
+    padding:30px;
+}
+
+@media(max-width:800px){
+    .archive-grid,.stats,.filters{
+        grid-template-columns:1fr;
+    }
+
+    .topbar{
+        flex-direction:column;
+        gap:15px;
+    }
+
+    .topbar img{
+        width:100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <img src="school-logo.png" alt="شعارات المدرسة">
+    <a href="index.html" class="back">← العودة للرئيسية</a>
+</header>
+
+<main class="page">
+
+    <div class="heading">
+        <h1>التوثيقات والفعاليات</h1>
+        <p>
+            أرشيف إلكتروني موحد لتوثيق فعاليات المدرسة ومبادراتها
+            ومتابعة الأعمال المنفذة خلال العام الدراسي 2026 - 2027.
+        </p>
+    </div>
+
+    <div class="actions">
+        <a href="documentation.html" class="new-btn">＋ توثيق جديد</a>
+        <input class="search" type="search" placeholder="البحث في التوثيقات...">
+    </div>
+
+    <div class="filters">
+        <select>
+            <option>جميع الأقسام</option>
+            <option>الرياضيات</option>
+            <option>العلوم</option>
+            <option>الاجتماعيات</option>
+            <option>اللغة العربية</option>
+            <option>اللغة الإنجليزية</option>
+            <option>التربية الإسلامية</option>
+        </select>
+
+        <select>
+            <option>جميع الفصول الدراسية</option>
+            <option>الفصل الدراسي الأول</option>
+            <option>الفصل الدراسي الثاني</option>
+        </select>
+
+        <select>
+            <option>جميع المجالات</option>
+            <option>التعليم والتعلم والتقويم</option>
+            <option>الإنجاز الأكاديمي</option>
+            <option>التطور الشخصي والمسئولية الاجتماعية</option>
+            <option>القيادة والإدارة</option>
+        </select>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <span>إجمالي التوثيقات</span>
+            <strong>0</strong>
+        </div>
+
+        <div class="stat">
+            <span>فعاليات الفصل الحالي</span>
+            <strong>0</strong>
+        </div>
+
+        <div class="stat">
+            <span>المبادرات والمشاريع</span>
+            <strong>0</strong>
+        </div>
+    </div>
+
+    <h2 class="section-title">أحدث التوثيقات</h2>
+
+    <div class="archive-grid" id="archiveGrid">
+
+        <div class="empty-state">
+            <div class="icon">🗂️</div>
+            <h3>سيظهر أرشيف التوثيقات هنا</h3>
+            <p>
+                عند ربط البوابة بقاعدة البيانات ستظهر التوثيقات المحفوظة
+                مع إمكانية البحث والتصفية والرجوع إلى التقرير.
+            </p>
+        </div>
+
+    </div>
+
+</main>
+
+<footer>
+    بوابة أم كلثوم الذكية • مدرسة أم كلثوم الابتدائية الإعدادية للبنات
+</footer>
+
+</body>
+</html>
