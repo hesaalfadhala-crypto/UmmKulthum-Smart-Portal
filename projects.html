@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المبادرات والمشاريع | بوابة أم كلثوم الذكية</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Tahoma,Arial,sans-serif;
+    background:#f5f8f7;
+    color:#263b3a;
+}
+
+.topbar{
+    background:white;
+    min-height:105px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 5%;
+    border-bottom:1px solid #e2e9e7;
+}
+
+.topbar img{
+    max-width:620px;
+    width:55%;
+    max-height:65px;
+    object-fit:contain;
+}
+
+.back{
+    text-decoration:none;
+    color:#17544f;
+    font-weight:bold;
+    border:1px solid #d9e5e2;
+    padding:11px 18px;
+    border-radius:12px;
+}
+
+.page{
+    max-width:1200px;
+    margin:auto;
+    padding:38px 25px;
+}
+
+.heading{
+    margin-bottom:28px;
+}
+
+.heading h1{
+    color:#17544f;
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.heading p{
+    color:#7c8d8a;
+    line-height:1.8;
+}
+
+.summary{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:32px;
+}
+
+.stat{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:16px;
+    padding:20px;
+}
+
+.stat span{
+    display:block;
+    color:#8a9997;
+    font-size:13px;
+    margin-bottom:8px;
+}
+
+.stat strong{
+    color:#17544f;
+    font-size:25px;
+}
+
+.toolbar{
+    display:flex;
+    gap:12px;
+    margin-bottom:25px;
+    flex-wrap:wrap;
+}
+
+.search{
+    flex:1;
+    min-width:260px;
+    padding:13px 16px;
+    border:1px solid #d9e5e2;
+    border-radius:12px;
+    background:white;
+    font-family:inherit;
+}
+
+.new-btn{
+    background:#17544f;
+    color:white;
+    border:0;
+    border-radius:12px;
+    padding:13px 20px;
+    font-family:inherit;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.section-title{
+    color:#17544f;
+    font-size:21px;
+    margin-bottom:17px;
+}
+
+.projects{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.project{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:18px;
+    padding:22px;
+    transition:.2s;
+}
+
+.project:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 25px rgba(23,84,79,.08);
+}
+
+.project-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:17px;
+}
+
+.icon{
+    width:45px;
+    height:45px;
+    background:#edf6f3;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+.status{
+    background:#eef7f4;
+    color:#17635a;
+    border-radius:20px;
+    padding:6px 10px;
+    font-size:11px;
+}
+
+.project h3{
+    color:#174f4b;
+    margin-bottom:9px;
+    font-size:18px;
+}
+
+.project p{
+    color:#81918e;
+    font-size:13px;
+    line-height:1.8;
+    min-height:46px;
+}
+
+.project-footer{
+    margin-top:18px;
+    padding-top:13px;
+    border-top:1px solid #edf1f0;
+    display:flex;
+    justify-content:space-between;
+    color:#9aa6a4;
+    font-size:12px;
+}
+
+footer{
+    text-align:center;
+    color:#9aa8a5;
+    font-size:12px;
+    padding:30px;
+}
+
+@media(max-width:800px){
+    .projects,.summary{
+        grid-template-columns:1fr;
+    }
+
+    .topbar{
+        flex-direction:column;
+        gap:15px;
+    }
+
+    .topbar img{
+        width:100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <img src="school-logo.png" alt="شعارات المدرسة">
+    <a href="index.html" class="back">← العودة للرئيسية</a>
+</header>
+
+<main class="page">
+
+    <div class="heading">
+        <h1>المبادرات والمشاريع</h1>
+        <p>
+            مساحة موحدة لمتابعة المبادرات والمشاريع المدرسية وربطها
+            بالتوثيقات والفعاليات وقياس الأثر.
+        </p>
+    </div>
+
+    <div class="summary">
+        <div class="stat">
+            <span>إجمالي المبادرات والمشاريع</span>
+            <strong>13</strong>
+        </div>
+
+        <div class="stat">
+            <span>التوثيقات المرتبطة</span>
+            <strong>—</strong>
+        </div>
+
+        <div class="stat">
+            <span>العام الدراسي</span>
+            <strong>2026 - 2027</strong>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <input class="search" type="search" placeholder="البحث عن مبادرة أو مشروع...">
+        <button class="new-btn" onclick="window.location.href='documentation.html'">
+            ＋ إضافة توثيق
+        </button>
+    </div>
+
+    <h2 class="section-title">مشاريع ومبادرات المدرسة</h2>
+
+    <div class="projects">
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">🌱</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>التعليم الأخضر</h3>
+            <p>توثيق المبادرات والممارسات المرتبطة بالتعليم والاستدامة الخضراء.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">🌍</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>اليونسكو</h3>
+            <p>متابعة مبادرات وأنشطة المدرسة المرتبطة بمحاور وبرامج اليونسكو.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">💻</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>التمكين الرقمي</h3>
+            <p>الممارسات والمبادرات التي تدعم توظيف التقنية والتحول الرقمي.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">🌿</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>غرس</h3>
+            <p>متابعة وتوثيق أنشطة ومبادرات مشروع غرس المدرسي.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">🇬🇧</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>English and Beyond</h3>
+            <p>توثيق الأنشطة والممارسات المرتبطة بالمشروع.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">📚</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>لغتي هويتي</h3>
+            <p>متابعة الأنشطة والمبادرات الداعمة للغة العربية والهوية.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">➗</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>الخوارزمي</h3>
+            <p>متابعة وتوثيق أنشطة وممارسات المشروع.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">✨</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>أصيل</h3>
+            <p>توثيق المبادرات والأنشطة المرتبطة بالمشروع.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">🤍</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>حاملات المسك</h3>
+            <p>متابعة الأنشطة والتوثيقات الخاصة بالمشروع.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">🏃‍♀️</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>Fitness Queen</h3>
+            <p>متابعة الأنشطة والممارسات المرتبطة بالمشروع.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">🚀</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>بمهاراتي أرتقي</h3>
+            <p>توثيق البرامج والأنشطة الداعمة لتنمية مهارات الطالبات.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">📖</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>تحدي القراءة العربي</h3>
+            <p>متابعة وتوثيق مشاركة الطالبات والفعاليات المرتبطة بالتحدي.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+        <div class="project">
+            <div class="project-top">
+                <div class="icon">📊</div>
+                <span class="status">قيد التنفيذ</span>
+            </div>
+            <h3>TIMSS</h3>
+            <p>توثيق الخطط والبرامج والأنشطة الداعمة للاستعداد لاختبارات TIMSS.</p>
+            <div class="project-footer"><span>التوثيقات</span><span>—</span></div>
+        </div>
+
+    </div>
+
+</main>
+
+<footer>
+    بوابة أم كلثوم الذكية • مدرسة أم كلثوم الابتدائية الإعدادية للبنات
+</footer>
+
+</body>
+</html>
