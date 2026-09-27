@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>النماذج والاستبانات الذكية | بوابة أم كلثوم الذكية</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Tahoma,Arial,sans-serif;
+    background:#f5f8f7;
+    color:#263b3a;
+}
+
+/* الشريط العلوي */
+.topbar{
+    background:#fff;
+    min-height:105px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 5%;
+    border-bottom:1px solid #e2e9e7;
+}
+
+.topbar img{
+    max-width:620px;
+    width:55%;
+    max-height:65px;
+    object-fit:contain;
+}
+
+.back{
+    text-decoration:none;
+    color:#17544f;
+    font-weight:bold;
+    border:1px solid #d9e5e2;
+    padding:11px 18px;
+    border-radius:12px;
+}
+
+/* الصفحة */
+.page{
+    max-width:1200px;
+    margin:auto;
+    padding:38px 25px;
+}
+
+.heading{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.heading h1{
+    color:#17544f;
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.heading p{
+    color:#7c8d8a;
+    line-height:1.8;
+}
+
+.new-btn{
+    border:0;
+    background:#17544f;
+    color:white;
+    padding:14px 22px;
+    border-radius:12px;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:bold;
+    cursor:pointer;
+    white-space:nowrap;
+}
+
+/* المؤشرات */
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:35px;
+}
+
+.stat{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:16px;
+    padding:20px;
+}
+
+.stat span{
+    display:block;
+    color:#8a9997;
+    font-size:13px;
+    margin-bottom:10px;
+}
+
+.stat strong{
+    color:#17544f;
+    font-size:25px;
+}
+
+/* الأدوات */
+.tools{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:38px;
+}
+
+.tool{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:18px;
+    padding:23px;
+    transition:.2s;
+}
+
+.tool:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 25px rgba(23,84,79,.08);
+}
+
+.icon{
+    width:48px;
+    height:48px;
+    border-radius:13px;
+    background:#edf6f3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    margin-bottom:15px;
+}
+
+.tool h3{
+    color:#17544f;
+    margin-bottom:8px;
+}
+
+.tool p{
+    color:#81918e;
+    font-size:13px;
+    line-height:1.8;
+}
+
+/* النماذج */
+.section-title{
+    color:#17544f;
+    font-size:21px;
+    margin-bottom:15px;
+}
+
+.forms-box{
+    background:white;
+    border:1px solid #e0e8e6;
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.form-row{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr 1fr 1fr;
+    align-items:center;
+    gap:12px;
+    padding:17px 20px;
+    border-bottom:1px solid #edf1f0;
+}
+
+.form-row:last-child{
+    border-bottom:0;
+}
+
+.form-row.header{
+    background:#eef5f3;
+    color:#17544f;
+    font-weight:bold;
+}
+
+.form-row span{
+    font-size:13px;
+    color:#687d79;
+    text-align:center;
+}
+
+.form-row span:first-child{
+    text-align:right;
+}
+
+.empty{
+    padding:45px 20px;
+    text-align:center;
+}
+
+.empty-icon{
+    width:65px;
+    height:65px;
+    margin:0 auto 15px;
+    border-radius:50%;
+    background:#edf6f3;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:27px;
+}
+
+.empty h3{
+    color:#17544f;
+    margin-bottom:8px;
+}
+
+.empty p{
+    color:#8b9a97;
+    font-size:13px;
+    line-height:1.8;
+}
+
+.badge{
+    display:inline-block;
+    background:#edf6f3;
+    color:#1d746a;
+    border-radius:20px;
+    padding:6px 10px;
+    font-size:11px;
+}
+
+/* ملاحظة */
+.note{
+    margin-top:25px;
+    background:#fffaf0;
+    border:1px solid #eee2c7;
+    border-radius:14px;
+    padding:16px 18px;
+    color:#806b42;
+    font-size:12px;
+    line-height:1.8;
+}
+
+footer{
+    text-align:center;
+    color:#9aa8a5;
+    font-size:12px;
+    padding:30px;
+}
+
+@media(max-width:850px){
+
+    .heading{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .stats,
+    .tools{
+        grid-template-columns:1fr;
+    }
+
+    .form-row{
+        grid-template-columns:1fr;
+    }
+
+    .form-row.header{
+        display:none;
+    }
+
+    .form-row span{
+        text-align:right;
+    }
+
+    .topbar{
+        flex-direction:column;
+        gap:15px;
+    }
+
+    .topbar img{
+        width:100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <img src="school-logo.png" alt="شعارات المدرسة">
+
+    <a href="index.html" class="back">
+        ← العودة للرئيسية
+    </a>
+
+</header>
+
+<main class="page">
+
+    <section class="heading">
+
+        <div>
+            <h1>النماذج والاستبانات الذكية</h1>
+
+            <p>
+                إنشاء ونشر النماذج المدرسية، استقبال الردود،
+                ومتابعة النتائج والمؤشرات بصورة مباشرة.
+            </p>
+        </div>
+
+        <button class="new-btn" type="button">
+            ＋ إنشاء نموذج جديد
+        </button>
+
+    </section>
+
+
+    <section class="stats">
+
+        <div class="stat">
+            <span>النماذج المنشورة</span>
+            <strong>—</strong>
+        </div>
+
+        <div class="stat">
+            <span>إجمالي الردود</span>
+            <strong>—</strong>
+        </div>
+
+        <div class="stat">
+            <span>النماذج النشطة</span>
+            <strong>—</strong>
+        </div>
+
+        <div class="stat">
+            <span>نسبة المشاركة</span>
+            <strong>—</strong>
+        </div>
+
+    </section>
+
+
+    <h2 class="section-title">مركز النماذج</h2>
+
+    <section class="tools">
+
+        <div class="tool">
+            <div class="icon">✎</div>
+            <h3>إنشاء نموذج</h3>
+            <p>
+                إنشاء استبانة أو نموذج جديد وإضافة الأسئلة
+                وتحديد خيارات الإجابة.
+            </p>
+        </div>
+
+        <div class="tool">
+            <div class="icon">◎</div>
+            <h3>النشر والاستهداف</h3>
+            <p>
+                تحديد الفئة المستهدفة وموعد النشر والإغلاق
+                وإتاحة النموذج للمستخدمين المطلوبين.
+            </p>
+        </div>
+
+        <div class="tool">
+            <div class="icon">▥</div>
+            <h3>النتائج المباشرة</h3>
+            <p>
+                متابعة الردود والنسب والمؤشرات والرسوم البيانية
+                فور وصول المشاركات.
+            </p>
+        </div>
+
+    </section>
+
+
+    <h2 class="section-title">النماذج المنشورة</h2>
+
+    <section class="forms-box">
+
+        <div class="form-row header">
+            <span>اسم النموذج</span>
+            <span>الفئة المستهدفة</span>
+            <span>الحالة</span>
+            <span>الردود</span>
+            <span>النتائج</span>
+        </div>
+
+        <div class="empty">
+
+            <div class="empty-icon">▤</div>
+
+            <h3>لا توجد نماذج منشورة حاليًا</h3>
+
+            <p>
+                عند إنشاء أول نموذج ونشره سيظهر هنا،
+                مع عدد الردود وحالته وإمكانية عرض نتائجه.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <div class="note">
+        المرحلة القادمة: سيتم ربط هذه الصفحة بقاعدة بيانات آمنة
+        ليتم حفظ النماذج والردود وعرض النتائج الفعلية للمستخدمين
+        وفق الصلاحيات.
+    </div>
+
+</main>
+
+
+<footer>
+    بوابة أم كلثوم الذكية • مدرسة أم كلثوم الابتدائية الإعدادية للبنات
+</footer>
+
+</body>
+</html>
