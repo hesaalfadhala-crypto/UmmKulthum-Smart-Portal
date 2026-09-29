@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | بوابة أم كلثوم الذكية</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+        }
+
+        body{
+            font-family:Tahoma,Arial,sans-serif;
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#f4f7f6;
+            color:#263b3a;
+            padding:20px;
+        }
+
+        .login-card{
+            width:100%;
+            max-width:440px;
+            background:white;
+            border-radius:20px;
+            padding:35px;
+            box-shadow:0 15px 45px rgba(0,0,0,.10);
+            text-align:center;
+        }
+
+        .logo{
+            width:100%;
+            max-height:90px;
+            object-fit:contain;
+            margin-bottom:22px;
+        }
+
+        h1{
+            color:#174f46;
+            font-size:24px;
+            margin-bottom:8px;
+        }
+
+        .subtitle{
+            color:#71807e;
+            font-size:14px;
+            margin-bottom:28px;
+        }
+
+        .field{
+            text-align:right;
+            margin-bottom:17px;
+        }
+
+        label{
+            display:block;
+            font-weight:bold;
+            margin-bottom:7px;
+        }
+
+        input{
+            width:100%;
+            padding:13px;
+            border:1px solid #d8e0de;
+            border-radius:10px;
+            font-size:15px;
+            outline:none;
+        }
+
+        input:focus{
+            border-color:#174f46;
+        }
+
+        button{
+            width:100%;
+            padding:14px;
+            border:0;
+            border-radius:10px;
+            background:#174f46;
+            color:white;
+            font-size:16px;
+            font-weight:bold;
+            cursor:pointer;
+            margin-top:5px;
+        }
+
+        button:hover{
+            background:#103e37;
+        }
+
+        #message{
+            margin-top:17px;
+            font-size:14px;
+            min-height:20px;
+        }
+
+        .footer{
+            margin-top:25px;
+            padding-top:18px;
+            border-top:1px solid #edf0ef;
+            color:#84918f;
+            font-size:12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-card">
+
+    <img src="school-logo.png" class="logo" alt="شعار المدرسة">
+
+    <h1>بوابة أم كلثوم الذكية</h1>
+
+    <div class="subtitle">
+        تسجيل الدخول للمستخدمين المصرح لهم
+    </div>
+
+    <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input id="email" type="email" autocomplete="email">
+    </div>
+
+    <div class="field">
+        <label>كلمة المرور</label>
+        <input id="password" type="password" autocomplete="current-password">
+    </div>
+
+    <button type="button" onclick="login()">
+        تسجيل الدخول
+    </button>
+
+    <div id="message"></div>
+
+    <div class="footer">
+        مدرسة أم كلثوم الابتدائية الإعدادية للبنات
+        <br>
+        العام الدراسي 2026–2027م
+    </div>
+
+</div>
+
+<script>
+const SUPABASE_URL =
+"https://ulqwkxzjwdmkspsjzvup.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+async function login(){
+
+    const email =
+        document.getElementById("email").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const message =
+        document.getElementById("message");
+
+    if(!email || !password){
+        message.style.color="#b42318";
+        message.textContent="يرجى إدخال البريد الإلكتروني وكلمة المرور.";
+        return;
+    }
+
+    message.style.color="#6c7b79";
+    message.textContent="جاري تسجيل الدخول...";
+
+    const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+            email:email,
+            password:password
+        });
+
+    if(error){
+        console.error(error);
+        message.style.color="#b42318";
+        message.textContent="البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+        return;
+    }
+
+    message.style.color="#18794e";
+    message.textContent="تم تسجيل الدخول بنجاح ✓";
+
+    window.location.href="index.html";
+}
+</script>
+
+</body>
+</html>
