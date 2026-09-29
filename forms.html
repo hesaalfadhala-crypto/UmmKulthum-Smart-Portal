@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>النماذج والاستبانات الذكية | بوابة أم كلثوم الذكية</title>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{
     box-sizing:border-box;
@@ -316,8 +316,8 @@ footer{
             </p>
         </div>
 
-        <button class="new-btn" type="button">
-            ＋ إنشاء نموذج جديد
+<button class="new-btn" type="button" onclick="openCreateForm()">
+        ＋ إنشاء نموذج جديد
         </button>
 
     </section>
@@ -422,6 +422,144 @@ footer{
 <footer>
     بوابة أم كلثوم الذكية • مدرسة أم كلثوم الابتدائية الإعدادية للبنات
 </footer>
+    <!-- نافذة إنشاء نموذج جديد -->
+<div id="createFormModal" style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+">
 
+    <div style="
+        background:white;
+        width:100%;
+        max-width:600px;
+        border-radius:18px;
+        padding:28px;
+        box-shadow:0 20px 50px rgba(0,0,0,.18);
+    ">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;">
+            <h2 style="color:#174f46;margin:0;">إنشاء نموذج جديد</h2>
+
+            <button type="button"
+                onclick="closeCreateForm()"
+                style="border:0;background:none;font-size:25px;cursor:pointer;">
+                ×
+            </button>
+        </div>
+
+        <label>عنوان النموذج *</label>
+        <input id="formTitle" type="text"
+            placeholder="مثال: حصر الاحتياجات التدريبية"
+            style="width:100%;padding:12px;margin:7px 0 16px;border:1px solid #ddd;border-radius:9px;">
+
+        <label>وصف النموذج</label>
+        <textarea id="formDescription"
+            placeholder="اكتبي وصفًا مختصرًا للنموذج"
+            style="width:100%;padding:12px;margin:7px 0 16px;border:1px solid #ddd;border-radius:9px;min-height:90px;"></textarea>
+
+        <label>الفئة المستهدفة</label>
+        <select id="formAudience"
+            style="width:100%;padding:12px;margin:7px 0 16px;border:1px solid #ddd;border-radius:9px;">
+            <option value="">اختاري الفئة المستهدفة</option>
+            <option value="جميع المستخدمين">جميع المستخدمين</option>
+            <option value="الهيئة التعليمية">الهيئة التعليمية</option>
+            <option value="الهيئة الإدارية">الهيئة الإدارية</option>
+            <option value="المنسقات والمعلمات الأوائل">المنسقات والمعلمات الأوائل</option>
+            <option value="المعلمات">المعلمات</option>
+        </select>
+
+        <label>تاريخ الإغلاق</label>
+        <input id="formClosingDate" type="datetime-local"
+            style="width:100%;padding:12px;margin:7px 0 22px;border:1px solid #ddd;border-radius:9px;">
+
+        <button type="button"
+            onclick="saveNewForm()"
+            style="
+                width:100%;
+                padding:13px;
+                border:0;
+                border-radius:10px;
+                background:#174f46;
+                color:white;
+                font-size:16px;
+                font-weight:bold;
+                cursor:pointer;
+            ">
+            حفظ النموذج
+        </button>
+
+    </div>
+</div>
+
+<script>
+function openCreateForm(){
+    document.getElementById("createFormModal").style.display = "flex";
+}
+
+function closeCreateForm(){
+    document.getElementById("createFormModal").style.display = "none";
+}
+</script>
+<script>
+const SUPABASE_URL = "https://ulqwkxzjwdmkspsjzvup.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
+
+const supabaseClient = supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+    async function saveNewForm(){
+
+    const title = document.getElementById("formTitle").value.trim();
+    const description = document.getElementById("formDescription").value.trim();
+    const targetAudience = document.getElementById("formAudience").value;
+    const closingDate = document.getElementById("formClosingDate").value;
+
+    if(!title){
+        alert("يرجى كتابة عنوان النموذج");
+        return;
+    }
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if(!user){
+        alert("يجب تسجيل الدخول أولاً");
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from("forms")
+        .insert({
+            title: title,
+            description: description || null,
+            target_audience: targetAudience || null,
+            closing_date: closingDate || null,
+            status: "draft",
+            created_by: user.id,
+            updated_at: new Date().toISOString()
+        });
+
+    if(error){
+        console.error(error);
+        alert("حدث خطأ أثناء حفظ النموذج");
+        return;
+    }
+
+    alert("تم حفظ النموذج بنجاح ✓");
+
+    closeCreateForm();
+
+    document.getElementById("formTitle").value = "";
+    document.getElementById("formDescription").value = "";
+    document.getElementById("formAudience").value = "";
+    document.getElementById("formClosingDate").value = "";
+}
+</script>
 </body>
 </html>
