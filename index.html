@@ -519,12 +519,35 @@ body{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
 const SUPABASE_URL = "https://ulqwkxzjwdmkspsjzvup.supabase.co";
-const SUPABASE_KEY = "هني_بنحط_الـ_publishable_key";
-
+const SUPABASE_KEY = "sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
-</script>
+    async function checkUserAccess() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const { data: profile, error } = await supabaseClient
+        .from("profiles")
+        .select("full_name, role, department")
+        .eq("id", user.id)
+        .single();
+
+    if (error || !profile) {
+        console.error("Profile error:", error);
+        alert("تعذر قراءة صلاحيات الحساب");
+        return;
+    }
+
+    console.log("User profile:", profile);
+}
+
+checkUserAccess();
+        </script>
 </body>
 </html>
