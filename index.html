@@ -405,7 +405,11 @@ body{
             <div class="label">UMM KULTHUM SMART PORTAL</div>
 
             <h2>مرحبًا بكِ في بوابة أم كلثوم الذكية</h2>
-
+<div id="userInfo" style="margin-top:10px; font-weight:700;">
+    <span id="userName"></span>
+    <span style="margin:0 6px;">|</span>
+    <span id="userRole"></span>
+</div>
             <p>
                 بيئة مدرسية موحدة للتوثيق والمتابعة والتطوير،
                 تجمع الأعمال والمبادرات والفعاليات في مكان واحد،
@@ -545,6 +549,18 @@ const supabaseClient = supabase.createClient(
     }
 
     console.log("User profile:", profile);
+        document.getElementById("userName").textContent = profile.full_name;
+
+const roleNames = {
+    principal: "مديرة المدرسة",
+    assistant_principal: "مديرة مساعدة",
+    coordinator: "منسقة",
+    first_teacher: "معلمة أولى",
+    teacher: "معلمة"
+};
+
+document.getElementById("userRole").textContent =
+    roleNames[profile.role] || profile.role;
 }
 
 checkUserAccess();
