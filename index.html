@@ -549,8 +549,11 @@ const supabaseClient = supabase.createClient(
     }
 
     console.log("User profile:", profile);
-        document.getElementById("userName").textContent = profile.full_name;
+const userNameElement = document.getElementById("userName");
 
+if (userNameElement) {
+    userNameElement.textContent = profile.full_name || "";
+}
 const roleNames = {
     principal: "مديرة المدرسة",
     assistant_principal: "مديرة مساعدة",
@@ -559,8 +562,12 @@ const roleNames = {
     teacher: "معلمة"
 };
 
-document.getElementById("userRole").textContent =
-    roleNames[profile.role] || profile.role;
+const userRoleElement = document.getElementById("userRole");
+
+if (userRoleElement) {
+    userRoleElement.textContent =
+        roleNames[profile.role] || profile.role || "";
+}
 }
 
 checkUserAccess();
