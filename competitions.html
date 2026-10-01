@@ -342,6 +342,10 @@ textarea{min-height:90px;resize:vertical}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+    const SUPABASE_URL = "https://ulqwkxzjwdmkspsjzvup.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 function toggleExternalFields(){
     const type=document.getElementById("competitionType").value;
     document.getElementById("externalFields").classList.toggle(
@@ -371,19 +375,72 @@ function removeStudent(button){
     }
 }
 
-function prepareRecord(){
-    const name=document.getElementById("competitionName").value.trim();
-    const type=document.getElementById("competitionType").value;
-    const department=document.getElementById("department").value;
-    const supervisor=document.getElementById("supervisor").value.trim();
-    const result=document.querySelector('input[name="result"]:checked');
+async function prepareRecord(){
+
+    const name = document.getElementById("competitionName").value.trim();
+    const type = document.getElementById("competitionType").value;
+    const department = document.getElementById("department").value;
+    const competitionDate = document.getElementById("competitionDate").value || null;
+    const organizer = document.getElementById("organizer").value.trim() || null;
+    const host = document.getElementById("host").value.trim() || null;
+    const competitionLevel = document.getElementById("competitionLevel").value || null;
+    const stage = document.getElementById("stage").value || null;
+    const grade = document.getElementById("grade").value.trim() || null;
+    const supervisor = document.getElementById("supervisor").value.trim();
+    const studentCount = document.getElementById("studentCount").value || null;
+    const result = document.querySelector('input[name="result"]:checked');
 
     if(!name || !type || !department || !supervisor || !result){
-        alert("يرجى استكمال الحقول المطلوبة قبل الحفظ.");
+        alert("يرجى استكمال الحقول المطلوبة قبل الحفظ");
         return;
     }
 
-    alert("تم تجهيز سجل المسابقة بنجاح. الخطوة التالية هي ربط الحفظ بقاعدة البيانات.");
+    const students = [...document.querySelectorAll(".student-row")].map(row => ({
+        name: row.querySelector(".student-name").value.trim(),
+        class: row.querySelector(".student-class").value.trim()
+    })).filter(student => student.name || student.class);
+
+    const { data: { user }, error: userError } =
+        await supabaseClient.auth.getUser();
+
+    if(userError || !user){
+        alert("يرجى تسجيل الدخول أولاً");
+        window.location.href = "login.html";
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from("competitions")
+        .insert({
+            competition_name: name,
+            competition_type: type,
+            department: department,
+            competition_date: competitionDate,
+            organizer: type === "خارجية" ? organizer : null,
+            host: type === "خارجية" ? host : null,
+            competition_level: type === "خارجية" ? competitionLevel : null,
+            stage: stage,
+            grade: grade,
+            supervisor: supervisor,
+            student_count: studentCount ? Number(studentCount) : students.length,
+            students: students,
+            result: result.value,
+            award_details: document.getElementById("awardDetails").value.trim() || null,
+            awards_count: Number(document.getElementById("awardsCount").value) || 0,
+            notes: document.getElementById("notes").value.trim() || null,
+            created_by: user.id,
+            status: "draft",
+            updated_at: new Date().toISOString(),
+            attachments: []
+        });
+
+    if(error){
+        console.error(error);
+        alert("حدث خطأ أثناء حفظ سجل المسابقة");
+        return;
+    }
+
+    alert("تم حفظ سجل المسابقة بنجاح 🏆");
 }
 </script>
 </body>
