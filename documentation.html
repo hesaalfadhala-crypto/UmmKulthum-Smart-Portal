@@ -534,6 +534,25 @@ button{
         <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
     </div>
 </div>
+                <!-- اللجنة المرتبطة بالتوثيق -->
+<div class="field">
+    <div class="check-title">اللجنة المرتبطة بالتوثيق</div>
+
+    <div class="checks committee-checks">
+        <label class="check"><input type="checkbox" value="لجنة اليونسكو"> لجنة اليونسكو</label>
+        <label class="check"><input type="checkbox" value="لجنة التعليم الأخضر"> لجنة التعليم الأخضر</label>
+        <label class="check"><input type="checkbox" value="لجنة المواطنة وتأصيل القيم"> لجنة المواطنة وتأصيل القيم</label>
+        <label class="check"><input type="checkbox" value="لجنة الصحة والسلامة المدرسية"> لجنة الصحة والسلامة المدرسية</label>
+        <label class="check"><input type="checkbox" value="لجنة السعادة"> لجنة السعادة</label>
+        <label class="check"><input type="checkbox" value="لجنة راقية بأخلاقي"> لجنة راقية بأخلاقي</label>
+        <label class="check"><input type="checkbox" value="لجنة الموهبة"> لجنة الموهبة</label>
+        <label class="check"><input type="checkbox" value="لجنة التقييم الذاتي"> لجنة التقييم الذاتي</label>
+        <label class="check"><input type="checkbox" value="اللجنة الإعلامية"> اللجنة الإعلامية</label>
+        <label class="check"><input type="checkbox" value="لجنة المسرح"> لجنة المسرح</label>
+        <label class="check"><input type="checkbox" value="لجنة الصحافة"> لجنة الصحافة</label>
+        <label class="check"><input type="checkbox" value="غير مرتبط بلجنة"> غير مرتبط بلجنة</label>
+    </div>
+</div>
                 <!-- الفئات المستهدفة من الطالبات -->
 <div class="field">
     <div class="check-title">
@@ -692,6 +711,10 @@ button{
                         <h4>المشروع / المبادرة المرتبطة</h4>
                         <p id="pProjects" class="empty">لم يتم التحديد</p>
                     </div>
+                    <div class="report-section">
+    <h4>اللجنة المرتبطة بالتوثيق</h4>
+    <p id="pCommittees" class="empty">لم يتم التحديد</p>
+</div>
 <div class="report-section" id="assistantsReport" style="display:none;">
     <h4>الإشراف</h4>
     <p id="pAssistants"></p>
@@ -785,6 +808,23 @@ projectChecks.forEach(check=>{
             : "لم يتم التحديد";
 
         output.classList.toggle("empty",!selected.length);
+    });
+});
+    const committeeChecks = document.querySelectorAll(".committee-checks input[type=checkbox]");
+
+committeeChecks.forEach(check => {
+    check.addEventListener("change", () => {
+        const selected = [...committeeChecks]
+            .filter(c => c.checked)
+            .map(c => c.value);
+
+        const output = document.getElementById("pCommittees");
+
+        output.textContent = selected.length
+            ? selected.join(" • ")
+            : "لم يتم التحديد";
+
+        output.classList.toggle("empty", !selected.length);
     });
 });
 // تحديث المجالات في التقرير
