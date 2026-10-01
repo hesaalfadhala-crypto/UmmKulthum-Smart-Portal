@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المسابقات والإنجازات الطلابية | بوابة أم كلثوم الذكية</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:"Tahoma","Arial",sans-serif;
+    background:#f5f7f7;
+    color:#183b3b;
+}
+.header{
+    background:linear-gradient(135deg,#0d5956,#164e4c);
+    color:white;
+    padding:25px;
+    text-align:center;
+}
+.header h1{margin:0 0 7px;font-size:27px}
+.header p{margin:0;opacity:.9}
+
+.container{
+    max-width:1100px;
+    margin:25px auto;
+    padding:0 18px 40px;
+}
+.card{
+    background:white;
+    border-radius:18px;
+    padding:25px;
+    margin-bottom:20px;
+    box-shadow:0 4px 18px rgba(0,0,0,.07);
+}
+.card-title{
+    font-size:20px;
+    font-weight:bold;
+    color:#0d5956;
+    margin-bottom:20px;
+    border-right:5px solid #c6a35b;
+    padding-right:10px;
+}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+.field{margin-bottom:17px}
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+input,select,textarea{
+    width:100%;
+    padding:12px;
+    border:1px solid #d6dddd;
+    border-radius:10px;
+    font-family:inherit;
+    font-size:15px;
+    background:white;
+}
+textarea{min-height:90px;resize:vertical}
+
+.radio-group{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+.radio-option{
+    border:1px solid #d8dfdf;
+    border-radius:10px;
+    padding:10px 14px;
+    background:#fafcfc;
+}
+.radio-option input{
+    width:auto;
+    margin-left:5px;
+}
+
+.hidden{display:none}
+
+.student-row{
+    display:grid;
+    grid-template-columns:2fr 1fr 55px;
+    gap:10px;
+    margin-bottom:10px;
+}
+.remove-btn{
+    border:none;
+    background:#f4e3e3;
+    color:#9d3333;
+    border-radius:9px;
+    cursor:pointer;
+    font-size:18px;
+}
+.add-btn{
+    background:#e8f2f1;
+    color:#0d5956;
+    border:none;
+    border-radius:10px;
+    padding:10px 15px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.actions{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    margin-top:25px;
+}
+.primary{
+    border:none;
+    background:#0d5956;
+    color:white;
+    padding:13px 30px;
+    border-radius:11px;
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+}
+.secondary{
+    border:1px solid #0d5956;
+    background:white;
+    color:#0d5956;
+    padding:13px 30px;
+    border-radius:11px;
+    font-weight:bold;
+    cursor:pointer;
+}
+.note{
+    background:#f8f4e9;
+    border-right:4px solid #c6a35b;
+    padding:13px;
+    border-radius:9px;
+    font-size:14px;
+    margin-bottom:20px;
+}
+
+@media(max-width:700px){
+    .grid{grid-template-columns:1fr}
+    .student-row{grid-template-columns:1fr 1fr 45px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🏆 المسابقات والإنجازات الطلابية</h1>
+    <p>بوابة أم كلثوم الذكية | العام الدراسي 2026–2027م</p>
+</div>
+
+<div class="container">
+
+<div class="note">
+يُستخدم هذا النموذج لتسجيل مشاركات الطالبات في المسابقات وتوثيق المراكز والإنجازات المحققة على مستوى المدرسة وخارجها.
+</div>
+
+<div class="card">
+<div class="card-title">بيانات المسابقة</div>
+
+<div class="grid">
+
+<div class="field">
+<label>اسم المسابقة *</label>
+<input id="competitionName" type="text" placeholder="اكتبي اسم المسابقة">
+</div>
+
+<div class="field">
+<label>نوع المسابقة *</label>
+<select id="competitionType" onchange="toggleExternalFields()">
+<option value="">اختاري</option>
+<option value="داخلية">داخلية – داخل المدرسة</option>
+<option value="خارجية">خارجية</option>
+</select>
+</div>
+
+<div class="field">
+<label>القسم / المادة *</label>
+<select id="department">
+<option value="">اختاري القسم</option>
+<option>اللغة العربية</option>
+<option>اللغة الإنجليزية</option>
+<option>الرياضيات</option>
+<option>العلوم</option>
+<option>الاجتماعيات</option>
+<option>التربية الإسلامية</option>
+<option>التربية الرياضية</option>
+<option>المجالات</option>
+<option>التربية الأسرية</option>
+<option>الحاسوب</option>
+<option>الأنشطة والفعاليات</option>
+<option>أخرى</option>
+</select>
+</div>
+
+<div class="field">
+<label>تاريخ المسابقة</label>
+<input id="competitionDate" type="date">
+</div>
+
+</div>
+
+<div id="externalFields" class="hidden">
+
+<div class="grid">
+
+<div class="field">
+<label>الجهة المنظمة</label>
+<input id="organizer" type="text" placeholder="مثال: وزارة التربية والتعليم">
+</div>
+
+<div class="field">
+<label>المدرسة / الجهة المستضيفة</label>
+<input id="host" type="text" placeholder="إن وجد">
+</div>
+
+<div class="field">
+<label>مستوى المسابقة</label>
+<select id="competitionLevel">
+<option value="">اختاري المستوى</option>
+<option>بين مدارس المنطقة</option>
+<option>على مستوى مملكة البحرين</option>
+<option>خليجية</option>
+<option>عربية</option>
+<option>دولية</option>
+<option>أخرى</option>
+</select>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">بيانات المشاركة</div>
+
+<div class="grid">
+
+<div class="field">
+<label>المرحلة</label>
+<select id="stage">
+<option value="">اختاري</option>
+<option>المرحلة الابتدائية</option>
+<option>المرحلة الإعدادية</option>
+<option>أكثر من مرحلة</option>
+</select>
+</div>
+
+<div class="field">
+<label>الصف</label>
+<input id="grade" type="text" placeholder="مثال: السادس / الثاني الإعدادي">
+</div>
+
+<div class="field">
+<label>المعلمة المشرفة *</label>
+<input id="supervisor" type="text" placeholder="اسم المعلمة المشرفة">
+</div>
+
+<div class="field">
+<label>عدد الطالبات المشاركات</label>
+<input id="studentCount" type="number" min="1">
+</div>
+
+</div>
+
+<div class="field">
+<label>أسماء الطالبات المشاركات</label>
+
+<div id="students">
+<div class="student-row">
+<input type="text" class="student-name" placeholder="اسم الطالبة">
+<input type="text" class="student-class" placeholder="الصف / الشعبة">
+<button type="button" class="remove-btn" onclick="removeStudent(this)">×</button>
+</div>
+</div>
+
+<button type="button" class="add-btn" onclick="addStudent()">
++ إضافة طالبة
+</button>
+
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">النتيجة والإنجاز</div>
+
+<div class="field">
+<label>نتيجة المشاركة *</label>
+<div class="radio-group">
+<label class="radio-option"><input type="radio" name="result" value="المركز الأول">🥇 المركز الأول</label>
+<label class="radio-option"><input type="radio" name="result" value="المركز الثاني">🥈 المركز الثاني</label>
+<label class="radio-option"><input type="radio" name="result" value="المركز الثالث">🥉 المركز الثالث</label>
+<label class="radio-option"><input type="radio" name="result" value="فوز أو تميز">⭐ فوز / تميز</label>
+<label class="radio-option"><input type="radio" name="result" value="مشاركة">مشاركة</label>
+<label class="radio-option"><input type="radio" name="result" value="أخرى">أخرى</label>
+</div>
+</div>
+
+<div class="grid">
+
+<div class="field">
+<label>اسم الجائزة / المركز بالتفصيل</label>
+<input id="awardDetails" type="text" placeholder="مثال: المركز الأول على مستوى مدارس البحرين">
+</div>
+
+<div class="field">
+<label>عدد المراكز / الجوائز المحققة</label>
+<input id="awardsCount" type="number" min="0">
+</div>
+
+</div>
+
+<div class="field">
+<label>ملاحظات إضافية</label>
+<textarea id="notes" placeholder="أي تفاصيل إضافية عن المشاركة أو الإنجاز"></textarea>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">الشواهد والمرفقات</div>
+
+<div class="field">
+<label>إرفاق صور أو شهادات</label>
+<input id="attachments" type="file" accept="image/*,.pdf" multiple>
+</div>
+
+<div class="note">
+يمكن إرفاق صور المشاركة أو شهادات الطالبات أو خطاب إعلان النتيجة. وسيتم ربط رفع الملفات بالتخزين المركزي في المرحلة التالية.
+</div>
+</div>
+
+<div class="actions">
+<button type="button" class="secondary" onclick="window.location.href='index.html'">العودة للبوابة</button>
+<button type="button" class="primary" onclick="prepareRecord()">حفظ سجل المسابقة</button>
+</div>
+
+</div>
+
+<script>
+function toggleExternalFields(){
+    const type=document.getElementById("competitionType").value;
+    document.getElementById("externalFields").classList.toggle(
+        "hidden",
+        type!=="خارجية"
+    );
+}
+
+function addStudent(){
+    const container=document.getElementById("students");
+    const row=document.createElement("div");
+    row.className="student-row";
+    row.innerHTML=`
+        <input type="text" class="student-name" placeholder="اسم الطالبة">
+        <input type="text" class="student-class" placeholder="الصف / الشعبة">
+        <button type="button" class="remove-btn" onclick="removeStudent(this)">×</button>
+    `;
+    container.appendChild(row);
+}
+
+function removeStudent(button){
+    const rows=document.querySelectorAll(".student-row");
+    if(rows.length>1){
+        button.parentElement.remove();
+    }else{
+        button.parentElement.querySelectorAll("input").forEach(i=>i.value="");
+    }
+}
+
+function prepareRecord(){
+    const name=document.getElementById("competitionName").value.trim();
+    const type=document.getElementById("competitionType").value;
+    const department=document.getElementById("department").value;
+    const supervisor=document.getElementById("supervisor").value.trim();
+    const result=document.querySelector('input[name="result"]:checked');
+
+    if(!name || !type || !department || !supervisor || !result){
+        alert("يرجى استكمال الحقول المطلوبة قبل الحفظ.");
+        return;
+    }
+
+    alert("تم تجهيز سجل المسابقة بنجاح. الخطوة التالية هي ربط الحفظ بقاعدة البيانات.");
+}
+</script>
+
+</body>
+</html>
