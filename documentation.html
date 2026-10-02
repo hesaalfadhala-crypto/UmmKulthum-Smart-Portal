@@ -534,6 +534,80 @@ button{
         <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
     </div>
 </div>
+                <!-- نوع التوثيق -->
+<div class="field">
+    <div class="check-title">نوع التوثيق</div>
+
+    <select id="documentationType">
+        <option value="">اختاري نوع التوثيق</option>
+        <option value="فعالية">فعالية</option>
+        <option value="مسابقة وإنجاز طلابي">مسابقة وإنجاز طلابي</option>
+        <option value="حصة احتياط">حصة احتياط</option>
+        <option value="أخرى">أخرى</option>
+    </select>
+</div>
+                <!-- تفاصيل المسابقة والإنجاز الطلابي -->
+<div id="competitionDocumentationFields" class="field" style="display:none;">
+    <div class="check-title">🏆 تفاصيل المسابقة والإنجاز الطلابي</div>
+
+    <label>نوع المسابقة</label>
+    <select id="docCompetitionType">
+        <option value="">اختاري نوع المسابقة</option>
+        <option value="داخلية">داخلية</option>
+        <option value="خارجية">خارجية</option>
+    </select>
+
+    <label>الجهة المنظمة</label>
+    <input type="text" id="docCompetitionOrganizer" placeholder="اسم الجهة المنظمة">
+
+    <label>المدرسة / الجهة المستضيفة</label>
+    <input type="text" id="docCompetitionHost" placeholder="اسم المدرسة أو الجهة المستضيفة">
+
+    <label>مستوى المسابقة</label>
+    <select id="docCompetitionLevel">
+        <option value="">اختاري المستوى</option>
+        <option value="داخل المدرسة">داخل المدرسة</option>
+        <option value="بين مدارس المنطقة">بين مدارس المنطقة</option>
+        <option value="على مستوى مملكة البحرين">على مستوى مملكة البحرين</option>
+        <option value="خليجية">خليجية</option>
+        <option value="عربية">عربية</option>
+        <option value="دولية">دولية</option>
+    </select>
+
+    <label>أسماء الطالبات المشاركات</label>
+    <textarea id="docCompetitionStudents" placeholder="اكتبي أسماء الطالبات المشاركات"></textarea>
+
+    <label>النتيجة / الإنجاز</label>
+    <select id="docCompetitionResult">
+        <option value="">اختاري النتيجة</option>
+        <option value="المركز الأول">المركز الأول</option>
+        <option value="المركز الثاني">المركز الثاني</option>
+        <option value="المركز الثالث">المركز الثالث</option>
+        <option value="فوز أو تميز">فوز أو تميز</option>
+        <option value="مشاركة">مشاركة</option>
+        <option value="أخرى">أخرى</option>
+    </select>
+
+    <label>تفاصيل الإنجاز</label>
+    <textarea id="docCompetitionDetails" placeholder="تفاصيل إضافية عن الإنجاز"></textarea>
+</div>
+
+<!-- تفاصيل حصة الاحتياط -->
+<div id="reserveClassFields" class="field" style="display:none;">
+    <div class="check-title">📚 توثيق حصة الاحتياط</div>
+
+    <label>الصف / الشعبة</label>
+    <input type="text" id="reserveClass" placeholder="مثال: 2 إعدادي / 3">
+
+    <label>رقم الحصة</label>
+    <input type="text" id="reservePeriod" placeholder="مثال: الحصة الثالثة">
+
+    <label>المعلمة الأساسية</label>
+    <input type="text" id="originalTeacher" placeholder="اسم المعلمة الأساسية">
+
+    <label>ما تم تنفيذه في حصة الاحتياط</label>
+    <textarea id="reserveImplementation" placeholder="اكتبي ما تم تنفيذه مع الطالبات"></textarea>
+</div>
                 <!-- اللجنة المرتبطة بالتوثيق -->
 <div class="field">
     <div class="check-title">اللجنة المرتبطة بالتوثيق</div>
@@ -712,6 +786,25 @@ button{
                         <p id="pProjects" class="empty">لم يتم التحديد</p>
                     </div>
                     <div class="report-section">
+    <h4>نوع التوثيق</h4>
+    <p id="pDocumentationType" class="empty">لم يتم التحديد</p>
+</div>
+                    <!-- تفاصيل المسابقة في التقرير -->
+<div class="report-section" id="competitionReport" style="display:none;">
+    <h4>🏆 تفاصيل المسابقة والإنجاز الطلابي</h4>
+
+    <div class="info">
+        <div><strong>اسم المسابقة:</strong> <span id="pCompetitionName">-</span></div>
+        <div><strong>نوع المسابقة:</strong> <span id="pCompetitionType">-</span></div>
+        <div><strong>الجهة المنظمة:</strong> <span id="pCompetitionOrganizer">-</span></div>
+        <div><strong>المستوى:</strong> <span id="pCompetitionLevel">-</span></div>
+        <div><strong>الطالبات المشاركات:</strong> <span id="pCompetitionStudents">-</span></div>
+        <div><strong>النتيجة:</strong> <span id="pCompetitionResult">-</span></div>
+    </div>
+
+    <p id="pCompetitionDetails" class="empty"></p>
+</div>
+                    <div class="report-section">
     <h4>اللجنة المرتبطة بالتوثيق</h4>
     <p id="pCommittees" class="empty">لم يتم التحديد</p>
 </div>
@@ -809,6 +902,58 @@ projectChecks.forEach(check=>{
 
         output.classList.toggle("empty",!selected.length);
     });
+});
+const documentationType = document.getElementById("documentationType");
+const pDocumentationType = document.getElementById("pDocumentationType");
+
+documentationType.addEventListener("change", () => {
+    const value = documentationType.value;
+
+    pDocumentationType.textContent = value || "لم يتم التحديد";
+    pDocumentationType.classList.toggle("empty", !value);
+
+    toggleDocumentationFields();
+});
+
+function toggleDocumentationFields() {
+    const type = documentationType.value;
+
+    const competitionFields = document.getElementById("competitionFields");
+    const reserveClassFields = document.getElementById("reserveClassFields");
+    const competitionReport = document.getElementById("competitionReport");
+
+    competitionFields.style.display =
+        type === "مسابقة وإنجاز طلابي" ? "block" : "none";
+
+    reserveClassFields.style.display =
+        type === "حصة احتياط" ? "block" : "none";
+    competitionReport.style.display =
+    type === "مسابقة وإنجاز طلابي" ? "block" : "none";
+}
+    const competitionLinks = [
+    ["docCompetitionName", "pCompetitionName"],
+    ["docCompetitionType", "pCompetitionType"],
+    ["docCompetitionOrganizer", "pCompetitionOrganizer"],
+    ["docCompetitionLevel", "pCompetitionLevel"],
+    ["docCompetitionStudents", "pCompetitionStudents"],
+    ["docCompetitionResult", "pCompetitionResult"],
+    ["docCompetitionDetails", "pCompetitionDetails"]
+];
+
+competitionLinks.forEach(([inputId, previewId]) => {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+
+    if (input && preview) {
+        const updateCompetitionPreview = () => {
+            const value = input.value.trim();
+            preview.textContent = value || "-";
+            preview.classList.toggle("empty", !value);
+        };
+
+        input.addEventListener("input", updateCompetitionPreview);
+        input.addEventListener("change", updateCompetitionPreview);
+    }
 });
     const committeeChecks = document.querySelectorAll(".committee-checks input[type=checkbox]");
 
