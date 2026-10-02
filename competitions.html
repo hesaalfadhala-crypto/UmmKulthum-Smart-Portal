@@ -338,7 +338,14 @@ textarea{min-height:90px;resize:vertical}
 <button type="button" class="secondary" onclick="window.location.href='index.html'">العودة للبوابة</button>
 <button type="button" class="primary" onclick="prepareRecord()">حفظ سجل المسابقة</button>
 </div>
+<div class="card" id="competitionReportsSection" style="margin-top:25px;">
+    <h2>📊 تقارير المسابقات والإنجازات الطلابية</h2>
+    <p style="color:#666;">السجلات المحفوظة حسب صلاحية المستخدم</p>
 
+    <div id="competitionReports">
+        <p>جاري تحميل السجلات...</p>
+    </div>
+</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -440,8 +447,74 @@ async function prepareRecord(){
         return;
     }
 
-    alert("تم حفظ سجل المسابقة بنجاح 🏆");
+
+alert("🏆 تم حفظ سجل المسابقة بنجاح");
 }
+
+async function loadCompetitionReports() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("competitions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    const container = document.getElementById("competitionReports");
+
+    if (error) {
+        console.error("Error loading competitions:", error);
+        container.innerHTML = "<p>تعذر تحميل سجلات المسابقات.</p>";
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        container.innerHTML = "<p>لا توجد مسابقات مسجلة حتى الآن.</p>";
+        return;
+    }
+
+    container.innerHTML = data.map(item => `
+        <div style="
+            border:1px solid #ddd;
+            border-radius:14px;
+            padding:18px;
+            margin-bottom:14px;
+            background:#fff;
+        ">
+            <h3 style="margin-top:0;">🏆 ${item.competition_name || "مسابقة"}</h3>
+
+            <p><strong>نوع المسابقة:</strong> ${item.competition_type || "-"}</p>
+            <p><strong>القسم:</strong> ${item.department || "-"}</p>
+            <p><strong>تاريخ المسابقة:</strong> ${item.competition_date || "-"}</p>
+            <p><strong>المرحلة:</strong> ${item.stage || "-"}</p>
+            <p><strong>الصف:</strong> ${item.grade || "-"}</p>
+            <p><strong>المعلمة المشرفة:</strong> ${item.supervisor || "-"}</p>
+            <p><strong>عدد الطالبات:</strong> ${item.student_count ?? "-"}</p>
+            <p><strong>النتيجة:</strong> ${item.result || "-"}</p>
+
+            ${item.competition_type === "خارجية" ? `
+                <p><strong>الجهة المنظمة:</strong> ${item.organizer || "-"}</p>
+                <p><strong>الجهة / المدرسة المستضيفة:</strong> ${item.host || "-"}</p>
+                <p><strong>مستوى المسابقة:</strong> ${item.competition_level || "-"}</p>
+            ` : ""}
+
+            ${item.award_details ? `
+                <p><strong>تفاصيل الإنجاز:</strong> ${item.award_details}</p>
+            ` : ""}
+
+            ${item.notes ? `
+                <p><strong>ملاحظات:</strong> ${item.notes}</p>
+            ` : ""}
+        </div>
+    `).join("");
+}
+
+loadCompetitionReports();
+    
 </script>
 </body>
 </html>
