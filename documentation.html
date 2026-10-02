@@ -439,10 +439,11 @@ button{
                             <option>فعالية</option>
                             <option>نشاط</option>
                             <option>مبادرة</option>
-                            <option>مسابقة</option>
+<option>مسابقة وإنجاز طلابي</option>
                             <option>ورشة تدريبية</option>
                             <option>لقاء توعوي</option>
                             <option>زيارة</option>
+                            <option>حصة احتياط</option>
                             <option>أخرى</option>
                         </select>
                     </div>
@@ -534,22 +535,12 @@ button{
         <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
     </div>
 </div>
-                <!-- نوع التوثيق -->
-<div class="field">
-    <div class="check-title">نوع التوثيق</div>
 
-    <select id="documentationType">
-        <option value="">اختاري نوع التوثيق</option>
-        <option value="فعالية">فعالية</option>
-        <option value="مسابقة وإنجاز طلابي">مسابقة وإنجاز طلابي</option>
-        <option value="حصة احتياط">حصة احتياط</option>
-        <option value="أخرى">أخرى</option>
-    </select>
-</div>
                 <!-- تفاصيل المسابقة والإنجاز الطلابي -->
 <div id="competitionDocumentationFields" class="field" style="display:none;">
     <div class="check-title">🏆 تفاصيل المسابقة والإنجاز الطلابي</div>
-
+<label>اسم المسابقة</label>
+<input type="text" id="docCompetitionName" placeholder="اكتبي اسم المسابقة">
     <label>نوع المسابقة</label>
     <select id="docCompetitionType">
         <option value="">اختاري نوع المسابقة</option>
@@ -593,46 +584,7 @@ button{
 </div>
 
 <!-- تفاصيل حصة الاحتياط -->
-<!-- تفاصيل المسابقة والإنجاز الطلابي -->
-<div id="competitionFields" class="field" style="display:none;">
-    <div class="check-title">🏆 تفاصيل المسابقة والإنجاز الطلابي</div>
 
-    <label>اسم المسابقة</label>
-    <input type="text" id="docCompetitionName" placeholder="اكتبي اسم المسابقة">
-
-    <label>نوع المسابقة</label>
-    <select id="docCompetitionType">
-        <option value="">اختاري النوع</option>
-        <option value="داخلية">داخلية</option>
-        <option value="خارجية">خارجية</option>
-    </select>
-
-    <label>الجهة المنظمة</label>
-    <input type="text" id="docCompetitionOrganizer" placeholder="اكتبي الجهة المنظمة">
-
-    <label>مستوى المسابقة</label>
-    <select id="docCompetitionLevel">
-        <option value="">اختاري المستوى</option>
-        <option value="مدرسي">مدرسي</option>
-        <option value="محلي">محلي</option>
-        <option value="وطني">وطني</option>
-        <option value="خليجي">خليجي</option>
-        <option value="عربي">عربي</option>
-        <option value="دولي">دولي</option>
-    </select>
-
-    <label>الطالبات المشاركات</label>
-    <textarea id="docCompetitionStudents"
-              placeholder="اكتبي أسماء الطالبات المشاركات والصفوف"></textarea>
-
-    <label>النتيجة / المركز المحقق</label>
-    <input type="text" id="docCompetitionResult"
-           placeholder="مثال: المركز الأول">
-
-    <label>تفاصيل إضافية</label>
-    <textarea id="docCompetitionDetails"
-              placeholder="اكتبي تفاصيل الإنجاز أو الجوائز إن وجدت"></textarea>
-</div>
                 <div id="reserveClassFields" class="field" style="display:none;">
     <div class="check-title">📚 توثيق حصة الاحتياط</div>
 
@@ -943,8 +895,8 @@ projectChecks.forEach(check=>{
         output.classList.toggle("empty",!selected.length);
     });
 });
-const documentationType = document.getElementById("documentationType");
-const pDocumentationType = document.getElementById("pDocumentationType");
+const documentationType = document.getElementById("type");
+    const pDocumentationType = document.getElementById("pDocumentationType");
 
 documentationType.addEventListener("change", () => {
     const value = documentationType.value;
@@ -958,7 +910,7 @@ documentationType.addEventListener("change", () => {
 function toggleDocumentationFields() {
     const type = documentationType.value;
 
-    const competitionFields = document.getElementById("competitionFields");
+const competitionFields = document.getElementById("competitionDocumentationFields");
     const reserveClassFields = document.getElementById("reserveClassFields");
     const competitionReport = document.getElementById("competitionReport");
 
