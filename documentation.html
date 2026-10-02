@@ -593,7 +593,47 @@ button{
 </div>
 
 <!-- تفاصيل حصة الاحتياط -->
-<div id="reserveClassFields" class="field" style="display:none;">
+<!-- تفاصيل المسابقة والإنجاز الطلابي -->
+<div id="competitionFields" class="field" style="display:none;">
+    <div class="check-title">🏆 تفاصيل المسابقة والإنجاز الطلابي</div>
+
+    <label>اسم المسابقة</label>
+    <input type="text" id="docCompetitionName" placeholder="اكتبي اسم المسابقة">
+
+    <label>نوع المسابقة</label>
+    <select id="docCompetitionType">
+        <option value="">اختاري النوع</option>
+        <option value="داخلية">داخلية</option>
+        <option value="خارجية">خارجية</option>
+    </select>
+
+    <label>الجهة المنظمة</label>
+    <input type="text" id="docCompetitionOrganizer" placeholder="اكتبي الجهة المنظمة">
+
+    <label>مستوى المسابقة</label>
+    <select id="docCompetitionLevel">
+        <option value="">اختاري المستوى</option>
+        <option value="مدرسي">مدرسي</option>
+        <option value="محلي">محلي</option>
+        <option value="وطني">وطني</option>
+        <option value="خليجي">خليجي</option>
+        <option value="عربي">عربي</option>
+        <option value="دولي">دولي</option>
+    </select>
+
+    <label>الطالبات المشاركات</label>
+    <textarea id="docCompetitionStudents"
+              placeholder="اكتبي أسماء الطالبات المشاركات والصفوف"></textarea>
+
+    <label>النتيجة / المركز المحقق</label>
+    <input type="text" id="docCompetitionResult"
+           placeholder="مثال: المركز الأول">
+
+    <label>تفاصيل إضافية</label>
+    <textarea id="docCompetitionDetails"
+              placeholder="اكتبي تفاصيل الإنجاز أو الجوائز إن وجدت"></textarea>
+</div>
+                <div id="reserveClassFields" class="field" style="display:none;">
     <div class="check-title">📚 توثيق حصة الاحتياط</div>
 
     <label>الصف / الشعبة</label>
