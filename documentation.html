@@ -382,6 +382,7 @@ button{
 }
 }
 </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -864,6 +865,9 @@ button{
 
 
 <script>
+    const SUPABASE_URL = "https://ulqwkxzjwdmkspsjzvup.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const links = [
     ["activity","pActivity"],
     ["semester","pSemester"],
@@ -1119,7 +1123,7 @@ function clearForm(){
 
     location.reload();
 }
-    function smartSave(){
+async function smartSave(){
     const data = {};
 
     document.querySelectorAll("input[type=text], input[type=date], textarea, select").forEach(el => {
@@ -1129,7 +1133,44 @@ function clearForm(){
     document.querySelectorAll("input[type=checkbox]").forEach(el => {
         if(el.value) data["check_" + el.value] = el.checked;
     });
+const { data: userData } = await supabaseClient.auth.getUser();
+const user = userData?.user;
 
+if (!user) {
+    alert("يرجى تسجيل الدخول أولاً");
+    return;
+}
+
+const documentationRecord = {
+    created_by: user.id,
+    activity: data.activity || null,
+    documentation_type: data.documentationType || null,
+    semester: data.semester || null,
+    department: data.department || null,
+    executor: data.executor || null,
+    activity_date: data.date || null,
+    location: data.location || null,
+    goal: data.goal || null,
+    implementation: data.implementation || null,
+    results: data.impact || null,
+    competition_type: data.docCompetitionType || null,
+    competition_organizer: data.docCompetitionOrganizer || null,
+    competition_host: data.docCompetitionHost || null,
+    competition_level: data.docCompetitionLevel || null,
+    competition_students: data.docCompetitionStudents || null,
+    competition_result: data.docCompetitionResult || null,
+    competition_details: data.docCompetitionDetails || null
+};
+
+const { error } = await supabaseClient
+    .from("documentations")
+    .insert([documentationRecord]);
+
+if (error) {
+    console.error("Supabase save error:", error);
+    alert("تعذر حفظ التوثيق في قاعدة البيانات: " + error.message);
+    return;
+}
     localStorage.setItem("ummKulthumDocumentation", JSON.stringify(data));
 
     alert("تم حفظ بيانات التوثيق بنجاح ✓");
