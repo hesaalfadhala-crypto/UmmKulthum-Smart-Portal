@@ -311,6 +311,65 @@ footer{
 <footer>
     بوابة أم كلثوم الذكية • مدرسة أم كلثوم الابتدائية الإعدادية للبنات
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script>
+const SUPABASE_URL = "https://ulqwkxzjwdmkspsjzvup.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+async function loadDocumentations() {
+    const archiveGrid = document.getElementById("archiveGrid");
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+        archiveGrid.innerHTML = `
+            <div class="empty-state">
+                <div class="icon">🔒</div>
+                <h3>يرجى تسجيل الدخول</h3>
+            </div>
+        `;
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("documentations")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error(error);
+        archiveGrid.innerHTML = `
+            <div class="empty-state">
+                <h3>تعذر تحميل التوثيقات</h3>
+            </div>
+        `;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        archiveGrid.innerHTML = `
+            <div class="empty-state">
+                <div class="icon">🗂️</div>
+                <h3>لا توجد توثيقات محفوظة حتى الآن</h3>
+            </div>
+        `;
+        return;
+    }
+
+    archiveGrid.innerHTML = data.map(item => `
+        <div class="archive-card">
+            <h3>${item.activity || "توثيق بدون عنوان"}</h3>
+            <p><strong>نوع الفعالية:</strong> ${item.activity_type || "-"}</p>
+            <p><strong>القسم:</strong> ${item.department || "-"}</p>
+            <p><strong>المنفذ:</strong> ${item.executor || "-"}</p>
+            <p><strong>التاريخ:</strong> ${item.activity_date || "-"}</p>
+            <p><strong>المكان:</strong> ${item.location || "-"}</p>
+        </div>
+    `).join("");
+}
+
+loadDocumentations();
+</script>
 </body>
 </html>
