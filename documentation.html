@@ -786,15 +786,28 @@ button{
     <h4>🏆 تفاصيل المسابقة والإنجاز الطلابي</h4>
 
     <div class="info">
-        <div><strong>اسم المسابقة:</strong> <span id="pCompetitionName">-</span></div>
         <div><strong>نوع المسابقة:</strong> <span id="pCompetitionType">-</span></div>
         <div><strong>الجهة المنظمة:</strong> <span id="pCompetitionOrganizer">-</span></div>
+        <div><strong>المدرسة / الجهة المستضيفة:</strong> <span id="pCompetitionHost">-</span></div>
         <div><strong>المستوى:</strong> <span id="pCompetitionLevel">-</span></div>
         <div><strong>الطالبات المشاركات:</strong> <span id="pCompetitionStudents">-</span></div>
         <div><strong>النتيجة:</strong> <span id="pCompetitionResult">-</span></div>
     </div>
 
     <p id="pCompetitionDetails" class="empty"></p>
+</div>
+                    <!-- تفاصيل حصة الاحتياط في التقرير -->
+<div class="report-section" id="reserveClassReport" style="display:none;">
+    <h4>📚 تفاصيل حصة الاحتياط</h4>
+
+    <div class="info">
+        <div><strong>الصف / الشعبة:</strong> <span id="pReserveClass">-</span></div>
+        <div><strong>رقم الحصة:</strong> <span id="pReservePeriod">-</span></div>
+        <div><strong>المعلمة الأساسية:</strong> <span id="pOriginalTeacher">-</span></div>
+    </div>
+
+    <h4>ما تم تنفيذه في حصة الاحتياط</h4>
+    <p id="pReserveImplementation" class="empty">لم يتم التحديد</p>
 </div>
                     <div class="report-section">
     <h4>اللجنة المرتبطة بالتوثيق</h4>
@@ -913,7 +926,7 @@ function toggleDocumentationFields() {
 const competitionFields = document.getElementById("competitionDocumentationFields");
     const reserveClassFields = document.getElementById("reserveClassFields");
     const competitionReport = document.getElementById("competitionReport");
-
+const reserveClassReport = document.getElementById("reserveClassReport");
     competitionFields.style.display =
         type === "مسابقة وإنجاز طلابي" ? "block" : "none";
 
@@ -923,9 +936,9 @@ const competitionFields = document.getElementById("competitionDocumentationField
     type === "مسابقة وإنجاز طلابي" ? "block" : "none";
 }
     const competitionLinks = [
-    ["docCompetitionName", "pCompetitionName"],
     ["docCompetitionType", "pCompetitionType"],
     ["docCompetitionOrganizer", "pCompetitionOrganizer"],
+        ["docCompetitionHost", "pCompetitionHost"],
     ["docCompetitionLevel", "pCompetitionLevel"],
     ["docCompetitionStudents", "pCompetitionStudents"],
     ["docCompetitionResult", "pCompetitionResult"],
@@ -945,6 +958,28 @@ competitionLinks.forEach(([inputId, previewId]) => {
 
         input.addEventListener("input", updateCompetitionPreview);
         input.addEventListener("change", updateCompetitionPreview);
+    }
+});
+    const reserveClassLinks = [
+    ["reserveClass", "pReserveClass"],
+    ["reservePeriod", "pReservePeriod"],
+    ["originalTeacher", "pOriginalTeacher"],
+    ["reserveImplementation", "pReserveImplementation"]
+];
+
+reserveClassLinks.forEach(([inputId, previewId]) => {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+
+    if (input && preview) {
+        const updateReservePreview = () => {
+            const value = input.value.trim();
+            preview.textContent = value || "-";
+            preview.classList.toggle("empty", !value);
+        };
+
+        input.addEventListener("input", updateReservePreview);
+        input.addEventListener("change", updateReservePreview);
     }
 });
     const committeeChecks = document.querySelectorAll(".committee-checks input[type=checkbox]");
