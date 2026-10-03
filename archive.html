@@ -368,10 +368,13 @@ async function loadDocumentations() {
             <p><strong>الفصل الدراسي:</strong> ${item.semester || "-"}</p>
 <p><strong>الهدف:</strong> ${item.goal || "-"}</p>
 <p><strong>النتائج والأثر:</strong> ${item.results || "-"}</p>
+<button onclick="openDocumentationReport(${item.id})" class="report-btn">📄 عرض التقرير</button>
         </div>
     `).join("");
 }
-
+async function openDocumentationReport(id) {
+    window.location.href = `documentation.html?id=${id}&mode=view`;
+}
 loadDocumentations();
 </script>
 </body>
