@@ -175,4 +175,8 @@ test('archive pagination retrieves more than the first page', async () => {
     const old = normalize({ id: 12, activity: 'سجل قديم', results: 'أثر محفوظ', competition_result: 'المركز الأول' });
     assert.equal(old.data.impact, 'أثر محفوظ'); assert.equal(old.data.docCompetitionResult, 'المركز الأول');
     assert.deepEqual(old.photos, []);
+    const legacyGroups = normalize({id:13, documentation_area:'التعليم والتعلم والتقويم • القيادة والإدارة', projects:'["الخوارزمي","غرس"]', target_categories:'جميع الطالبات'});
+    assert.deepEqual(legacyGroups.data.areas, ['التعليم والتعلم والتقويم','القيادة والإدارة']);
+    assert.deepEqual(legacyGroups.data.projects, ['الخوارزمي','غرس']);
+    assert.deepEqual(legacyGroups.data.targets, ['جميع الطالبات']);
 });
