@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<script>const recordId=new URLSearchParams(location.search).get("id");if(recordId)location.replace("report.html?id="+encodeURIComponent(recordId));</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>توثيق جديد | بوابة أم كلثوم الذكية</title>
@@ -180,6 +181,7 @@ textarea{
 
 .actions{
     display:flex;
+    flex-wrap:wrap;
     gap:10px;
     margin-top:20px;
 }
@@ -211,7 +213,7 @@ button{
 
 .report{
     background:white;
-    min-height:850px;
+    min-height:0;
     padding:35px;
     border-radius:5px;
     box-shadow:0 5px 25px rgba(40,70,65,.08);
@@ -292,6 +294,8 @@ button{
 }
 
 .report-section p{
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
     font-size:13px;
     line-height:1.9;
     color:#526663;
@@ -356,6 +360,8 @@ button{
 }
 
 .report-section p{
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
     margin:2px 0;
     line-height:1.35;
 }
@@ -366,23 +372,32 @@ button{
 
 #reportImages{
     display:grid;
-    grid-template-columns:repeat(5, 1fr);
+    grid-template-columns:repeat(2, 1fr);
     gap:4px;
 }
 
 #reportImages img{
     width:100% !important;
-    height:65px !important;
+    height:65mm !important;
     margin:0 !important;
-    object-fit:cover;
+    object-fit:contain;
 }
 
 .report{
-    page-break-inside:avoid;
+    page-break-inside:auto;
 }
 }
+#reportImages{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#reportImages figure{min-width:0;break-inside:avoid}
+#reportImages img{width:100%;height:210px;object-fit:contain;background:#f4f8f7;border-radius:8px}
+#reportImages figcaption{text-align:center;font-size:12px;color:#708781}
+#saveStatus{margin-top:14px;line-height:1.8;color:#174f4b;white-space:pre-wrap}
+#saveStatus.error{color:#a63333}
+button:disabled{opacity:.6;cursor:wait}
+[hidden]{display:none!important}
+@media(max-width:480px){.row{grid-template-columns:1fr}.report{padding:16px}.info{grid-template-columns:1fr}}
 </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
 </head>
 
 <body>
@@ -423,7 +438,7 @@ button{
 
                 <div class="field">
                     <label>اسم الفعالية أو النشاط <span class="required">*</span></label>
-                    <input id="activity" type="text" placeholder="مثال: أسبوع القراءة">
+                    <input id="activity" type="text" required maxlength="300" placeholder="مثال: أسبوع القراءة">
                 </div>
 <div class="field">
     <label>الفصل الدراسي</label>
@@ -723,15 +738,17 @@ button{
                     <div class="upload">
                         📷<br>
                         إرفاق صور الفعالية
-<input id="images" type="file" multiple accept="image/*">                    </div>
+<input id="images" type="file" multiple accept="image/jpeg,image/png,image/webp"><p id="imageCount" role="status">لم تُرفق صور بعد</p>                    </div>
                 </div>
 
                 <div class="actions">
-                    <button class="primary" type="button" onclick="window.print()">طباعة التقرير</button>
-                    <button class="primary" type="button" onclick="smartSave()">💾 حفظ ذكي</button>
-                    <button class="secondary" type="button" onclick="clearForm()">مسح البيانات</button>
+                    <button id="save" class="primary" type="button" disabled>حفظ في الأرشيف وعرض التقرير</button>
+                    <button id="clear" class="secondary" type="button" disabled>مسح المسودة</button>
+                    <button id="editDraft" class="secondary" type="button" hidden>تعديل المسودة</button>
+                    <a class="back" href="archive.html">فتح الأرشيف</a>
                 </div>
 
+                <p id="saveStatus" role="status" aria-live="polite">جار التحقق من تسجيل الدخول…</p>
             </div>
         </section>
 
@@ -762,7 +779,7 @@ button{
 
                     <div class="info">
                         <div><strong>اسم الفعالية:</strong> <span id="pActivity">—</span></div>
-                        <div><strong>الفصل الدراسي:</strong> <span id="pSemester">الفصل الدراسي الأول</span></div>  
+                        <div><strong>الفصل الدراسي:</strong> <span id="pSemester">الفصل الدراسي الأول</span></div>
                         <div><strong>النوع:</strong> <span id="pType">—</span></div>
                         <div><strong>القسم:</strong> <span id="pDepartment">—</span></div>
                         <div><strong>المنفذة:</strong> <span id="pExecutor">—</span></div>
@@ -778,15 +795,13 @@ button{
                         <h4>المشروع / المبادرة المرتبطة</h4>
                         <p id="pProjects" class="empty">لم يتم التحديد</p>
                     </div>
-                    <div class="report-section">
-    <h4>نوع التوثيق</h4>
-    <p id="pDocumentationType" class="empty">لم يتم التحديد</p>
-</div>
+
                     <!-- تفاصيل المسابقة في التقرير -->
 <div class="report-section" id="competitionReport" style="display:none;">
     <h4>🏆 تفاصيل المسابقة والإنجاز الطلابي</h4>
 
     <div class="info">
+        <div><strong>اسم المسابقة:</strong> <span id="pCompetitionName">-</span></div>
         <div><strong>نوع المسابقة:</strong> <span id="pCompetitionType">-</span></div>
         <div><strong>الجهة المنظمة:</strong> <span id="pCompetitionOrganizer">-</span></div>
         <div><strong>المدرسة / الجهة المستضيفة:</strong> <span id="pCompetitionHost">-</span></div>
@@ -847,7 +862,7 @@ button{
     <div id="reportImages"></div>
 </div>
                     <div class="note">
-                        بوابة أم كلثوم الذكية • نموذج توثيق إلكتروني
+                        هذه معاينة. يُتاح التقرير النهائي وتصدير PDF بعد تأكيد الحفظ في الأرشيف.
                     </div>
 
     <div style="margin-top:45px; text-align:left; direction:rtl; padding-left:25px;">
@@ -864,343 +879,7 @@ button{
 </main>
 
 
-<script>
-    const SUPABASE_URL = "https://ulqwkxzjwdmkspsjzvup.supabase.co";
-const SUPABASE_KEY = "sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const links = [
-    ["activity","pActivity"],
-    ["semester","pSemester"],
-    ["type","pType"],
-    ["department","pDepartment"],
-    ["executor","pExecutor"],
-    ["date","pDate"],
-    ["location","pLocation"],
-    ["goal","pGoal"],
-    ["implementation","pImplementation"],
-    ["impact","pImpact"],
-    ["recommendations","pRecommendations"]
-];
-
-links.forEach(([inputId,previewId])=>{
-    const input=document.getElementById(inputId);
-    const preview=document.getElementById(previewId);
-
-    function update(){
-        const value=input.value.trim();
-        preview.textContent=value || "—";
-        preview.classList.toggle("empty",!value);
-    }
-
-    input.addEventListener("input",update);
-    input.addEventListener("change",update);
-});
-
-const projectChecks=document.querySelectorAll(".project-checks input[type=checkbox]");
-projectChecks.forEach(check=>{
-    check.addEventListener("change",()=>{
-        const selected=[...projectChecks]
-            .filter(c=>c.checked)
-            .map(c=>c.value);
-
-        const output=document.getElementById("pProjects");
-
-        output.textContent=selected.length
-            ? selected.join(" • ")
-            : "لم يتم التحديد";
-
-        output.classList.toggle("empty",!selected.length);
-    });
-});
-const documentationType = document.getElementById("type");
-    const pDocumentationType = document.getElementById("pDocumentationType");
-
-documentationType.addEventListener("change", () => {
-    const value = documentationType.value;
-
-    pDocumentationType.textContent = value || "لم يتم التحديد";
-    pDocumentationType.classList.toggle("empty", !value);
-
-    toggleDocumentationFields();
-});
-
-function toggleDocumentationFields() {
-    const type = documentationType.value;
-
-const competitionFields = document.getElementById("competitionDocumentationFields");
-    const reserveClassFields = document.getElementById("reserveClassFields");
-    const competitionReport = document.getElementById("competitionReport");
-const reserveClassReport = document.getElementById("reserveClassReport");
-    competitionFields.style.display =
-        type === "مسابقة وإنجاز طلابي" ? "block" : "none";
-
-    reserveClassFields.style.display =
-        type === "حصة احتياط" ? "block" : "none";
-    competitionReport.style.display =
-    type === "مسابقة وإنجاز طلابي" ? "block" : "none";
-}
-    const competitionLinks = [
-    ["docCompetitionType", "pCompetitionType"],
-    ["docCompetitionOrganizer", "pCompetitionOrganizer"],
-        ["docCompetitionHost", "pCompetitionHost"],
-    ["docCompetitionLevel", "pCompetitionLevel"],
-    ["docCompetitionStudents", "pCompetitionStudents"],
-    ["docCompetitionResult", "pCompetitionResult"],
-    ["docCompetitionDetails", "pCompetitionDetails"]
-];
-
-competitionLinks.forEach(([inputId, previewId]) => {
-    const input = document.getElementById(inputId);
-    const preview = document.getElementById(previewId);
-
-    if (input && preview) {
-        const updateCompetitionPreview = () => {
-            const value = input.value.trim();
-            preview.textContent = value || "-";
-            preview.classList.toggle("empty", !value);
-        };
-
-        input.addEventListener("input", updateCompetitionPreview);
-        input.addEventListener("change", updateCompetitionPreview);
-    }
-});
-    const reserveClassLinks = [
-    ["reserveClass", "pReserveClass"],
-    ["reservePeriod", "pReservePeriod"],
-    ["originalTeacher", "pOriginalTeacher"],
-    ["reserveImplementation", "pReserveImplementation"]
-];
-
-reserveClassLinks.forEach(([inputId, previewId]) => {
-    const input = document.getElementById(inputId);
-    const preview = document.getElementById(previewId);
-
-    if (input && preview) {
-        const updateReservePreview = () => {
-            const value = input.value.trim();
-            preview.textContent = value || "-";
-            preview.classList.toggle("empty", !value);
-        };
-
-        input.addEventListener("input", updateReservePreview);
-        input.addEventListener("change", updateReservePreview);
-    }
-});
-    const committeeChecks = document.querySelectorAll(".committee-checks input[type=checkbox]");
-
-committeeChecks.forEach(check => {
-    check.addEventListener("change", () => {
-        const selected = [...committeeChecks]
-            .filter(c => c.checked)
-            .map(c => c.value);
-
-        const output = document.getElementById("pCommittees");
-
-        output.textContent = selected.length
-            ? selected.join(" • ")
-            : "لم يتم التحديد";
-
-        output.classList.toggle("empty", !selected.length);
-    });
-});
-// تحديث المجالات في التقرير
-const areaChecks = document.querySelectorAll(".areas-checks input[type=checkbox]");
-
-areaChecks.forEach(check => {
-    check.addEventListener("change", () => {
-        const selected = [...areaChecks]
-            .filter(c => c.checked)
-            .map(c => c.value);
-
-        const output = document.getElementById("pAreas");
-
-        output.textContent = selected.length
-            ? selected.join(" • ")
-            : "لم يتم التحديد";
-
-        output.classList.toggle("empty", !selected.length);
-    });
-});
-    // تحديث الفئات المستهدفة في التقرير
-const targetChecks = document.querySelectorAll(".target-checks input[type=checkbox]");
-
-targetChecks.forEach(check => {
-    check.addEventListener("change", () => {
-        const selected = [...targetChecks]
-            .filter(c => c.checked)
-            .map(c => c.value);
-
-        const output = document.getElementById("pTarget");
-
-        output.textContent = selected.length
-            ? selected.join(" • ")
-            : "لم يتم التحديد";
-
-        output.classList.toggle("empty", !selected.length);
-    });
-});
-
-    // تحديد الصور بحد أقصى 10 صور
-const imagesInput = document.getElementById("images");
-imagesInput.addEventListener("change", () => {
-
-    const files = [...imagesInput.files];
-
-    if (files.length > 10) {
-        alert("يمكن إرفاق 10 صور كحد أقصى.");
-        imagesInput.value = "";
-        return;
-    }
-
-    const reportImages = document.getElementById("reportImages");
-    const photosReport = document.getElementById("photosReport");
-
-    reportImages.innerHTML = "";
-
-    if (files.length === 0) {
-        photosReport.style.display = "none";
-        return;
-    }
-
-    photosReport.style.display = "block";
-
-    files.forEach(file => {
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-
-        img.style.width = "150px";
-        img.style.height = "110px";
-        img.style.objectFit = "cover";
-        img.style.borderRadius = "8px";
-        img.style.margin = "5px";
-
-        reportImages.appendChild(img);
-    });
-});
-imagesInput.addEventListener("change", () => {
-    if (imagesInput.files.length > 10) {
-        alert("يمكن إرفاق 10 صور كحد أقصى.");
-        imagesInput.value = "";
-    }
-});
-
-// تحديث المديرات المساعدات في التقرير
-const assistantChecks = document.querySelectorAll(".assistant-checks input[type=checkbox]");
-
-assistantChecks.forEach(check => {
-    check.addEventListener("change", () => {
-        const selected = [...assistantChecks]
-            .filter(c => c.checked)
-            .map(c => c.value);
-
-        const report = document.getElementById("assistantsReport");
-        const output = document.getElementById("pAssistants");
-
-        if (selected.length) {
-            const title = selected.length === 1
-                ? "المديرة المساعدة المشرفة: "
-                : "المديرات المساعدات المشرفات: ";
-
-            output.textContent = title + selected.join(" • ");
-            report.style.display = "block";
-        } else {
-            output.textContent = "";
-            report.style.display = "none";
-        }
-    });
-});
-function clearForm(){
-    if(!confirm("هل تريدين مسح جميع البيانات المدخلة؟")) return;
-
-    document.querySelectorAll("input[type=text], input[type=date], textarea")
-        .forEach(el=>el.value="");
-
-    document.querySelectorAll("select")
-        .forEach(el=>el.selectedIndex=0);
-
-    document.querySelectorAll("input[type=checkbox]")
-        .forEach(el=>el.checked=false);
-
-    location.reload();
-}
-async function smartSave(){
-    const data = {};
-
-    document.querySelectorAll("input[type=text], input[type=date], textarea, select").forEach(el => {
-        if(el.id) data[el.id] = el.value;
-    });
-
-    document.querySelectorAll("input[type=checkbox]").forEach(el => {
-        if(el.value) data["check_" + el.value] = el.checked;
-    });
-const { data: userData } = await supabaseClient.auth.getUser();
-const user = userData?.user;
-
-if (!user) {
-    alert("يرجى تسجيل الدخول أولاً");
-    return;
-}
-
-const documentationRecord = {
-    created_by: user.id,
-    activity: data.activity || null,
-activity_type: data.type || null,
-    semester: data.semester || null,
-    department: data.department || null,
-    executor: data.executor || null,
-    activity_date: data.date || null,
-    location: data.location || null,
-    goal: data.goal || null,
-    implementation: data.implementation || null,
-    results: data.impact || null,
-    competition_type: data.docCompetitionType || null,
-    competition_organizer: data.docCompetitionOrganizer || null,
-    competition_host: data.docCompetitionHost || null,
-    competition_level: data.docCompetitionLevel || null,
-    competition_students: data.docCompetitionStudents || null,
-    competition_result: data.docCompetitionResult || null,
-    competition_details: data.docCompetitionDetails || null
-};
-
-const { error } = await supabaseClient
-    .from("documentations")
-    .insert([documentationRecord]);
-
-if (error) {
-    console.error("Supabase save error:", error);
-    alert("تعذر حفظ التوثيق في قاعدة البيانات: " + error.message);
-    return;
-}
-    localStorage.setItem("ummKulthumDocumentation", JSON.stringify(data));
-
-    alert("تم حفظ بيانات التوثيق بنجاح ✓");
-}
-
-    function loadSavedData(){
-    const saved = localStorage.getItem("ummKulthumDocumentation");
-    if(!saved) return;
-
-    const data = JSON.parse(saved);
-
-    document.querySelectorAll("input[type=text], input[type=date], textarea, select").forEach(el => {
-        if(el.id && data[el.id] !== undefined){
-            el.value = data[el.id];
-            el.dispatchEvent(new Event("input"));
-            el.dispatchEvent(new Event("change"));
-        }
-    });
-
-    document.querySelectorAll("input[type=checkbox]").forEach(el => {
-        const key = "check_" + el.value;
-        if(data[key] !== undefined){
-            el.checked = data[key];
-            el.dispatchEvent(new Event("change"));
-        }
-    });
-}
-
-window.addEventListener("DOMContentLoaded", loadSavedData);
-</script>
+<script type="module" src="assets/js/documentation.js"></script>
 
 </body>
 </html>
