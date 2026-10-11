@@ -1,0 +1,23 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {JSDOM} from 'jsdom';import {createCanvas,GlobalFonts,loadImage} from '@napi-rs/canvas';
+import {testExcelBytes} from './template.mjs';
+import {weeklyCanvases} from '../../assets/js/weekly-pdf.js';import {packPDF} from '../../assets/js/pdf-export.js';import {missingExcel} from '../../assets/js/weekly-excel.js';import {workbookXML,importTemplate} from '../../assets/js/weekly-import.js';import {monitoring,statistics,planHTML,PERIODS} from '../../assets/js/weekly-model.js';
+GlobalFonts.registerFromPath('assets/fonts/NotoNaskhArabic-Regular.ttf','Portal Arabic');GlobalFonts.registerFromPath('assets/fonts/NotoNaskhArabic-Bold.ttf','Portal Arabic');
+const period={id:'test-week',week_number:7,academic_year:'2026-2027',semester:1,starts_on:'2026-10-11',ends_on:'2026-10-15',due_at:'2026-10-12T12:00:00+03:00'};
+test('import supplied native Excel, preserve 40 tasks, export Arabic A4 PDF with logos, and protect read-only HTML',async()=>{
+ const template=testExcelBytes(),Parser=new JSDOM().window.DOMParser;
+ const imported=importTemplate(await workbookXML(template),Parser),body=imported.body;assert.equal(imported.dates[0],'2026-09-27');assert.equal(body.slots.length,40);assert.equal(body.slots.find(s=>s.day===4&&s.period==='4').text.trim(),'مهمة اختبار 4 4');
+ const plan={kind:'staff',owner_name:'صاحبة خطة اختبار — بيانات تجريبية',department:'قسم اختبار',body,updated_at:'2026-10-11T20:00:00Z'};
+ const logo=await loadImage('school-logo.png'),pages=weeklyCanvases(plan,{...period,starts_on:imported.dates[0],ends_on:imported.dates[4]},{logo,createCanvas});assert.equal(pages.length,1,'normal template fits one landscape A4');
+ await fs.mkdir('.test-output/plans',{recursive:true});await fs.writeFile('.test-output/plans/weekly-template.pdf',packPDF(pages.map(c=>c.encodeSync('jpeg',97)),2480,1754,841.89,595.28));await fs.writeFile('.test-output/plans/weekly-template.png',pages[0].encodeSync('png'));
+ const dom=new JSDOM(planHTML({...plan,body:{...body,notes:'<img src=x onerror=alert(1)>'}},period));assert.equal(dom.window.document.querySelectorAll('table tbody tr').length,5);assert.equal(dom.window.document.querySelectorAll('input,textarea,select,script').length,0);assert.equal(dom.window.document.querySelectorAll('img').length,1);
+});
+test('counts only assigned population, correct lateness boundaries, missing email remains in denominator, no-data distinguished',()=>{
+ const staff=[{id:'a',active:true,full_name:'أ',department:'رياضيات',user_id:'a'},{id:'b',active:true,full_name:'ب',department:'رياضيات',user_id:null},{id:'c',active:true,full_name:'ج',department:'عربي',user_id:'c'}],assignments=[{period_id:period.id,staff_id:'a',required:true},{period_id:period.id,staff_id:'b',required:true}],plans=[{kind:'staff',staff_id:'a',period_id:period.id,status:'approved',submitted_at:'2026-10-12T08:59:00Z'}];
+ const before=monitoring(staff,assignments,plans,period,new Date('2026-10-12T08:59:59Z'));assert.equal(statistics(before).late,0);const after=monitoring(staff,assignments,plans,period,new Date('2026-10-12T09:00:01Z'));assert.deepEqual(statistics(after),{required:2,submitted:1,approved:1,late:1,commitment:50});assert.equal(after[2].status,'not_required');assert.equal(statistics([]).commitment,null);
+});
+test('missing native Excel/PDF exports validate, and long plans split into non-empty pages',async()=>{
+ const rows=Array.from({length:72},(_,i)=>({staff:{full_name:'اسم اختبار '+i,department:'قسم اختبار',user_id:null},status:'missing'})),logo=await loadImage('school-logo.png');
+ const excel=missingExcel(rows,period);assert.equal(new DataView(excel.buffer).getUint32(0,true),0x04034b50);await fs.writeFile('.test-output/plans/missing.xlsx',excel);
+ const pages=weeklyCanvases(null,period,{logo,createCanvas,missing:rows});assert.ok(pages.length>1&&pages.length<10);await fs.writeFile('.test-output/plans/missing.pdf',packPDF(pages.map(c=>c.encodeSync('jpeg',97)),2480,1754,841.89,595.28));
+ const long={kind:'principal',owner_name:'مديرة اختبار',updated_at:new Date().toISOString(),body:{slots:[{day:0,period:'1',category:'visit',text:'مهمة زيارة اختبارية '.repeat(100)}],deliveries:Array.from({length:30},()=>({task:'متابعة ملف اختبار '.repeat(15),responsible:'مسؤولة اختبار',due:'2026-10-15'})),notes:'ملاحظة اختبار '.repeat(350)}};const longPages=weeklyCanvases(long,period,{logo,createCanvas});assert.ok(longPages.length>1&&longPages.length<20);for(const c of longPages){const data=c.getContext('2d').getImageData(70,355,2340,1250).data;assert.ok(data.some((v,i)=>i%4!==3&&v<200),'no blank body page');}assert.equal(PERIODS.length,10);
+});

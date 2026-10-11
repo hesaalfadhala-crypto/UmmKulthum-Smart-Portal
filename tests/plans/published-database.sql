@@ -1,0 +1,52 @@
+-- Execute against the existing project. Everything below is rolled back.
+begin;
+do $$
+declare principal uuid; deputy uuid; math_lead uuid; teacher uuid; scoped_deputy uuid; math_staff uuid; own_staff uuid; missing_staff uuid; w uuid; p uuid:=gen_random_uuid(); v uuid:=gen_random_uuid(); ordinary_plan uuid:=gen_random_uuid(); f uuid:=gen_random_uuid(); result jsonb; b jsonb:='{"slots":[{"day":0,"period":"1","category":"meeting","text":"اختبار آمن للخطط — لا يعتمد للاستخدام المدرسي"}],"deliveries":[],"notes":"بيانات اختبار تُلغى بالكامل"}'; starts date:=date '2098-01-01'+((7-extract(dow from date '2098-01-01')::int)%7); pathname text;
+begin
+ select id into strict principal from public.profiles where role='principal' and school_access='all';
+ select id into strict deputy from public.profiles where role='assistant_principal' and school_access='all';
+ select s.user_id,s.id into strict math_lead,math_staff from public.weekly_staff s join public.profiles pr on pr.id=s.user_id where s.department='الرياضيات' and pr.role='first_teacher';
+ select s.user_id,s.id into strict teacher,own_staff from public.weekly_staff s join public.profiles pr on pr.id=s.user_id where pr.role='teacher' and s.department='الاجتماعيات والمواطنة';
+ select s.id into missing_staff from public.weekly_staff s where s.user_id is null and s.department='الرياضيات' limit 1;
+ select pr.id into strict scoped_deputy from public.profiles pr join public.observation_access a on a.user_id=pr.id where pr.role='assistant_principal' and pr.school_access='own' and a.department='التربية الإسلامية';
+
+ perform set_config('request.jwt.claim.sub',principal::text,true);execute 'set local role authenticated';
+ result:=public.configure_weekly_plans(jsonb_build_object('action','period','academic_year','2098-2099','semester',1,'week_number',60,'starts_on',starts,'due_at',starts::timestamptz+interval '1 day','staff_ids',jsonb_build_array(math_staff,own_staff,missing_staff)));w:=(result->>'id')::uuid;
+ if(select count(*) from public.weekly_assignments where period_id=w and required)<>3 then raise exception 'QA: assignment denominator';end if;
+ result:=public.save_weekly_plan(jsonb_build_object('id',p,'period_id',w,'kind','principal','staff_id',null,'body',b,'file_id',null,'submit',false),0,gen_random_uuid());
+ perform set_config('request.jwt.claim.sub',teacher::text,true);
+ if exists(select 1 from public.weekly_plans where id=p) or exists(select 1 from public.weekly_publications where plan_id=p) then raise exception 'QA: principal draft leak';end if;
+ perform set_config('request.jwt.claim.sub',deputy::text,true);
+ begin perform public.decide_weekly_plan(p,'published','اختبار',1,gen_random_uuid());raise exception 'QA: implicit publishing authority';exception when insufficient_privilege then null;end;
+ perform set_config('request.jwt.claim.sub',principal::text,true);
+ perform public.decide_weekly_plan(p,'published','نشر اختباري يُلغى',1,gen_random_uuid());
+ perform set_config('request.jwt.claim.sub',teacher::text,true);
+ if not exists(select 1 from public.weekly_publications where plan_id=p) or exists(select 1 from public.weekly_plans where id=p) then raise exception 'QA: published visibility';end if;
+ perform public.save_weekly_plan(jsonb_build_object('id',ordinary_plan,'period_id',w,'kind','staff','staff_id',own_staff,'body',b,'file_id',null,'submit',true),0,gen_random_uuid());
+ perform set_config('request.jwt.claim.sub',math_lead::text,true);
+ if exists(select 1 from public.weekly_plans where id=ordinary_plan) then raise exception 'QA: department privacy';end if;
+ result:=public.save_weekly_plan(jsonb_build_object('id',v,'period_id',w,'kind','staff','staff_id',math_staff,'body',b,'file_id',null,'submit',true),0,gen_random_uuid());
+ pathname:=math_lead::text||'/'||v::text||'/'||f::text||'.pdf';
+ insert into storage.objects(bucket_id,name,owner_id) values('weekly-plan-files',pathname,math_lead::text);
+ perform public.attach_weekly_file(v,f,pathname,'اختبار آمن.pdf','application/pdf',gen_random_uuid());
+ perform public.save_weekly_plan(jsonb_build_object('id',v,'period_id',w,'kind','staff','staff_id',math_staff,'body',b,'file_id',f,'submit',true),1,gen_random_uuid());
+ perform set_config('request.jwt.claim.sub',teacher::text,true);
+ if exists(select 1 from public.weekly_files where id=f) or exists(select 1 from storage.objects where name=pathname) then raise exception 'QA: private file leak';end if;
+ perform set_config('request.jwt.claim.sub',scoped_deputy::text,true);
+ if exists(select 1 from public.weekly_plans where id in(v,ordinary_plan)) then raise exception 'QA: scoped assistant privacy';end if;
+ perform set_config('request.jwt.claim.sub',deputy::text,true);
+ if(select count(*) from public.weekly_plans where id in(v,ordinary_plan))<>2 then raise exception 'QA: full assistant access';end if;
+ perform public.decide_weekly_plan(v,'approved','اعتماد اختباري',2,gen_random_uuid());
+ if(select count(*) from public.weekly_plans where period_id=w and kind='staff' and submitted_at is not null)<>2 then raise exception 'QA: submitted count';end if;
+ if(select count(*) from public.weekly_plans where period_id=w and status='approved')<>1 then raise exception 'QA: approved count';end if;
+ perform set_config('request.jwt.claim.sub',math_lead::text,true);
+ if not exists(select 1 from public.weekly_plans where id=v and status='approved') or not exists(select 1 from storage.objects where name=pathname) then raise exception 'QA: restore saved plan and file metadata';end if;
+ if not exists(select 1 from public.weekly_notifications where plan_id=v and recipient_id=math_lead and event='approved') then raise exception 'QA: approval notification';end if;
+ perform set_config('request.jwt.claim.sub',principal::text,true);
+ perform public.save_weekly_plan(jsonb_build_object('id',p,'period_id',w,'kind','principal','staff_id',null,'body',jsonb_set(b,'{notes}','"تعديل غير منشور"'),'file_id',null,'submit',false),2,gen_random_uuid());
+ perform set_config('request.jwt.claim.sub',teacher::text,true);
+ if exists(select 1 from public.weekly_publications where plan_id=p and body->>'notes'='تعديل غير منشور') then raise exception 'QA: edited draft publication leak';end if;
+ execute 'reset role';
+end $$;
+rollback;
+select jsonb_build_object('rollback_only_live_tests','passed','plans_left',(select count(*) from public.weekly_plans),'periods_left',(select count(*) from public.weekly_periods),'files_left',(select count(*) from public.weekly_files),'notifications_left',(select count(*) from public.weekly_notifications),'private_bucket',(select not public from storage.buckets where id='weekly-plan-files')) as verification;
