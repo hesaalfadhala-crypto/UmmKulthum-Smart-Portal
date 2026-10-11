@@ -339,6 +339,7 @@ body{
         grid-template-columns:1fr;
     }
 }
+a.menu-item,a.card{display:block;text-decoration:none;color:inherit}a:focus-visible,button:focus-visible{outline:3px solid #d2aa50;outline-offset:3px}#logout{margin-top:12px;padding:9px 18px;border:0;border-radius:8px;cursor:pointer} .card.secure{opacity:.65}
 </style>
 </head>
 
@@ -361,22 +362,21 @@ body{
 
     <div class="menu-title">القائمة الرئيسية</div>
 
-    <div class="menu-item active">⌂ &nbsp; لوحة التحكم</div>
-<div class="menu-item" onclick="window.location.href='archive.html'" style="cursor:pointer;">✎ &nbsp; التوثيقات والفعاليات</div>
-<div class="menu-item" onclick="window.location.href='projects.html'" style="cursor:pointer;">◎ &nbsp; المبادرات والمشاريع</div>
-<div class="menu-item" onclick="window.location.href='training.html'" style="cursor:pointer;">🎓 &nbsp; مركز الدعم والتطوير المهني</div>
-<div class="menu-item" onclick="window.location.href='plans.html'" style="cursor:pointer;">▤ &nbsp; الخطط والمتابعة</div>
-        <div class="menu-item" onclick="window.location.href='forms.html'" style="cursor:pointer;">▣ &nbsp; النماذج والاستبانات الذكية</div>
-        <div class="menu-item" onclick="window.location.href='competitions.html'" style="cursor:pointer;">🏆 &nbsp; المسابقات والإنجازات الطلابية</div>
-    <div class="menu-item">☆ &nbsp; الشهادات والتكريم</div>
-<div class="menu-item" onclick="window.location.href='archive.html'" style="cursor:pointer;">▰ &nbsp; الأرشيف الذكي</div>
+    <a class="menu-item active" href="index.html">⌂ &nbsp; لوحة التحكم</a>
+<a class="menu-item" href="archive.html">✎ &nbsp; التوثيقات والفعاليات</a>
+<a class="menu-item" href="projects.html">◎ &nbsp; المبادرات والمشاريع</a>
+<a class="menu-item" href="training.html">🎓 &nbsp; مركز الدعم والتطوير المهني</a>
+<a class="menu-item" href="plans.html">▤ &nbsp; الخطط والمتابعة</a>
+        <a class="menu-item" href="forms.html">▣ &nbsp; النماذج والاستبانات الذكية</a>
+        <a class="menu-item" href="competitions.html">🏆 &nbsp; المسابقات والإنجازات الطلابية</a>
+    <div class="menu-item" aria-disabled="true">☆ &nbsp; الشهادات والتكريم — غير مفعلة</div>
+<a class="menu-item" href="archive.html">▰ &nbsp; الأرشيف الذكي</a>
     <div class="menu-title">صلاحيات خاصة</div>
 
-    <div class="menu-item">◉ &nbsp; منظومة الزيارات الصفية</div>
+    <a class="menu-item" href="visits.html">◉ &nbsp; منظومة الزيارات الصفية</a>
 
     <div class="user">
-        👤 مستخدم تجريبي<br>
-        <small>سيتم ربط الحساب والصلاحيات لاحقًا</small>
+        <span id="sidebarUser">جار التحقق من الحساب…</span><br><button id="logout" type="button">تسجيل الخروج</button>
     </div>
 
 </aside>
@@ -393,7 +393,7 @@ body{
     <img src="school-logo.png" alt="شعارات مدرسة أم كلثوم">
 </div>
         <div class="status">
-            ● النظام يعمل
+            <span id="dashboardStatus" role="status">جار تحميل البيانات…</span>
         </div>
     </header>
 
@@ -420,7 +420,7 @@ body{
 
 
         <div class="section-title">
-            <h3>مؤشرات المدرسة</h3>
+            <h3>مؤشرات التوثيقات المتاحة لكِ</h3>
             <span>نظرة سريعة</span>
         </div>
 
@@ -430,25 +430,25 @@ body{
             <div class="stat">
                 <div class="stat-icon">🎯</div>
                 <small>الفعاليات والتوثيقات</small>
-                <strong>0</strong>
+                <strong id="stat-total">…</strong>
             </div>
 
             <div class="stat">
                 <div class="stat-icon">💡</div>
-                <small>المبادرات والمشاريع</small>
-                <strong>0</strong>
+                <small>توثيقات المبادرات والمشاريع</small>
+                <strong id="stat-projects">…</strong>
             </div>
 
             <div class="stat">
                 <div class="stat-icon">🎓</div>
-                <small>برامج التطوير المهني</small>
-                <strong>0</strong>
+                <small>توثيقات الورش التدريبية</small>
+                <strong id="stat-workshops">…</strong>
             </div>
 
             <div class="stat">
                 <div class="stat-icon">✓</div>
-                <small>التوثيقات المكتملة</small>
-                <strong>0</strong>
+                <small>التوثيقات المحفوظة</small>
+                <strong id="stat-saved">…</strong>
             </div>
 
         </section>
@@ -462,115 +462,64 @@ body{
 
         <section class="cards">
 
-<div class="card" onclick="window.location.href='documentation.html'">
+<a class="card" href="documentation.html">
             <h4>توثيق جديد</h4>
                 <p>
                     تسجيل فعالية أو نشاط وإضافة الهدف والتنفيذ
                     والنتائج والأثر والصور.
                 </p>
-            </div>
+            </a>
 
-            <div class="card">
+            <a class="card" href="projects.html">
                 <div class="icon">🎯</div>
                 <h4>المبادرات والمشاريع</h4>
                 <p>
                     متابعة مبادرات المدرسة والمشاريع المرتبطة
                     بالتوثيقات والفعاليات.
                 </p>
-            </div>
+            </a>
 
-            <div class="card">
+            <a class="card" href="training.html">
                 <div class="icon">🎓</div>
                 <h4>مركز الدعم والتطوير</h4>
                 <p>
                     الاحتياجات التدريبية والورش والبرامج
                     المهنية وقياس أثر التدريب.
                 </p>
-            </div>
+            </a>
 
-            <div class="card">
+            <a class="card" href="archive.html">
                 <div class="icon">📁</div>
                 <h4>الأرشيف الذكي</h4>
                 <p>
                     الوصول إلى التوثيقات والتقارير السابقة
                     بطريقة منظمة وسريعة.
                 </p>
-            </div>
+            </a>
 
-            <div class="card">
+            <a class="card" href="plans.html">
                 <div class="icon">📊</div>
                 <h4>الخطط والمتابعة</h4>
                 <p>
                     متابعة الخطط المدرسية ومؤشرات التنفيذ
                     ونسب الإنجاز.
                 </p>
-            </div>
+            </a>
 
-            <div class="card secure">
-                <div class="icon">🔐</div>
+            <a class="card" href="visits.html">
+                <div class="icon">◉</div>
                 <h4>منظومة الزيارات الصفية</h4>
                 <p>
                     مساحة خاصة بالقيادة والمنسقات والمعلمات
-                    الأوائل وفق صلاحيات الدخول.
+                    الأوائل وفق صلاحيات الدخول، ونتائج المعلمة الخاصة بها.
                 </p>
-            </div>
+            </a>
 
         </section>
 
     </div>
 
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-const SUPABASE_URL = "https://ulqwkxzjwdmkspsjzvup.supabase.co";
-const SUPABASE_KEY = "sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
-const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
-    async function checkUserAccess() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-
-    if (!user) {
-        window.location.href = "login.html";
-        return;
-    }
-
-    const { data: profile, error } = await supabaseClient
-        .from("profiles")
-        .select("full_name, role, department")
-        .eq("id", user.id)
-        .single();
-
-    if (error || !profile) {
-        console.error("Profile error:", error);
-        alert("تعذر قراءة صلاحيات الحساب");
-        return;
-    }
-
-    console.log("User profile:", profile);
-const userNameElement = document.getElementById("userName");
-
-if (userNameElement) {
-    userNameElement.textContent = profile.full_name || "";
-}
-const roleNames = {
-    principal: "مديرة المدرسة",
-    assistant_principal: "مديرة مساعدة",
-    coordinator: "منسقة",
-    first_teacher: "معلمة أولى",
-    teacher: "معلمة"
-};
-
-const userRoleElement = document.getElementById("userRole");
-
-if (userRoleElement) {
-    userRoleElement.textContent =
-        roleNames[profile.role] || profile.role || "";
-}
-}
-
-checkUserAccess();
-        </script>
-</body>
-</html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
+<script type="module" src="assets/js/dashboard.js"></script>
+</body></html>

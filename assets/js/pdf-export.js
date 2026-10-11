@@ -8,7 +8,7 @@ async function loadImage(url) { const res = await fetch(url, { cache: 'no-store'
 finally {
     URL.revokeObjectURL(src);
 } }
-export function packPDF(pages, width = 1240, height = 1754) {
+export function packPDF(pages, width = 1240, height = 1754, pageWidth = 595.28, pageHeight = 841.89) {
     const encoder = new TextEncoder();
     const parts = [];
     const offsets = [0];
@@ -18,7 +18,7 @@ export function packPDF(pages, width = 1240, height = 1754) {
     add('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
     obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
     obj(2, '<< /Type /Pages /Count ' + pages.length + ' /Kids [' + pages.map((_, i) => (3 + i * 3) + ' 0 R').join(' ') + '] >>');
-    pages.forEach((jpeg, i) => { const n = 3 + i * 3; obj(n, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im ' + (n + 1) + ' 0 R >> >> /Contents ' + (n + 2) + ' 0 R >>'); offsets[n + 1] = length; add((n + 1) + ' 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + width + ' /Height ' + height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpeg.length + ' >>\nstream\n'); add(jpeg); add('\nendstream\nendobj\n'); const content = 'q\n595.28 0 0 841.89 0 0 cm\n/Im Do\nQ'; obj(n + 2, '<< /Length ' + encoder.encode(content).length + ' >>\nstream\n' + content + '\nendstream'); });
+    pages.forEach((jpeg, i) => { const n = 3 + i * 3; obj(n, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pageWidth + ' ' + pageHeight + '] /Resources << /XObject << /Im ' + (n + 1) + ' 0 R >> >> /Contents ' + (n + 2) + ' 0 R >>'); offsets[n + 1] = length; add((n + 1) + ' 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + width + ' /Height ' + height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpeg.length + ' >>\nstream\n'); add(jpeg); add('\nendstream\nendobj\n'); const content = 'q\n' + pageWidth + ' 0 0 ' + pageHeight + ' 0 0 cm\n/Im Do\nQ'; obj(n + 2, '<< /Length ' + encoder.encode(content).length + ' >>\nstream\n' + content + '\nendstream'); });
     const xref = length;
     const count = 3 + pages.length * 3;
     add('xref\n0 ' + count + '\n0000000000 65535 f \n');

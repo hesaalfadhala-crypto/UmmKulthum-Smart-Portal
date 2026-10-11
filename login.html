@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل الدخول | بوابة أم كلثوم الذكية</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
 
     <style>
         *{
@@ -123,21 +123,24 @@
         تسجيل الدخول للمستخدمين المصرح لهم
     </div>
 
+    <form id="loginForm">
     <div class="field">
-        <label>البريد الإلكتروني</label>
+        <label for="email">البريد الإلكتروني</label>
         <input id="email" type="email" autocomplete="email">
     </div>
 
     <div class="field">
-        <label>كلمة المرور</label>
+        <label for="password">كلمة المرور</label>
         <input id="password" type="password" autocomplete="current-password">
     </div>
 
-    <button type="button" onclick="login()">
+    <button id="loginButton" type="submit">
         تسجيل الدخول
     </button>
 
-    <div id="message"></div>
+    </form>
+    <button id="resetPassword" type="button" style="background:#eef4f2;color:#174f46">نسيت كلمة المرور</button>
+    <div id="message" role="status" aria-live="polite"></div>
 
     <div class="footer">
         مدرسة أم كلثوم الابتدائية الإعدادية للبنات
@@ -159,45 +162,31 @@ const supabaseClient = supabase.createClient(
     SUPABASE_KEY
 );
 
-async function login(){
-
-    const email =
-        document.getElementById("email").value.trim();
-
-    const password =
-        document.getElementById("password").value;
-
-    const message =
-        document.getElementById("message");
-
-    if(!email || !password){
-        message.style.color="#b42318";
-        message.textContent="يرجى إدخال البريد الإلكتروني وكلمة المرور.";
-        return;
-    }
-
-    message.style.color="#6c7b79";
-    message.textContent="جاري تسجيل الدخول...";
-
-    const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-            email:email,
-            password:password
-        });
-
-    if(error){
-        console.error(error);
-        message.style.color="#b42318";
-        message.textContent="البريد الإلكتروني أو كلمة المرور غير صحيحة.";
-        return;
-    }
-
-    message.style.color="#18794e";
-    message.textContent="تم تسجيل الدخول بنجاح ✓";
-
-    window.location.href="index.html";
+let busy=false;
+function setMessage(text,error=false){const message=document.getElementById('message');message.style.color=error?'#b42318':'#174f46';message.textContent=text;}
+async function login(event){
+ event.preventDefault();if(busy)return;
+ const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;
+ if(!email||!password){setMessage('يرجى إدخال البريد الإلكتروني وكلمة المرور.',true);return;}
+ busy=true;document.getElementById('loginButton').disabled=true;setMessage('جار تسجيل الدخول…');
+ try{
+  const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){setMessage(error.code==='invalid_credentials'?'البريد الإلكتروني أو كلمة المرور غير صحيحة.':'تعذر تسجيل الدخول. تحققي من الاتصال أو حاولي لاحقًا.',true);return;}
+  location.replace('index.html');
+ }catch{setMessage('تعذر الاتصال بخدمة الدخول. حاولي مرة أخرى.',true);}
+ finally{busy=false;document.getElementById('loginButton').disabled=false;}
 }
-</script>
-
-</body>
-</html>
+document.getElementById('loginForm').addEventListener('submit',login);
+document.getElementById('resetPassword').addEventListener('click',async()=>{
+ if(busy)return;const email=document.getElementById('email').value.trim();
+ if(!email||!document.getElementById('email').checkValidity()){setMessage('أدخلي بريد حسابكِ الصحيح أولًا.',true);return;}
+ busy=true;const button=document.getElementById('resetPassword');button.disabled=true;
+ try{
+  const redirectTo=new URL('reset-password.html',location.href).href;
+  const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
+  if(error)throw error;
+  setMessage('إذا كان البريد مرتبطًا بحساب، ستصل رسالة لاستعادة كلمة المرور. استخدمي أحدث رسالة فقط.');
+ }catch{setMessage('تعذر إرسال طلب الاستعادة. حاولي لاحقًا أو راجعي الإدارة.',true);}
+ finally{busy=false;button.disabled=false;}
+});
+</script></body></html>

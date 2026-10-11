@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>النماذج والاستبانات الذكية | بوابة أم كلثوم الذكية</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
 <style>
 *{
     box-sizing:border-box;
@@ -382,9 +382,9 @@ footer{
     </section>
 
 
-    <h2 class="section-title">النماذج المنشورة</h2>
+    <h2 class="section-title">النماذج المحفوظة حسب صلاحيتكِ</h2>
 
-    <section class="forms-box">
+    <section class="forms-box" id="savedForms">
 
         <div class="form-row header">
             <span>اسم النموذج</span>
@@ -411,9 +411,7 @@ footer{
 
 
     <div class="note">
-        المرحلة القادمة: سيتم ربط هذه الصفحة بقاعدة بيانات آمنة
-        ليتم حفظ النماذج والردود وعرض النتائج الفعلية للمستخدمين
-        وفق الصلاحيات.
+        يمكن حفظ بيانات النموذج واسترجاعها. إضافة الأسئلة واستقبال الردود ونشر الاستبانات لم تُفعّل بعد.
     </div>
 
 </main>
@@ -479,7 +477,7 @@ footer{
             style="width:100%;padding:12px;margin:7px 0 22px;border:1px solid #ddd;border-radius:9px;">
 
         <button type="button"
-            onclick="saveNewForm()"
+            id="saveFormButton" onclick="saveNewForm()"
             style="
                 width:100%;
                 padding:13px;
@@ -514,7 +512,9 @@ const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
+    let formSaveBusy=false;
     async function saveNewForm(){
+    if(formSaveBusy)return;
 
     const title = document.getElementById("formTitle").value.trim();
     const description = document.getElementById("formDescription").value.trim();
@@ -533,13 +533,15 @@ const supabaseClient = supabase.createClient(
         return;
     }
 
+    formSaveBusy=true;document.getElementById("saveFormButton").disabled=true;
+    try {
     const { error } = await supabaseClient
         .from("forms")
         .insert({
             title: title,
             description: description || null,
             target_audience: targetAudience || null,
-            closing_date: closingDate || null,
+            closing_date: closingDate ? new Date(closingDate).toISOString() : null,
             status: "draft",
             created_by: user.id,
             updated_at: new Date().toISOString()
@@ -554,12 +556,15 @@ const supabaseClient = supabase.createClient(
     alert("تم حفظ النموذج بنجاح ✓");
 
     closeCreateForm();
+    await loadSavedForms();
 
     document.getElementById("formTitle").value = "";
     document.getElementById("formDescription").value = "";
     document.getElementById("formAudience").value = "";
     document.getElementById("formClosingDate").value = "";
+    }catch{alert("تعذر الاتصال. لم يُؤكد الحفظ؛ تحققي من القائمة قبل إعادة المحاولة.");}
+    finally{formSaveBusy=false;document.getElementById("saveFormButton").disabled=false;}
 }
 </script>
-</body>
+<script src="assets/js/forms-list.js"></script></body>
 </html>

@@ -1,0 +1,5 @@
+node_modules/
+*.local.json
+*.local.sql
+.test-output/
+supabase/.temp/

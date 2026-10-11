@@ -1,0 +1,13 @@
+{
+  "name": "ummkulthum-smart-portal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:visits": "node --test --test-concurrency=1 tests/visits/*.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@napi-rs/canvas": "0.1.80",
+    "jsdom": "30.1.2"
+  }
+}
