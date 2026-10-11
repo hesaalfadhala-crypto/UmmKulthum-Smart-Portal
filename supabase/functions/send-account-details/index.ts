@@ -34,7 +34,7 @@ Deno.serve(async(req)=>{
  if(claimError)return reply(claimError.code==='23505'?429:503,'تعذر بدء الإرسال؛ قد تكون أرسلتِ لهذا الحساب خلال آخر خمس دقائق.');
  const transport=nodemailer.createTransport({host:'smtp.gmail.com',port:465,secure:true,auth:{user:sender,pass:smtpPassword.replace(/\s/g,'')},connectionTimeout:15000,socketTimeout:20000});
  try{
-  const text=`الأستاذة ${name}\nمرحبًا بكِ في بوابة أم كلثوم الذكية.\nرابط البوابة: https://hesaalfadhala-crypto.github.io/UmmKulthum-Smart-Portal/login.html\nبريد تسجيل الدخول: ${input.mode==='test'?'هذه رسالة اختبار فقط':recipient}\nكلمة المرور المؤقتة الموحدة: ${initialPassword}\nاحتفظي ببيانات الدخول لنفسكِ.\nمدرسة أم كلثوم الابتدائية الإعدادية للبنات`;
+  const text=`الأستاذة ${name}\nمرحبًا بكِ في بوابة أم كلثوم الذكية.\nرابط البوابة: https://hesaalfadhala-crypto.github.io/UmmKulthum-Smart-Portal/login.html\nبريد تسجيل الدخول: ${input.mode==='test'?'هذه رسالة اختبار فقط':recipient}\nكلمة المرور الخاصة بك: ${initialPassword}\nاحتفظي ببيانات الدخول لنفسكِ.\nمدرسة أم كلثوم الابتدائية الإعدادية للبنات`;
   const result=await transport.sendMail({from:{name:'بوابة أم كلثوم الذكية',address:sender},to:recipient,subject:input.mode==='test'?'اختبار إرسال بوابة أم كلثوم':'بيانات الدخول — بوابة أم كلثوم الذكية',text});
   if(!result.accepted?.length)throw new Error('Not accepted');
   const {error}=await db.from('account_email_deliveries').update({status:'accepted',finished_at:new Date().toISOString()}).eq('id',input.operation_id);
