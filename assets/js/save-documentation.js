@@ -34,6 +34,8 @@ export function databaseRecord(userId, submission) {
         competition_students: d.docCompetitionStudents || null,
         competition_result: d.docCompetitionResult || null,
         competition_details: d.docCompetitionDetails || null,
+        support_program_id: d.type==='ورشة تدريبية'?(d.centerProgramId||null):null,
+        training_beneficiaries: d.type==='ورشة تدريبية'&&d.trainingBeneficiaries!=null&&d.trainingBeneficiaries!==''?Number(d.trainingBeneficiaries):null,
         details: d, photo_files: submission.uploaded || []
     };
 }

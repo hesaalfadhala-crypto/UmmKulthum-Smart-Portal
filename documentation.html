@@ -733,6 +733,12 @@ button:disabled{opacity:.6;cursor:wait}
                     <textarea id="recommendations" placeholder="التوصيات أو الخطوات المستقبلية"></textarea>
                 </div>
 
+                <div id="trainingDocumentationFields" hidden>
+                    <h3>ربط الورشة بمركز الدعم</h3>
+                    <p>توثيق «ورشة تدريبية» يظهر تلقائيًا في تقارير المركز بعد حفظه في الأرشيف.</p>
+                    <div class="field"><label for="centerProgramId">البرنامج المعتمد المرتبط (اختياري)</label><select id="centerProgramId"><option value="">ورشة غير مرتبطة ببرنامج مسجل</option></select></div>
+                    <div class="field"><label for="trainingBeneficiaries">عدد المستفيدات / المشاركات الفعلي (اختياري)</label><input id="trainingBeneficiaries" type="number" min="0" max="10000" step="1"><p>اتركيه فارغًا إذا لم يُحصر العدد؛ لن نعتبره صفرًا.</p></div>
+                </div>
                 <div class="field">
 <label>صور التوثيق (حتى 10 صور)</label>
                     <div class="upload">
@@ -746,6 +752,7 @@ button:disabled{opacity:.6;cursor:wait}
                     <button id="clear" class="secondary" type="button" disabled>مسح المسودة</button>
                     <button id="editDraft" class="secondary" type="button" hidden>تعديل المسودة</button>
                     <a class="back" href="archive.html">فتح الأرشيف</a>
+                    <a class="back" href="training.html#reports">تقارير الورش في المركز</a>
                 </div>
 
                 <p id="saveStatus" role="status" aria-live="polite">جار التحقق من تسجيل الدخول…</p>

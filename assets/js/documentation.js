@@ -12,6 +12,7 @@ const status = document.getElementById('saveStatus');
 const groups = { areas: 'areas', projects: 'project', committees: 'committee', targets: 'target', assistants: 'assistant' };
 let user, files = [], pending = null, saving = false, ready = false, previewUrls = [];
 let requestId = crypto.randomUUID(), writeQueue = Promise.resolve();
+let centerPrograms=[];
 
 function message(text, error = false) {
     status.textContent = text;
@@ -53,6 +54,7 @@ function preview() {
         reserveImplementation: 'pReserveImplementation' })) output(id, d[key]);
     output('pTarget', [...d.targets, d.target].filter(Boolean).join(' • '));
     const competition = d.type === 'مسابقة وإنجاز طلابي', reserve = d.type === 'حصة احتياط';
+    document.getElementById('trainingDocumentationFields').hidden=d.type!=='ورشة تدريبية';
     document.getElementById('competitionDocumentationFields').style.display = competition ? 'block' : 'none';
     document.getElementById('competitionReport').style.display = competition ? 'block' : 'none';
     document.getElementById('reserveClassFields').style.display = reserve ? 'block' : 'none';
@@ -114,6 +116,7 @@ images.addEventListener('change', () => {
 });
 saveButton.addEventListener('click', async () => {
     if (!ready || saving) return;
+    const details=collect();if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات يجب أن يكون عددًا صحيحًا من 0 إلى 10000، أو اتركيه فارغًا.',true);return;}
     if (!collect().activity) {
         message('اكتبي اسم الفعالية أو النشاط.', true);
         document.getElementById('activity').focus();
@@ -166,6 +169,8 @@ window.addEventListener('beforeunload', event => {
 freeze();
 try {
     user = await requireUser();
+    const {data:programs,error:programError}=await client.from('support_programs').select('id,title,starts_at,status').order('starts_at',{ascending:false});
+    if(!programError){centerPrograms=(programs||[]).filter(p=>p.status!=='cancelled');for(const p of centerPrograms){const option=element('option',p.title);option.value=p.id;document.getElementById('centerProgramId').append(option);}}
     let saved;
     try { saved = await readDraft(user.id); }
     catch (e) { message(e.message, true); }
@@ -173,7 +178,7 @@ try {
         requestId = saved.requestId; files = saved.files || []; pending = saved.pending || null;
         restore(saved.data || {});
         message(pending ? 'استُعيدت محاولة الحفظ السابقة. أعيدي الحفظ للتحقق من الأرشيف دون إنشاء نسخة مكررة.' : 'استُعيدت المسودة وصورها من هذا الجهاز.');
-    } else preview();
+    } else {const params=new URLSearchParams(location.search),program=centerPrograms.find(p=>p.id===params.get('center_program'));if(program||params.get('type')==='workshop'){document.getElementById('type').value='ورشة تدريبية';if(program){document.getElementById('centerProgramId').value=program.id;document.getElementById('activity').value=program.title;const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(program.starts_at));const d=Object.fromEntries(parts.map(p=>[p.type,p.value]));document.getElementById('date').value=d.year+'-'+d.month+'-'+d.day;}}preview();}
     previewPhotos(); ready = true; freeze();
 } catch (e) {
     message(e.message, true);

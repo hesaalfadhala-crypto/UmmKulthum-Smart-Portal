@@ -119,6 +119,7 @@ export async function renderPDF(record) {
     y += 16;
     for (const [k, v] of [['المجالات المرتبطة', d.areas], ['المشاريع والمبادرات', d.projects], ['اللجان المرتبطة', d.committees], ['الفئات المستهدفة', d.targets], ['تفاصيل الفئة المستهدفة', d.target]])
         section(k, v);
+    if (d.type === 'ورشة تدريبية') section('المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'غير مسجلة':String(d.trainingBeneficiaries));
     if (d.type === 'مسابقة وإنجاز طلابي')
         for (const [k, v] of [['اسم المسابقة', d.docCompetitionName], ['نوع المسابقة', d.docCompetitionType], ['الجهة المنظمة', d.docCompetitionOrganizer], ['الجهة المستضيفة', d.docCompetitionHost], ['المستوى', d.docCompetitionLevel], ['الطالبات المشاركات', d.docCompetitionStudents], ['النتيجة / المركز', d.docCompetitionResult], ['تفاصيل الإنجاز', d.docCompetitionDetails]])
             section(k, v);

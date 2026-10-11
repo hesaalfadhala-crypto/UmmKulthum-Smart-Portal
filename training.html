@@ -197,6 +197,7 @@ footer{
     .topbar img{width:100%}
 }
 </style>
+<link rel="stylesheet" href="assets/support.css">
 </head>
 
 <body>
@@ -207,6 +208,7 @@ footer{
 </header>
 
 <main class="page">
+<img class="print-only" src="school-logo.png" alt="هوية المدرسة والوزارة">
 
     <div class="heading">
         <h1>مركز الدعم والتطوير المهني</h1>
@@ -216,25 +218,28 @@ footer{
         </p>
     </div>
 
+    <p id="centerStatus" class="center-status" role="status" aria-live="polite">جار التحقق من حسابكِ…</p>
+    <p id="scopeNote" class="center-heading-note"></p>
+    <div class="center-toolbar"><span id="centerIdentity"></span><button id="refreshCenter" type="button" class="light">تحديث المركز</button><a id="managerNotice" href="#booking" hidden></a></div>
     <div class="stats">
         <div class="stat">
             <span>الاحتياجات التدريبية</span>
-            <strong>—</strong>
+            <strong id="stat-needs">—</strong>
         </div>
 
         <div class="stat">
             <span>الورش المنفذة</span>
-            <strong>—</strong>
+            <strong id="stat-workshops">—</strong>
         </div>
 
         <div class="stat">
-            <span>المستفيدات</span>
-            <strong>—</strong>
+            <span>المشاركات المسجلة في الورش</span>
+            <strong id="stat-beneficiaries">—</strong><small id="beneficiaryNote">إجمالي مرات الاستفادة؛ ليس عدد أشخاص فريدات.</small>
         </div>
 
         <div class="stat">
             <span>تقارير قياس الأثر</span>
-            <strong>—</strong>
+            <strong id="stat-impacts">—</strong>
         </div>
     </div>
 
@@ -246,49 +251,70 @@ footer{
             <div class="icon">📋</div>
             <h3>الاحتياجات التدريبية</h3>
             <p>حصر ومتابعة الاحتياجات التدريبية للهيئتين التعليمية والإدارية.</p>
-            <button>عرض الاحتياجات</button>
+            <button type="button" data-service="needs" disabled>عرض الاحتياجات</button>
         </div>
 
         <div class="card">
             <div class="icon">🎓</div>
             <h3>البرامج والورش</h3>
             <p>متابعة الورش والبرامج التطويرية المقدمة داخل المدرسة.</p>
-            <button>عرض الورش</button>
+            <button type="button" data-service="programs" disabled>عرض الورش</button>
         </div>
 
         <div class="card">
             <div class="icon">➕</div>
             <h3>تقديم ورشة</h3>
             <p>تسجيل طلب تقديم ورشة أو برنامج تدريبي ضمن خطة المركز.</p>
-            <button>تسجيل ورشة</button>
+            <button type="button" data-service="proposal" disabled>تسجيل ورشة</button>
         </div>
 
         <div class="card">
             <div class="icon">🗓️</div>
             <h3>حجز موعد</h3>
             <p>تنظيم مواعيد البرامج والورش والتنسيق المسبق مع المركز.</p>
-            <button>الحجز المسبق</button>
+            <button type="button" data-service="booking" disabled>الحجز المسبق</button>
         </div>
 
         <div class="card">
             <div class="icon">📄</div>
             <h3>تقارير الورش</h3>
             <p>حفظ تقارير البرامج المنفذة والتوثيقات المرتبطة بها.</p>
-            <button>عرض التقارير</button>
+            <button type="button" data-service="reports" disabled>عرض التقارير</button>
         </div>
 
         <div class="card">
             <div class="icon">📈</div>
             <h3>قياس الأثر</h3>
             <p>متابعة أثر التدريب وانعكاسه على الممارسات المهنية.</p>
-            <button>قياس الأثر</button>
+            <button type="button" data-service="impact" disabled>قياس الأثر</button>
         </div>
 
     </div>
 
-    <h2 class="section-title">الورش والبرامج الأخيرة</h2>
+    <section id="centerWorkspace" class="center-workspace" hidden>
+      <div class="center-toolbar"><button id="closeWorkspace" type="button" class="light">العودة إلى الخدمات</button><button id="printCenter" type="button" class="light">طباعة العرض</button></div>
+      <h2 id="workspaceTitle"></h2><p id="workspaceIntro" class="hint"></p>
+      <div data-panel="needs" hidden>
+        <form id="needForm" class="center-form"><div class="fields"><label>عنوان الاحتياج<input name="title" required maxlength="300"></label><label>القسم / الجهة<input name="department" maxlength="180"></label><label>الفئة المستهدفة<select name="audience"><option value="teachers">الهيئة التعليمية</option><option value="admins">الهيئة الإدارية</option><option value="students">الطالبات</option></select></label><label>الأولوية<select name="priority"><option value="normal">عادية</option><option value="high">عالية</option><option value="low">منخفضة</option></select></label></div><label>وصف الاحتياج والهدف<textarea name="details" maxlength="6000"></textarea></label><button type="submit">إرسال الاحتياج إلى المركز</button><p class="hint form-message" role="status"></p></form>
+        <h3 id="needsListTitle">احتياجاتي</h3><div id="needsList"></div>
+      </div>
+      <div data-panel="programs" hidden><div class="center-search"><label>بحث في البرامج والورش<input id="programSearch" type="search"></label></div><div id="programsList"></div></div>
+      <div data-panel="proposal" hidden>
+        <form id="proposalForm" class="center-form"><div class="fields"><label>عنوان الورشة<input name="title" required maxlength="300"></label><label>القسم / الجهة<input name="department" maxlength="180"></label><label>مقدمة الورشة<input name="presenter" maxlength="180"></label><label>الفئة المستهدفة<select name="audience"><option value="teachers">الهيئة التعليمية</option><option value="admins">الهيئة الإدارية</option><option value="students">الطالبات</option></select></label><label>التاريخ المقترح<input name="date" type="date" required></label><label>من الساعة<input name="from" type="time" required></label><label>إلى الساعة<input name="to" type="time" required></label></div><p class="hint">هذا طلب تقديم ورشة في المركز؛ لا يصبح برنامجًا معتمدًا قبل موافقة مسؤولة المركز.</p><label>الأهداف ومحاور الورشة<textarea name="details" required maxlength="6000"></textarea></label><button type="submit">إرسال طلب تقديم ورشة</button><p class="hint form-message" role="status"></p></form>
+        <h3 id="proposalsListTitle">طلبات تقديم الورش</h3><div id="proposalsList"></div>
+      </div>
+      <div data-panel="booking" hidden>
+        <form id="bookingForm" class="center-form"><div class="fields"><label>غرض الموعد / عنوان الورشة<input name="title" required maxlength="300"></label><label>القسم / الجهة<input name="department" maxlength="180"></label><label>الفئة المستهدفة<select name="audience"><option value="teachers">الهيئة التعليمية</option><option value="admins">الهيئة الإدارية</option><option value="students">الطالبات</option></select></label><label>تاريخ الموعد<input name="date" type="date" required></label><label>من الساعة<input name="from" type="time" required></label><label>إلى الساعة<input name="to" type="time" required></label></div><div id="availability" class="availability">اختاري التاريخ لعرض الأوقات المشغولة دون بيانات صاحبات الحجوزات.</div><label>تفاصيل الطلب / التجهيزات المطلوبة<textarea name="details" maxlength="6000"></textarea></label><button type="submit">إرسال طلب الموعد</button><p class="hint form-message" role="status"></p></form>
+        <h3 id="bookingsListTitle">حجوزاتي</h3><p class="hint">الطلب قيد المراجعة حتى اعتماد مسؤولة المركز. لا يمكن اعتماد موعد يتداخل مع حجز أو ورشة معتمدة.</p><div id="bookingsList"></div>
+      </div>
+      <div data-panel="reports" hidden><div class="center-toolbar"><a href="documentation.html?type=workshop">توثيق ورشة جديدة</a></div><p class="hint">تظهر توثيقات «ورشة تدريبية» هنا تلقائيًا من الأرشيف نفسه. افتحي التقرير النهائي لعرض الصور وتنزيل PDF.</p><div class="center-search"><label>بحث باسم الورشة أو القسم أو المنفذة<input id="reportSearch" type="search"></label></div><div id="reportsList"></div></div>
+      <div data-panel="impact" hidden>
+        <form id="impactForm" class="center-form"><div class="fields"><label>البرنامج / تقرير الورشة<select name="target" required id="impactTarget"><option value="">اختاري ورشة</option></select></label><label>تاريخ تطبيق أثر التدريب<input name="applied_on" type="date" required></label><label>تقييمي الذاتي قبل التطبيق (اختياري)<select name="before_level"><option value="">غير مقيم</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label><label>تقييمي الذاتي بعد التطبيق (اختياري)<select name="after_level"><option value="">غير مقيم</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></label></div><label>ما الذي طُبق في الممارسة المهنية؟<textarea name="application" required maxlength="6000"></textarea></label><label>الأدلة / الملاحظات<textarea name="evidence" maxlength="6000"></textarea></label><label>المتابعة أو الدعم المطلوب<textarea name="followup" maxlength="6000"></textarea></label><p class="hint">التقييم اختياري وذاتي؛ اختلافه وحده لا يثبت أن التدريب سبب التحسن.</p><button type="submit">حفظ قياس الأثر</button><p class="hint form-message" role="status"></p></form><h3>تقارير قياس الأثر المسموحة لحسابكِ</h3><div id="impactsList"></div>
+      </div>
+    </section>
+    <h2 id="recentProgramsTitle" class="section-title">الورش والبرامج الأخيرة</h2>
 
-    <div class="workshops">
+    <div id="recentPrograms" class="workshops">
         <div class="workshop header">
             <span>البرنامج / الورشة</span>
             <span>الفئة المستهدفة</span>
@@ -307,5 +333,7 @@ footer{
     بوابة أم كلثوم الذكية • مدرسة أم كلثوم الابتدائية الإعدادية للبنات
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
+<script type="module" src="assets/js/support-center.js"></script>
 </body>
 </html>
