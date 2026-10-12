@@ -172,7 +172,7 @@ async function login(event){
  try{
   const {error}=await supabaseClient.auth.signInWithPassword({email,password});
   if(error){setMessage(error.code==='invalid_credentials'?'البريد الإلكتروني أو كلمة المرور غير صحيحة.':'تعذر تسجيل الدخول. تحققي من الاتصال أو حاولي لاحقًا.',true);return;}
-  location.replace('index.html');
+  const back=new URLSearchParams(location.search).get('return_to');const dest=back?new URL(back,location.href):new URL('index.html',location.href);location.replace(dest.origin===location.origin&&dest.pathname.startsWith(new URL('.',location.href).pathname)?dest.href:'index.html');
  }catch{setMessage('تعذر الاتصال بخدمة الدخول. حاولي مرة أخرى.',true);}
  finally{busy=false;document.getElementById('loginButton').disabled=false;}
 }

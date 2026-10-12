@@ -34,9 +34,10 @@ export function databaseRecord(userId, submission) {
         competition_students: d.docCompetitionStudents || null,
         competition_result: d.docCompetitionResult || null,
         competition_details: d.docCompetitionDetails || null,
+        workshop_type:d.type==='ورشة تدريبية'?(d.workshopType||null):null,executing_agency:d.type==='ورشة تدريبية'&&d.workshopType==='external'?(d.executingAgency||null):null,
         support_program_id: d.type==='ورشة تدريبية'?(d.centerProgramId||null):null,
         training_beneficiaries: d.type==='ورشة تدريبية'&&d.trainingBeneficiaries!=null&&d.trainingBeneficiaries!==''?Number(d.trainingBeneficiaries):null,
-        details: d, photo_files: submission.uploaded || []
+        attachment_files:submission.uploadedAttachments||[],details: d, photo_files: submission.uploaded || []
     };
 }
 
@@ -91,6 +92,15 @@ export async function saveSubmission(client, userId, submission, checkpoint, pro
         submission.uploaded.push({ bucket: PHOTO_BUCKET, path,
             name: file.name, size: photo.blob.size, width: photo.width, height: photo.height });
         await checkpoint(submission);
+    }
+    submission.uploadedAttachments||=[];
+    for(let i=submission.uploadedAttachments.length;i<(submission.attachments||[]).length;i++){
+        const file=submission.attachments[i],magic=new Uint8Array(await file.slice(0,5).arrayBuffer());
+        if(file.size<1||file.size>8388608||String.fromCharCode(...magic)!=='%PDF-')throw new Error('المرفق يجب أن يكون PDF صالحًا حتى 8 ميغابايت.');
+        const path=userId+'/'+submission.requestId+'/'+crypto.randomUUID()+'.pdf';
+        const {error}=await client.storage.from('school-report-files').upload(path,file,{contentType:'application/pdf',upsert:false});
+        if(error)throw new Error('تعذر حفظ مرفق التقرير. أعيدي المحاولة بنفس المسودة.');
+        submission.uploadedAttachments.push({bucket:'school-report-files',path,name:file.name,size:file.size});await checkpoint(submission);
     }
     progress('جار حفظ التوثيق في الأرشيف…');
     submission.sent = true;

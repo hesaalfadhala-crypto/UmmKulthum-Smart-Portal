@@ -5,7 +5,8 @@
   "scripts": {
     "test:visits": "node --test --test-concurrency=1 tests/visits/*.test.mjs",
     "test:support": "node --test --test-concurrency=1 tests/support/*.test.mjs",
-    "test:plans": "node --test --test-concurrency=1 tests/plans/*.test.mjs"
+    "test:plans": "node --test --test-concurrency=1 tests/plans/*.test.mjs",
+    "test:complete": "node --test --test-concurrency=1 tests/complete/*.test.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

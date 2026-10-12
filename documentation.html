@@ -549,7 +549,7 @@ button:disabled{opacity:.6;cursor:wait}
         <label class="check"><input type="checkbox" value="TIMSS"> TIMSS</label>
         <label class="check"><input type="checkbox" value="أخرى"> أخرى</label>
         <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
-    </div>
+    <label><input type="checkbox" value="مشروع أثر التعليم في البيئة المدرسية"> مشروع أثر التعليم في البيئة المدرسية</label></div>
 </div>
 
                 <!-- تفاصيل المسابقة والإنجاز الطلابي -->
@@ -633,7 +633,7 @@ button:disabled{opacity:.6;cursor:wait}
         <label class="check"><input type="checkbox" value="لجنة المسرح"> لجنة المسرح</label>
         <label class="check"><input type="checkbox" value="لجنة الصحافة"> لجنة الصحافة</label>
         <label class="check"><input type="checkbox" value="غير مرتبط بلجنة"> غير مرتبط بلجنة</label>
-    </div>
+    <label><input type="checkbox" value="المجلس الطلابي"> المجلس الطلابي</label><label><input type="checkbox" value="مجلس الأمهات"> مجلس الأمهات</label><label><input type="checkbox" value="لجنة الإذاعة"> لجنة الإذاعة</label></div>
 </div>
                 <!-- الفئات المستهدفة من الطالبات -->
 <div class="field">
@@ -733,7 +733,7 @@ button:disabled{opacity:.6;cursor:wait}
                     <textarea id="recommendations" placeholder="التوصيات أو الخطوات المستقبلية"></textarea>
                 </div>
 
-                <div id="trainingDocumentationFields" hidden>
+                <div id="trainingDocumentationFields" hidden><div class="field"><label for="workshopType">نوع الورشة *</label><select id="workshopType"><option value="">اختاري نوع الورشة</option><option value="internal">ورشة داخلية</option><option value="external">ورشة خارجية</option></select></div><div id="agencyField" class="field" hidden><label for="executingAgency">الجهة المنفذة *</label><input id="executingAgency" maxlength="300"></div>
                     <h3>ربط الورشة بمركز الدعم</h3>
                     <p>توثيق «ورشة تدريبية» يظهر تلقائيًا في تقارير المركز بعد حفظه في الأرشيف.</p>
                     <div class="field"><label for="centerProgramId">البرنامج المعتمد المرتبط (اختياري)</label><select id="centerProgramId"><option value="">ورشة غير مرتبطة ببرنامج مسجل</option></select></div>
@@ -744,7 +744,7 @@ button:disabled{opacity:.6;cursor:wait}
                     <div class="upload">
                         📷<br>
                         إرفاق صور الفعالية
-<input id="images" type="file" multiple accept="image/jpeg,image/png,image/webp"><p id="imageCount" role="status">لم تُرفق صور بعد</p>                    </div>
+<input id="images" type="file" multiple accept="image/jpeg,image/png,image/webp"><label for="attachments">مرفقات التقرير (PDF، حتى 5 ملفات، 8 ميغابايت لكل ملف)</label><input id="attachments" type="file" accept="application/pdf,.pdf" multiple><p id="attachmentCount">لم تُرفق ملفات PDF بعد</p><p id="imageCount" role="status">لم تُرفق صور بعد</p>                    </div>
                 </div>
 
                 <div class="actions">

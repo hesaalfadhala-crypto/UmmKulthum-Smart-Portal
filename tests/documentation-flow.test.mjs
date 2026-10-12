@@ -39,6 +39,7 @@ function model() {
     class Query {
         constructor() { this.filters = []; this.selection = '*'; }
         select(s) { this.selection = s; return this; }
+        is(key,value){this.filters.push([key,value]);return this;}
         eq(key, value) { this.filters.push([key, value]); return this; }
         order() { return this; }
         range(start, end) { this.slice = [start, end + 1]; return this; }
@@ -57,7 +58,7 @@ function model() {
                 const row = { ...structuredClone(this.value), id: rows.length + 1, created_at: '2026-10-07T12:00:00Z' };
                 rows.push(row); matches = [row];
                 if (state.loseResponse) { state.loseResponse = false; throw new Error('network timeout after commit'); }
-            } else matches = rows.filter(row => this.filters.every(([key, value]) => String(row[key]) === String(value)));
+            } else matches = rows.filter(row => this.filters.every(([key, value]) => value===null?row[key]==null:String(row[key])===String(value)));
             if (this.slice) matches = matches.slice(...this.slice);
             return { data: this.one ? structuredClone(matches[0] || null) : structuredClone(matches), error: null };
         }
