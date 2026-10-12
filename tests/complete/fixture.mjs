@@ -12,6 +12,6 @@ export async function database(){const db=await base();await db.exec(`
  alter policy leadership on documentations rename to "Authorized school leadership reads documentations";
  `);
  await db.exec("update auth.users set email='qa'||right(id::text,1)||'@moe.bh',email_confirmed_at=now();");
- for(const file of['20261012195433_smart_forms_complete.sql','20261012195436_documentation_catalog_and_trash.sql','20261012195438_workshop_types_and_booking_revision.sql','20261012201501_documentation_pdf_attachments.sql','20261012203240_booking_revision_version_guard.sql'])await db.exec(await fs.readFile(new URL('../../supabase/migrations/'+file,import.meta.url),'utf8'));
+ for(const file of['20261012201845_smart_forms_complete.sql','20261012201858_documentation_catalog_and_trash.sql','20261012201929_workshop_types_and_booking_revision.sql','20261012201942_documentation_pdf_attachments.sql','20261012203531_booking_revision_version_guard.sql'])await db.exec(await fs.readFile(new URL('../../supabase/migrations/'+file,import.meta.url),'utf8'));
  return db;}
 export const questions=()=>[{id:id(901),title:'القسم',type:'dropdown',required:true,options:['الرياضيات','العلوم']},{id:id(902),title:'هل تمكنتِ من فتح النموذج بسهولة؟',type:'choice',required:true,options:['نعم','لا']},{id:id(903),title:'ما مدى سهولة استخدام النموذج؟',type:'rating',required:true},{id:id(904),title:'ملاحظاتكِ',type:'long',required:false}];
