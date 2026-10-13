@@ -160,8 +160,11 @@ textarea{
     background:#fafcfc;
 }
 
+.check:has(input:checked){background:#edf7f5;border-color:#2a8279;color:#174f4b}
+
 .check input{
     width:auto;
+    accent-color:#2a8279;
     margin-left:5px;
 }
 
@@ -547,9 +550,10 @@ button:disabled{opacity:.6;cursor:wait}
         <label class="check"><input type="checkbox" value="بمهاراتي أرتقي"> بمهاراتي أرتقي</label>
         <label class="check"><input type="checkbox" value="تحدي القراءة العربي"> تحدي القراءة العربي</label>
         <label class="check"><input type="checkbox" value="TIMSS"> TIMSS</label>
+        <label class="check"><input type="checkbox" value="الامتحانات الوطنية"> الامتحانات الوطنية</label>
         <label class="check"><input type="checkbox" value="أخرى"> أخرى</label>
         <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
-    <label><input type="checkbox" value="مشروع أثر التعليم في البيئة المدرسية"> مشروع أثر التعليم في البيئة المدرسية</label></div>
+    <label class="check"><input type="checkbox" value="مشروع أثر التعليم في البيئة المدرسية"> مشروع أثر التعليم في البيئة المدرسية</label></div>
 </div>
 
                 <!-- تفاصيل المسابقة والإنجاز الطلابي -->
@@ -633,7 +637,7 @@ button:disabled{opacity:.6;cursor:wait}
         <label class="check"><input type="checkbox" value="لجنة المسرح"> لجنة المسرح</label>
         <label class="check"><input type="checkbox" value="لجنة الصحافة"> لجنة الصحافة</label>
         <label class="check"><input type="checkbox" value="غير مرتبط بلجنة"> غير مرتبط بلجنة</label>
-    <label><input type="checkbox" value="المجلس الطلابي"> المجلس الطلابي</label><label><input type="checkbox" value="مجلس الأمهات"> مجلس الأمهات</label><label><input type="checkbox" value="لجنة الإذاعة"> لجنة الإذاعة</label></div>
+    <label class="check"><input type="checkbox" value="المجلس الطلابي"> المجلس الطلابي</label><label class="check"><input type="checkbox" value="مجلس الأمهات"> مجلس الأمهات</label><label class="check"><input type="checkbox" value="لجنة الإذاعة"> لجنة الإذاعة</label></div>
 </div>
                 <!-- الفئات المستهدفة من الطالبات -->
 <div class="field">
