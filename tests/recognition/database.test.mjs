@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {database as base,as,admin,id} from '../complete/fixture.mjs';
-const migration=await fs.readFile(new URL('../../supabase/migrations/20261015050000_execution_scope_and_recognition.sql',import.meta.url),'utf8');
+const migration=await fs.readFile(new URL('../../supabase/migrations/20261015050341_execution_scope_and_recognition.sql',import.meta.url),'utf8');
 let seq=5000;const details=(extra={})=>({activity:'اختبار آلي واضح',date:'2026-10-15',type:'فعالية',projects:[],executionScope:'internal',...extra});
 const rec=(ids=[id(3)])=>({title:'اختبار آلي — تكريم',date:'2026-10-15',recipientIds:ids,kind:'جهود استثنائية',reason:'بيانات تجريبية فقط',awards:['ساعات سعادة','شهادة شكر وتقدير'],hours:1.5,presenter:'جهة اختبار',notes:''});
 async function insert(db,d,n=1){return (await db.query(`insert into documentations(created_by,request_id,activity,activity_type,activity_date,details,projects) values($1,$2,$3,$4,$5,$6,$7) returning *`,[id(n),id(seq++),d.activity,d.type,d.date,d,d.projects.join(' • ')])).rows[0];}

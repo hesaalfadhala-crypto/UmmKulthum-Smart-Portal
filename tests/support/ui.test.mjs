@@ -6,7 +6,7 @@ import {database,as,admin,id,rpc} from '../complete/fixture.mjs';
 import {saveSubmission} from '../../assets/js/save-documentation.js';
 
 test('six center services: actual DOM forms → SQL → closed/reopened page → coordinator review → original workshop archive',async()=>{
- const db=await database();await db.exec(await fs.readFile(new URL('../../supabase/migrations/20261015050000_execution_scope_and_recognition.sql',import.meta.url),'utf8')); let actor=5,loseResponse=false,dom,sequence=0,prints=0;
+ const db=await database();await db.exec(await fs.readFile(new URL('../../supabase/migrations/20261015050341_execution_scope_and_recognition.sql',import.meta.url),'utf8')); let actor=5,loseResponse=false,dom,sequence=0,prints=0;
  const api={channel:()=>({on(){return this;},subscribe(){return this;}}),auth:{getUser:async()=>({data:{user:{id:id(actor)}},error:null})},from:table=>new Query(table),rpc:async(name,args={})=>{
   try{await as(db,actor);const result=await rpc(db,name,args);if(loseResponse&&name==='save_support_request'){loseResponse=false;return {data:null,error:{message:'انقطع الاتصال بعد الحفظ'}};}return {data:result,error:null};}catch(e){return {data:null,error:{code:e.code,message:e.message}};}
  }};
