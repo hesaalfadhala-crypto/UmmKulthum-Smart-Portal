@@ -1,7 +1,10 @@
+import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js';
+import {validateNewDetails} from './recognition-model.js';
 import { client, requireUser, element } from './portal-data.js';
 import { checkSaveSchema, saveSubmission } from './save-documentation.js';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
+installExtensions();
 const form = document.querySelector('.form');
 const fields = [...form.querySelectorAll('input:not([type=file]),select,textarea')];
 const images = document.getElementById('images');
@@ -20,6 +23,7 @@ function message(text, error = false) {
 }
 function freeze() {
     fields.forEach(el => { el.disabled = !ready || saving || !!pending; });
+    document.querySelectorAll('#recognitionStaff input').forEach(el=>el.disabled=!ready||saving||!!pending);
     images.disabled = !ready || saving || !!pending;document.getElementById('attachments').disabled=images.disabled;
     saveButton.disabled = !ready || saving;
     clearButton.disabled = !ready || saving || !!pending?.sent;
@@ -31,7 +35,7 @@ function collect() {
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => { data[el.id] = el.value.trim(); });
     for (const [key, cls] of Object.entries(groups))
         data[key] = [...form.querySelectorAll('.' + cls + '-checks input:checked')].map(el => el.value);
-    return data;
+    return collectExtensions(data);
 }
 function output(id, value) {
     const el = document.getElementById(id);
@@ -54,7 +58,7 @@ function preview() {
         reserveImplementation: 'pReserveImplementation' })) output(id, d[key]);
     output('pTarget', [...d.targets, d.target].filter(Boolean).join(' • '));
     const competition = d.type === 'مسابقة وإنجاز طلابي', reserve = d.type === 'حصة احتياط';
-    document.getElementById('trainingDocumentationFields').hidden=d.type!=='ورشة تدريبية';document.getElementById('agencyField').hidden=d.workshopType!=='external';if(d.workshopType==='internal')document.getElementById('executingAgency').value='';document.getElementById('workshopType').required=d.type==='ورشة تدريبية';document.getElementById('executingAgency').required=d.type==='ورشة تدريبية'&&d.workshopType==='external';
+    document.getElementById('trainingDocumentationFields').hidden=d.type!=='ورشة تدريبية';updateExtensions(d);
     document.getElementById('competitionDocumentationFields').style.display = competition ? 'block' : 'none';
     document.getElementById('competitionReport').style.display = competition ? 'block' : 'none';
     document.getElementById('reserveClassFields').style.display = reserve ? 'block' : 'none';
@@ -85,7 +89,7 @@ function restore(data) {
     });
     for (const [key, cls] of Object.entries(groups))
         form.querySelectorAll('.' + cls + '-checks input').forEach(el => { el.checked = data[key]?.includes(el.value) || false; });
-    preview();
+    restoreExtensions(data);preview();
 }
 function persist(snapshot) {
     const copy = structuredClone(snapshot);
@@ -116,7 +120,7 @@ images.addEventListener('change', () => {
 });
 saveButton.addEventListener('click', async () => {
     if (!ready || saving) return;
-    const details=collect();if(details.type==='ورشة تدريبية'&&(!details.workshopType||details.workshopType==='external'&&!details.executingAgency)){message('اختاري نوع الورشة وأدخلي الجهة المنفذة للورشة الخارجية.',true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات يجب أن يكون عددًا صحيحًا من 0 إلى 10000، أو اتركيه فارغًا.',true);return;}
+    const details=collect();try{validateNewDetails(details);}catch(e){message(e.message,true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات غير صالح.',true);return;}
     if (!collect().activity) {
         message('اكتبي اسم الفعالية أو النشاط.', true);
         document.getElementById('activity').focus();
@@ -158,6 +162,7 @@ clearButton.addEventListener('click', async () => {
             else if (el.tagName === 'SELECT') el.selectedIndex = 0;
             else el.value = '';
         });
+        document.querySelectorAll('#recognitionStaff input').forEach(i=>i.checked=false);
         files = [];attachments=[];document.getElementById('attachments').value=''; pending = null; requestId = crypto.randomUUID(); images.value = '';
         preview(); previewPhotos(); message('ابدئي توثيقًا جديدًا.');
     } catch (e) { message(e.message, true); }
@@ -166,11 +171,12 @@ clearButton.addEventListener('click', async () => {
 window.addEventListener('beforeunload', event => {
     if (saving) { event.preventDefault(); event.returnValue = ''; }
 });
-document.getElementById('centerProgramId').addEventListener('change',()=>{const p=centerPrograms.find(p=>p.id===document.getElementById('centerProgramId').value);if(p){document.getElementById('workshopType').value=p.workshop_type||'';document.getElementById('executingAgency').value=p.executing_agency||'';preview();void autosave();}});
+document.getElementById('centerProgramId').addEventListener('change',()=>{const p=centerPrograms.find(p=>p.id===document.getElementById('centerProgramId').value);if(p){document.getElementById('executionScope').value=p.workshop_type||'';document.getElementById('organizingEntity').value=p.executing_agency||'';document.getElementById('hostingEntity').value=p.hosting_entity||'';preview();void autosave();}});
 freeze();
 try {
     user = await requireUser();
-    const {data:programs,error:programError}=await client.from('support_programs').select('id,title,starts_at,status,workshop_type,executing_agency').order('starts_at',{ascending:false});
+    await loadExtensionAccess();
+    const {data:programs,error:programError}=await client.from('support_programs').select('id,title,starts_at,status,workshop_type,executing_agency,hosting_entity').order('starts_at',{ascending:false});
     if(!programError){centerPrograms=(programs||[]).filter(p=>p.status!=='cancelled');for(const p of centerPrograms){const option=element('option',p.title);option.value=p.id;document.getElementById('centerProgramId').append(option);}}
     let saved;
     try { saved = await readDraft(user.id); }
@@ -179,7 +185,8 @@ try {
         requestId = saved.requestId; files = saved.files || [];attachments=saved.attachments||[];document.getElementById('attachmentCount').textContent=attachments.length+' ملفات PDF مرفقة'; pending = saved.pending || null;
         restore(saved.data || {});
         message(pending ? 'استُعيدت محاولة الحفظ السابقة. أعيدي الحفظ للتحقق من الأرشيف دون إنشاء نسخة مكررة.' : 'استُعيدت المسودة وصورها من هذا الجهاز.');
-    } else {const params=new URLSearchParams(location.search),program=centerPrograms.find(p=>p.id===params.get('center_program'));if(program||params.get('type')==='workshop'){document.getElementById('type').value='ورشة تدريبية';if(program){document.getElementById('centerProgramId').value=program.id;document.getElementById('activity').value=program.title;document.getElementById('workshopType').value=program.workshop_type||'';document.getElementById('executingAgency').value=program.executing_agency||'';const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(program.starts_at));const d=Object.fromEntries(parts.map(p=>[p.type,p.value]));document.getElementById('date').value=d.year+'-'+d.month+'-'+d.day;}}preview();}
+    } else {const params=new URLSearchParams(location.search),program=centerPrograms.find(p=>p.id===params.get('center_program'));if(program||params.get('type')==='workshop'){document.getElementById('type').value='ورشة تدريبية';if(program){document.getElementById('centerProgramId').value=program.id;document.getElementById('activity').value=program.title;document.getElementById('executionScope').value=program.workshop_type||'';document.getElementById('organizingEntity').value=program.executing_agency||'';document.getElementById('hostingEntity').value=program.hosting_entity||'';const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(program.starts_at));const d=Object.fromEntries(parts.map(p=>[p.type,p.value]));document.getElementById('date').value=d.year+'-'+d.month+'-'+d.day;}}preview();}
+    if(!saved&&new URLSearchParams(location.search).get('project')==='recognition'){document.querySelector('#recognitionProjectOption input').checked=true;document.getElementById('type').value='فعالية';preview();}
     previewPhotos(); ready = true; freeze();
 } catch (e) {
     message(e.message, true);

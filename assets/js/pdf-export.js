@@ -1,3 +1,5 @@
+import {appendAttachments} from './pdf-attachments.js';
+import {extraSections} from './recognition-model.js';
 // Rasterized canvas preserves Arabic shaping and embeds every image. No external services.
 async function loadImage(url) { const res = await fetch(url, { cache: 'no-store' }); if (!res.ok)
     throw new Error('تعذر تحميل إحدى صور التقرير؛ أعيدي المحاولة.'); const blob = await res.blob(); const src = URL.createObjectURL(blob); try {
@@ -43,7 +45,7 @@ export async function renderPDF(record) {
     const W = 1240, H = 1754, M = 74, limit = 1560;
     const canvases = [];
     let c, ctx, y = 0;
-    const start = () => { c = document.createElement('canvas'); c.width = W; c.height = H; ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.direction = 'rtl'; ctx.textAlign = 'right'; ctx.fillStyle = '#174f4b'; ctx.font = 'bold 26px Tahoma, Arial'; ctx.fillText('بوابة أم كلثوم الذكية', W - M, 60); ctx.fillStyle = '#60736f'; ctx.font = '20px Tahoma, Arial'; ctx.direction = 'ltr'; ctx.textAlign = 'left'; ctx.fillText('2026–2027', M, 60); ctx.direction = 'rtl'; ctx.textAlign = 'right'; canvases.push(c); y = 100; };
+    const start = () => { c = document.createElement('canvas'); c.width = W; c.height = H; ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.direction = 'rtl'; ctx.textAlign = 'right'; ctx.fillStyle = '#174f4b'; ctx.font = 'bold 26px Tahoma, Arial'; ctx.fillText('بوابة أم كلثوم الذكية', W - M, 60); ctx.fillStyle = '#60736f'; ctx.font = '20px Tahoma, Arial'; ctx.direction = 'ltr'; ctx.textAlign = 'left'; ctx.fillText(d.academicYear||'غير مسجل', M, 60); ctx.direction = 'rtl'; ctx.textAlign = 'right'; canvases.push(c); y = 100; };
     const ensure = (n) => { if (y + n > limit)
         start(); };
     const wrap = (value, maxWidth) => { const lines = []; for (const paragraph of value.split('\n')) {
@@ -119,7 +121,8 @@ export async function renderPDF(record) {
     y += 16;
     for (const [k, v] of [['المجالات المرتبطة', d.areas], ['المشاريع والمبادرات', d.projects], ['اللجان المرتبطة', d.committees], ['الفئات المستهدفة', d.targets], ['تفاصيل الفئة المستهدفة', d.target]])
         section(k, v);
-    if(d.type==='ورشة تدريبية'){section('نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':'غير مسجل');section('الجهة المنفذة',d.executingAgency);}if(record.attachment_files?.length)section('المرفقات',record.attachment_files.map(f=>f.name).join(' • '));if (d.type === 'ورشة تدريبية') section('المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'غير مسجلة':String(d.trainingBeneficiaries));
+    for(const [k,v]of extraSections(d))section(k,v);
+    if(d.type==='ورشة تدريبية'&&!d.executionScope){section('نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':'غير مسجل');section('الجهة المنفذة',d.executingAgency);}if(record.attachment_files?.length)section('المرفقات',record.attachment_files.map(f=>f.name).join(' • '));if (d.type === 'ورشة تدريبية') section('المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'غير مسجلة':String(d.trainingBeneficiaries));
     if (d.type === 'مسابقة وإنجاز طلابي')
         for (const [k, v] of [['اسم المسابقة', d.docCompetitionName], ['نوع المسابقة', d.docCompetitionType], ['الجهة المنظمة', d.docCompetitionOrganizer], ['الجهة المستضيفة', d.docCompetitionHost], ['المستوى', d.docCompetitionLevel], ['الطالبات المشاركات', d.docCompetitionStudents], ['النتيجة / المركز', d.docCompetitionResult], ['تفاصيل الإنجاز', d.docCompetitionDetails]])
             section(k, v);
@@ -173,4 +176,4 @@ export async function renderPDF(record) {
     const pages = canvases.map(c => Uint8Array.from(atob(c.toDataURL('image/jpeg', .94).split(',')[1]), x => x.charCodeAt(0)));
     return packPDF(pages);
 }
-export async function exportPDF(record) { const bytes = await renderPDF(record); const blob = new Blob([bytes], { type: 'application/pdf' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'تقرير-' + record.data.activity.replace(/[\\/:*?"<>|]/g, '').slice(0, 70) + '-' + String(record.id).slice(0, 8) + '.pdf'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 20000); }
+export async function exportPDF(record) { const bytes = await appendAttachments(await renderPDF(record),record.attachment_files); const blob = new Blob([bytes], { type: 'application/pdf' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'تقرير-' + record.data.activity.replace(/[\\/:*?"<>|]/g, '').slice(0, 70) + '-' + String(record.id).slice(0, 8) + '.pdf'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 20000); }

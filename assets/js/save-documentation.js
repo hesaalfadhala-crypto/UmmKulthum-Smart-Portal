@@ -1,3 +1,4 @@
+import {validateNewDetails} from './recognition-model.js';
 // Immutable submission + request_id make retries safe after a lost response.
 export const PHOTO_BUCKET = 'school-documentation-images';
 
@@ -17,6 +18,7 @@ export async function findSubmission(client, userId, requestId) {
 export function databaseRecord(userId, submission) {
     const d = submission.data;
     return {
+        execution_scope:d.executionScope||null,organizing_entity:d.executionScope==='external'?d.organizingEntity||null:null,hosting_entity:d.executionScope==='external'?d.hostingEntity||null:null,
         created_by: userId, request_id: submission.requestId,
         activity: d.activity || null, activity_type: d.type || null,
         semester: d.semester || null, department: d.department || null,
@@ -74,6 +76,7 @@ export async function preparePhoto(file) {
 }
 
 export async function saveSubmission(client, userId, submission, checkpoint, progress = () => {}) {
+    validateNewDetails(submission.data);
     if (!submission.data.activity?.trim()) throw new Error('اكتبي اسم الفعالية أو النشاط.');
     if (submission.files.length > 10) throw new Error('يمكن إرفاق 10 صور كحد أقصى.');
     await checkSaveSchema(client);

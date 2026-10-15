@@ -1,3 +1,5 @@
+import {appendAttachments} from './pdf-attachments.js';
+import {extraSections} from './recognition-model.js';
 import {packPDF} from './pdf-export.js';
 async function image(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('تعذر تحميل صور التقرير. أعيدي المحاولة.');const src=URL.createObjectURL(await r.blob());try{const img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('تعذر قراءة صورة التقرير.'));img.src=src;});return img;}finally{URL.revokeObjectURL(src);}}
 export async function renderOnePagePDF(record){
@@ -6,7 +8,8 @@ export async function renderOnePagePDF(record){
  const d=record.data,logo=await image('school-logo.png'),photos=await Promise.all(record.photos.map(p=>image(p.url)));
  const W=1240,H=1754,M=64,MAX=1590,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
  const fields=[['المرفقات',(record.attachment_files||[]).map(f=>f.name)],['النوع / القسم',[d.type,d.department]],['المنفذة / التاريخ',[d.executor,d.date,d.location]],['المجالات',d.areas],['المشاريع والمبادرات',d.projects],['اللجان',d.committees],['الفئات المستهدفة',[...(d.targets||[]),d.target].filter(Boolean)],['الهدف',d.goal],['وصف التنفيذ',d.implementation],['النتائج والأثر',d.impact],['التوصيات',d.recommendations]];
- if(d.type==='ورشة تدريبية'){fields.push(['نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':'غير مسجل'],['الجهة المنفذة',d.executingAgency]);}if(d.type==='ورشة تدريبية')fields.push(['المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'غير مسجلة':String(d.trainingBeneficiaries)]);
+ fields.push(...extraSections(d));
+ if(d.type==='ورشة تدريبية'&&!d.executionScope){fields.push(['نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':'غير مسجل'],['الجهة المنفذة',d.executingAgency]);}if(d.type==='ورشة تدريبية')fields.push(['المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'غير مسجلة':String(d.trainingBeneficiaries)]);
  if(d.type==='مسابقة وإنجاز طلابي')fields.push(...[['اسم المسابقة',d.docCompetitionName],['نوع المسابقة',d.docCompetitionType],['الجهة المنظمة',d.docCompetitionOrganizer],['الجهة المستضيفة',d.docCompetitionHost],['المستوى',d.docCompetitionLevel],['الطالبات المشاركات',d.docCompetitionStudents],['النتيجة / المركز',d.docCompetitionResult],['تفاصيل الإنجاز',d.docCompetitionDetails]]);
  if(d.type==='حصة احتياط')fields.push(...[['الصف / الشعبة',d.reserveClass],['رقم الحصة',d.reservePeriod],['المعلمة الغائبة',d.originalTeacher],['ما تم تنفيذه',d.reserveImplementation]]);
  function fitText(value,width){const lines=[];for(const p of String(value).split('\n')){let line='';for(const word of p.split(/\s+/)){let chunks=[],part='';for(const letter of word){if(part&&g.measureText(part+letter).width>width){chunks.push(part);part=letter;}else part+=letter;}chunks.push(part);for(const chunk of chunks){const next=line?line+' '+chunk:chunk;if(line&&g.measureText(next).width>width){lines.push(line);line=chunk;}else line=next;}}lines.push(line);}return lines;}
@@ -26,4 +29,4 @@ export async function renderOnePagePDF(record){
  g.fillStyle='#fff';g.fillRect(0,0,W,H);layout(size,true);g.strokeStyle='#dce5e3';g.beginPath();g.moveTo(M,1640);g.lineTo(W-M,1640);g.stroke();g.fillStyle='#637772';g.font='18px "Portal Arabic", Tahoma, Arial';g.textAlign='right';g.fillText('بوابة أم كلثوم الذكية · رقم التوثيق '+String(record.id),W-M,1675);g.textAlign='left';g.fillText('صفحة 1 من 1',M,1675);
  return packPDF([Uint8Array.from(atob(c.toDataURL('image/jpeg',.96).split(',')[1]),x=>x.charCodeAt(0))]);
 }
-export async function exportOnePagePDF(record){const bytes=await renderOnePagePDF(record),url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),a=document.createElement('a');a.href=url;a.download='تقرير-صفحة-واحدة-'+String(record.id)+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),20000);}
+export async function exportOnePagePDF(record){const bytes=await appendAttachments(await renderOnePagePDF(record),record.attachment_files),url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),a=document.createElement('a');a.href=url;a.download='تقرير-صفحة-واحدة-'+String(record.id)+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),20000);}
