@@ -1,7 +1,7 @@
-import {renderSignatures} from './report-signatures.js';
-import {editContext} from './edit-documentation.js';
-import {extraSections} from './recognition-model.js';
-import {fetchRecord,normalize,loadPhotos,element,client,reportContext,setDeleted} from './portal-data.js';
+import {renderSignatures} from './report-signatures.js?v=20261017-multisupervision';
+import {editContext} from './edit-documentation.js?v=20261017-multisupervision';
+import {extraSections} from './recognition-model.js?v=20261017-multisupervision';
+import {fetchRecord,normalize,loadPhotos,element,client,reportContext,setDeleted} from './portal-data.js?v=20261017-multisupervision';
 import {exportPDF} from './pdf-export.js?v=20261017-signatures';
 import {exportOnePagePDF} from './one-page-pdf.js?v=20261017-signatures';
 const status=document.getElementById('status'),article=document.getElementById('report'),pdfButton=document.getElementById('pdf');let record=null;

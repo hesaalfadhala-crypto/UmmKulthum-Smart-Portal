@@ -1,6 +1,6 @@
-import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js';
+import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js?v=20261017-multisupervision';
 import {validateOtherChoices} from './documentation-choices.js';
-import {validateNewDetails} from './recognition-model.js';
+import {validateNewDetails} from './recognition-model.js?v=20261017-multisupervision';
 
 export async function editContext(client,id){
  const {data,error}=await client.rpc('report_edit_context',{report_id:id});

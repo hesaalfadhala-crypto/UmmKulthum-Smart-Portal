@@ -1,10 +1,10 @@
-import {renderSignatures} from './report-signatures.js';
-import {editContext,editableData,saveReportEdit} from './edit-documentation.js';
+import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261017-multisupervision';
+import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-multisupervision';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
-import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js';
-import {validateNewDetails} from './recognition-model.js';
-import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js';
-import { checkSaveSchema, saveSubmission } from './save-documentation.js';
+import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261017-multisupervision';
+import {validateNewDetails} from './recognition-model.js?v=20261017-multisupervision';
+import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261017-multisupervision';
+import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261017-multisupervision';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
@@ -16,7 +16,7 @@ const saveButton = document.getElementById('save');
 const clearButton = document.getElementById('clear');
 const editButton = document.getElementById('editDraft');
 const status = document.getElementById('saveStatus');
-const groups = { areas: 'areas', projects: 'project', committees: 'committee', targets: 'target',  };
+const groups = { areas: 'areas', projects: 'project', committees: 'committee', targets: 'target', reportSupervisors:'supervisor' };
 const editId=new URLSearchParams(location.search).get('edit');
 let originalReport=null, retainedPhotos=[], retainedAttachments=[], existingPhotos=[], draftKey;
 let profile, user, attachments = [], files = [], pending = null, saving = false, ready = false, previewUrls = [];
@@ -92,6 +92,7 @@ function previewPhotos() {
     if(editId)previewExisting();
 }
 function restore(data) {
+    data={...data,reportSupervisors:selectedSupervisors(data)};
     if(editId){for(const el of fields.filter(el=>el.tagName==='SELECT'))if(data[el.id]&&!Array.from(el.options).some(o=>o.value===String(data[el.id]))){const o=element('option',String(data[el.id]));o.value=String(data[el.id]);el.append(o);}
     for(const [key,cls]of Object.entries(groups))for(const value of data[key]||[])if(!Array.from(form.querySelectorAll('.'+cls+'-checks input')).some(i=>i.value===value)){const label=element('label'),input=element('input');input.type='checkbox';input.value=value;label.append(input,document.createTextNode(value));form.querySelector('.'+cls+'-checks')?.append(label);}}
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => {
@@ -190,6 +191,7 @@ try {
     user = await requireUser();
     const {data:loadedProfile,error:profileError}=await client.from('profiles').select('full_name').eq('id',user.id).single();
     profile=loadedProfile;
+    document.querySelector('.supervisor-checks input[value=assistant]').checked=true;
     if(profileError)throw new Error('تعذر تحميل اسم المستخدمة. أعيدي المحاولة.');
     document.getElementById('reportPreparedBy').value=profile?.full_name||user.user_metadata?.full_name||'';
     draftKey=editId?user.id+':report:'+editId:user.id;
@@ -201,7 +203,7 @@ try {
         if(!(await editContext(client,editId)).can_edit)throw new Error('ليست لديكِ صلاحية تعديل هذا التقرير.');
         retainedPhotos=structuredClone(originalReport.photo_files||[]);retainedAttachments=structuredClone(originalReport.attachment_files||[]);
         existingPhotos=await loadPhotos(originalReport);
-        const data=editableData(originalReport,normalize(originalReport));data.reportPreparedBy ||= data.executor||'';data.reportSupervisor ||= 'assistant';restore(data);
+        const data=editableData(originalReport,normalize(originalReport));data.reportPreparedBy ||= data.executor||'';restore(data);
         document.querySelector('h1').textContent='تعديل التقرير';clearButton.textContent='إلغاء مسودة التعديل';
         message('تعديل التقرير رقم '+originalReport.id+'؛ الحفظ يحدّث النسخة الأصلية. إزالة صورة تفصلها عن التقرير ولا تحذف الملف المخزن.');
     }

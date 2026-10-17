@@ -1,6 +1,6 @@
-import {drawSignatures} from './report-signatures.js';
+import {drawSignatures} from './report-signatures.js?v=20261017-multisupervision';
 import {appendAttachments} from './pdf-attachments.js';
-import {extraSections} from './recognition-model.js';
+import {extraSections} from './recognition-model.js?v=20261017-multisupervision';
 // Rasterized canvas preserves Arabic shaping and embeds every image. No external services.
 async function loadImage(url) { const res = await fetch(url, { cache: 'no-store' }); if (!res.ok)
     throw new Error('تعذر تحميل إحدى صور التقرير؛ أعيدي المحاولة.'); const blob = await res.blob(); const src = URL.createObjectURL(blob); try {

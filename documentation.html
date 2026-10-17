@@ -702,7 +702,9 @@ button:disabled{opacity:.6;cursor:wait}
     </div>
 </div>
 <div class="field"><label for="reportPreparedBy">معدّة التقرير</label><input id="reportPreparedBy" type="text" maxlength="300"></div>
-<div class="field"><label for="reportSupervisor">الإشراف على التقرير</label><select id="reportSupervisor"><option value="assistant">المديرة المساعدة: أ. حصه سند الفضاله</option><option value="services">رئيسة الخدمات: أ. حصه خليفة الظهراني</option></select></div>
+<fieldset class="field"><legend>الإشراف على التقرير — يمكن اختيار أكثر من مشرفة</legend><div class="checks supervisor-checks">
+<label class="check"><input type="checkbox" value="assistant"> المديرة المساعدة: أ. حصه سند الفضاله</label><label class="check"><input type="checkbox" value="aisha"> المديرة المساعدة: أ. عايشة محمد يعقوب</label><label class="check"><input type="checkbox" value="hiba"> المديرة المساعدة: أ. هبة علي حسين</label><label class="check"><input type="checkbox" value="services"> رئيسة الخدمات: أ. حصه خليفة الظهراني</label></div></fieldset>
+<div class="field"><label for="executingEntity">الجهة المنفذة</label><input id="executingEntity" maxlength="300"></div>
                 <div class="field">
                     <label>الفئة المستهدفة</label>
                     <input id="target" type="text" placeholder="مثال: طالبات الصف الأول الإعدادي">
@@ -882,7 +884,7 @@ button:disabled{opacity:.6;cursor:wait}
 </main>
 
 
-<script type="module" src="assets/js/documentation.js?v=20261017-signatures"></script>
+<script type="module" src="assets/js/documentation.js?v=20261017-multisupervision"></script>
 
 </body>
 </html>
