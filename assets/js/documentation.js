@@ -70,7 +70,7 @@ function preview() {
     document.getElementById('competitionReport').style.display = competition ? 'block' : 'none';
     document.getElementById('reserveClassFields').style.display = reserve ? 'block' : 'none';
     document.getElementById('reserveClassReport').style.display = reserve ? 'block' : 'none';
-    document.getElementById('assistantsReport').style.display = d.assistants.length ? 'block' : 'none';
+    document.getElementById('assistantsReport').style.display = 'none';
     document.querySelector('.report-title').textContent = 'معاينة تقرير ' + d.type;
 }
 function previewPhotos() {
