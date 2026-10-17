@@ -412,7 +412,7 @@ button:disabled{opacity:.6;cursor:wait}
 @media(max-width:480px){.row{grid-template-columns:1fr}.report{padding:16px}.info{grid-template-columns:1fr}}
 </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
-</head>
+<link rel="stylesheet" href="assets/signatures.css"></head>
 
 <body>
 
@@ -701,30 +701,8 @@ button:disabled{opacity:.6;cursor:wait}
         </label>
     </div>
 </div>
-<!-- المديرات المساعدات المشرفات -->
-<div class="field">
-    <div class="check-title">
-        المديرة/المديرات المساعدات المشرفات
-        <span style="font-weight:normal;color:#8a9b99;">(اختياري)</span>
-    </div>
-
-    <div class="checks assistant-checks">
-        <label class="check">
-            <input type="checkbox" value="أ. حصه سند الفضاله">
-            أ. حصه سند الفضاله
-        </label>
-
-        <label class="check">
-            <input type="checkbox" value="أ. عايشة محمد يعقوب">
-            أ. عايشة محمد يعقوب
-        </label>
-
-        <label class="check">
-            <input type="checkbox" value="أ. هبة علي حسين">
-            أ. هبة علي حسين
-        </label>
-    </div>
-</div>
+<div class="field"><label for="reportPreparedBy">معدّة التقرير</label><input id="reportPreparedBy" type="text" maxlength="300"></div>
+<div class="field"><label for="reportSupervisor">الإشراف على التقرير</label><select id="reportSupervisor"><option value="assistant">المديرة المساعدة: أ. حصه سند الفضاله</option><option value="services">رئيسة الخدمات: أ. حصه خليفة الظهراني</option></select></div>
                 <div class="field">
                     <label>الفئة المستهدفة</label>
                     <input id="target" type="text" placeholder="مثال: طالبات الصف الأول الإعدادي">
@@ -895,12 +873,7 @@ button:disabled{opacity:.6;cursor:wait}
                         هذه معاينة. يُتاح التقرير النهائي وتصدير PDF بعد تأكيد الحفظ في الأرشيف.
                     </div>
 
-    <div style="margin-top:45px; text-align:left; direction:rtl; padding-left:25px;">
-    <div style="display:inline-block; text-align:center; min-width:220px;">
-        <strong>مديرة المدرسة</strong>
-        <div style="margin-top:8px;">أ. هيا محمد النعيمي</div>
-    </div>
-</div>            </article>
+<footer id="previewSignatures" class="report-signatures"></footer>            </article>
 
             </div>
         </section>

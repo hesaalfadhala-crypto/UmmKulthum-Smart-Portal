@@ -1,3 +1,4 @@
+import {renderSignatures} from './report-signatures.js';
 import {editContext,editableData,saveReportEdit} from './edit-documentation.js';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js';
@@ -15,10 +16,10 @@ const saveButton = document.getElementById('save');
 const clearButton = document.getElementById('clear');
 const editButton = document.getElementById('editDraft');
 const status = document.getElementById('saveStatus');
-const groups = { areas: 'areas', projects: 'project', committees: 'committee', targets: 'target', assistants: 'assistant' };
+const groups = { areas: 'areas', projects: 'project', committees: 'committee', targets: 'target',  };
 const editId=new URLSearchParams(location.search).get('edit');
 let originalReport=null, retainedPhotos=[], retainedAttachments=[], existingPhotos=[], draftKey;
-let user, attachments = [], files = [], pending = null, saving = false, ready = false, previewUrls = [];
+let profile, user, attachments = [], files = [], pending = null, saving = false, ready = false, previewUrls = [];
 let requestId = crypto.randomUUID(), writeQueue = Promise.resolve();
 let centerPrograms=[];
 
@@ -37,7 +38,7 @@ function freeze() {
     saveButton.textContent = saving ? 'جار الحفظ…' : pending ? 'إعادة محاولة الحفظ' : editId ? 'حفظ التغييرات على التقرير الأصلي' : 'حفظ في الأرشيف وعرض التقرير';
 }
 function collect() {
-    const data = editId?{...originalReport?.details,academicYear:originalReport?.academic_year}:{};
+    const data = editId?{...originalReport?.details,academicYear:originalReport?.academic_year}:{};data.assistants ||= [];
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => { data[el.id] = el.value.trim(); });
     for (const [key, cls] of Object.entries(groups))
         data[key] = [...form.querySelectorAll('.' + cls + '-checks input:checked')].map(el => el.value);
@@ -51,7 +52,7 @@ function output(id, value) {
     el.classList.toggle('empty', !text);
 }
 function preview() {
-    const raw = collect(),d=displayChoices(raw);otherChoices.update();
+    const raw = collect(),d=displayChoices(raw);otherChoices.update();renderSignatures(document.getElementById('previewSignatures'),d);
     for (const [key, id] of Object.entries({ activity: 'pActivity', semester: 'pSemester', type: 'pType',
         department: 'pDepartment', executor: 'pExecutor', date: 'pDate', location: 'pLocation',
         goal: 'pGoal', implementation: 'pImplementation', impact: 'pImpact', recommendations: 'pRecommendations',
@@ -175,6 +176,7 @@ clearButton.addEventListener('click', async () => {
         });
         document.querySelectorAll('#recognitionStaff input').forEach(i=>i.checked=false);
         files = [];attachments=[];document.getElementById('attachments').value=''; pending = null; requestId = crypto.randomUUID(); images.value = '';
+        document.getElementById('reportPreparedBy').value=profile?.full_name||user.user_metadata?.full_name||'';
         preview(); previewPhotos(); message('ابدئي توثيقًا جديدًا.');
     } catch (e) { message(e.message, true); }
     finally { saving = false; freeze(); }
@@ -186,6 +188,10 @@ document.getElementById('centerProgramId').addEventListener('change',()=>{const 
 freeze();
 try {
     user = await requireUser();
+    const {data:loadedProfile,error:profileError}=await client.from('profiles').select('full_name').eq('id',user.id).single();
+    profile=loadedProfile;
+    if(profileError)throw new Error('تعذر تحميل اسم المستخدمة. أعيدي المحاولة.');
+    document.getElementById('reportPreparedBy').value=profile?.full_name||user.user_metadata?.full_name||'';
     draftKey=editId?user.id+':report:'+editId:user.id;
     await loadExtensionAccess();
     const {data:programs,error:programError}=await client.from('support_programs').select('id,title,starts_at,status,workshop_type,executing_agency,hosting_entity').order('starts_at',{ascending:false});
@@ -195,7 +201,7 @@ try {
         if(!(await editContext(client,editId)).can_edit)throw new Error('ليست لديكِ صلاحية تعديل هذا التقرير.');
         retainedPhotos=structuredClone(originalReport.photo_files||[]);retainedAttachments=structuredClone(originalReport.attachment_files||[]);
         existingPhotos=await loadPhotos(originalReport);
-        restore(editableData(originalReport,normalize(originalReport)));
+        const data=editableData(originalReport,normalize(originalReport));data.reportPreparedBy ||= data.executor||'';data.reportSupervisor ||= 'assistant';restore(data);
         document.querySelector('h1').textContent='تعديل التقرير';clearButton.textContent='إلغاء مسودة التعديل';
         message('تعديل التقرير رقم '+originalReport.id+'؛ الحفظ يحدّث النسخة الأصلية. إزالة صورة تفصلها عن التقرير ولا تحذف الملف المخزن.');
     }

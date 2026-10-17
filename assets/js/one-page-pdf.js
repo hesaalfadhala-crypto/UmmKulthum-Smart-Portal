@@ -1,3 +1,4 @@
+import {drawSignatures} from './report-signatures.js';
 import {appendAttachments} from './pdf-attachments.js';
 import {extraSections} from './recognition-model.js';
 import {packPDF} from './pdf-export.js';
@@ -22,7 +23,7 @@ export async function renderOnePagePDF(record){
   if(draw){g.fillStyle='#b59646';g.fillRect(M,y-6,W-2*M,2);}y+=size+10;
   for(const [label,value]of fields){const s=Array.isArray(value)?value.filter(Boolean).join(' • '):value;if(!s)continue;g.font=size+'px "Portal Arabic", Tahoma, Arial';const ls=fitText(s,W-2*M-215);g.font='bold '+size+'px "Portal Arabic", Tahoma, Arial';const labels=fitText(label,200);if(draw){g.fillStyle='#174f4b';for(let i=0;i<labels.length;i++)g.fillText(labels[i],W-M,y+i*lh);g.font=size+'px "Portal Arabic", Tahoma, Arial';g.fillStyle='#263d39';for(let i=0;i<ls.length;i++)g.fillText(ls[i],W-M-215,y+i*lh);}y+=Math.max(ls.length,labels.length)*lh+9;}
   if(photos.length){y+=text('صور التوثيق',W-M,W-2*M,size,'#174f4b',true)+6;const cols=photos.length>6?5:photos.length>2?3:photos.length,rows=Math.ceil(photos.length/cols),bw=(W-2*M-(cols-1)*12)/cols,bh=photos.length>6?140:photos.length>2?165:240;for(let i=0;i<photos.length;i++){const p=photos[i],x=W-M-bw-(i%cols)*(bw+12),top=y+Math.floor(i/cols)*(bh+25);if(draw){g.fillStyle='#f4f7f5';g.fillRect(x,top,bw,bh);const scale=Math.min(bw/p.width,bh/p.height);g.drawImage(p,x+(bw-p.width*scale)/2,top+(bh-p.height*scale)/2,p.width*scale,p.height*scale);g.fillStyle='#637772';g.font='16px "Portal Arabic", Tahoma, Arial';g.fillText('الصورة '+(i+1),x+bw,top+bh+18);}}y+=rows*(bh+25)+16;}
-  y+=18;const top=y;const right=text('إشراف المديرة المساعدة\n'+((d.assistants||[]).join(' • ')||'—'),W-M,(W-2*M)/2-20,size,'#174f4b');y=top;g.textAlign='left';const left=text('مديرة المدرسة\nأ. هيا محمد النعيمي',M,(W-2*M)/2-20,size,'#174f4b');g.textAlign='right';y=top+Math.max(right,left);return y;
+  y+=18;const sh=drawSignatures(g,d,W,M,0,size,'"Portal Arabic", Tahoma, Arial',false);if(draw)y=Math.max(y,MAX-sh);y+=drawSignatures(g,d,W,M,y,size,'"Portal Arabic", Tahoma, Arial',draw);return y;
  }
  let size=25;for(;size>=16;size--)if(layout(size,false)<=MAX)break;
  if(size<16)throw new Error('النص أطول من مساحة صفحة واحدة بحجم مقروء. اختاري PDF الكامل لحفظ كل المحتوى.');

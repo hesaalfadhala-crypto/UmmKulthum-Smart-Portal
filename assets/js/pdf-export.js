@@ -1,3 +1,4 @@
+import {drawSignatures} from './report-signatures.js';
 import {appendAttachments} from './pdf-attachments.js';
 import {extraSections} from './recognition-model.js';
 // Rasterized canvas preserves Arabic shaping and embeds every image. No external services.
@@ -153,25 +154,9 @@ export async function renderPDF(record) {
             y += 400;
         }
     }
-    ctx.font = '22px Tahoma, Arial';
-    const assistantLines = wrap(d.assistants.join(' • ') || '—', (W - 2 * M) / 2 - 20);
-    ensure(70 + assistantLines.length * 31);
-    y += 22;
-    ctx.fillStyle = '#174f4b';
-    ctx.font = 'bold 24px Tahoma, Arial';
-    ctx.fillText('إشراف المديرة المساعدة', W - M, y);
-    ctx.textAlign = 'left';
-    ctx.fillText('مديرة المدرسة', M, y);
-    ctx.textAlign = 'right';
-    y += 36;
-    ctx.font = '22px Tahoma, Arial';
-    for (const l of assistantLines) {
-        ctx.fillText(l, W - M, y);
-        y += 31;
-    }
-    ctx.textAlign = 'left';
-    ctx.fillText('أ. هيا محمد النعيمي', M, y - 31);
-    ctx.textAlign = 'right';
+    const signatureHeight=drawSignatures(ctx,d,W,M,0,24,'Tahoma, Arial',false);
+    ensure(signatureHeight+28);y=Math.max(y+22,limit-signatureHeight);
+    drawSignatures(ctx,d,W,M,y,24);
     canvases.forEach((canvas, i) => { const g = canvas.getContext('2d'); g.strokeStyle = '#dce5e3'; g.beginPath(); g.moveTo(M, 1640); g.lineTo(W - M, 1640); g.stroke(); g.fillStyle = '#60736f'; g.font = '19px Tahoma, Arial'; g.direction = 'rtl'; g.textAlign = 'right'; g.fillText('رقم التوثيق: ' + String(record.id).slice(0, 8), W - M, 1675); g.textAlign = 'left'; g.fillText('صفحة ' + (i + 1) + ' من ' + canvases.length, M, 1675); });
     const pages = canvases.map(c => Uint8Array.from(atob(c.toDataURL('image/jpeg', .94).split(',')[1]), x => x.charCodeAt(0)));
     return packPDF(pages);
