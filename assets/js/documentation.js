@@ -1,3 +1,4 @@
+import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js';
 import {validateNewDetails} from './recognition-model.js';
 import { client, requireUser, element } from './portal-data.js';
@@ -6,6 +7,7 @@ import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
 const form = document.querySelector('.form');
+const otherChoices=installOtherChoices(form);
 const fields = [...form.querySelectorAll('input:not([type=file]),select,textarea')];
 const images = document.getElementById('images');
 const saveButton = document.getElementById('save');
@@ -35,7 +37,7 @@ function collect() {
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => { data[el.id] = el.value.trim(); });
     for (const [key, cls] of Object.entries(groups))
         data[key] = [...form.querySelectorAll('.' + cls + '-checks input:checked')].map(el => el.value);
-    return collectExtensions(data);
+    return otherChoices.collect(collectExtensions(data));
 }
 function output(id, value) {
     const el = document.getElementById(id);
@@ -45,7 +47,7 @@ function output(id, value) {
     el.classList.toggle('empty', !text);
 }
 function preview() {
-    const d = collect();
+    const raw = collect(),d=displayChoices(raw);otherChoices.update();
     for (const [key, id] of Object.entries({ activity: 'pActivity', semester: 'pSemester', type: 'pType',
         department: 'pDepartment', executor: 'pExecutor', date: 'pDate', location: 'pLocation',
         goal: 'pGoal', implementation: 'pImplementation', impact: 'pImpact', recommendations: 'pRecommendations',
@@ -58,7 +60,7 @@ function preview() {
         reserveImplementation: 'pReserveImplementation' })) output(id, d[key]);
     output('pTarget', [...d.targets, d.target].filter(Boolean).join(' • '));
     const competition = d.type === 'مسابقة وإنجاز طلابي', reserve = d.type === 'حصة احتياط';
-    document.getElementById('trainingDocumentationFields').hidden=d.type!=='ورشة تدريبية';updateExtensions(d);
+    document.getElementById('trainingDocumentationFields').hidden=d.type!=='ورشة تدريبية';updateExtensions(raw);
     document.getElementById('competitionDocumentationFields').style.display = competition ? 'block' : 'none';
     document.getElementById('competitionReport').style.display = competition ? 'block' : 'none';
     document.getElementById('reserveClassFields').style.display = reserve ? 'block' : 'none';
@@ -89,7 +91,7 @@ function restore(data) {
     });
     for (const [key, cls] of Object.entries(groups))
         form.querySelectorAll('.' + cls + '-checks input').forEach(el => { el.checked = data[key]?.includes(el.value) || false; });
-    restoreExtensions(data);preview();
+    restoreExtensions(data);otherChoices.restore(data);preview();
 }
 function persist(snapshot) {
     const copy = structuredClone(snapshot);
@@ -120,7 +122,7 @@ images.addEventListener('change', () => {
 });
 saveButton.addEventListener('click', async () => {
     if (!ready || saving) return;
-    const details=collect();try{validateNewDetails(details);}catch(e){message(e.message,true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات غير صالح.',true);return;}
+    const details=collect();try{validateOtherChoices(details);validateNewDetails(details);}catch(e){message(e.message,true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات غير صالح.',true);return;}
     if (!collect().activity) {
         message('اكتبي اسم الفعالية أو النشاط.', true);
         document.getElementById('activity').focus();

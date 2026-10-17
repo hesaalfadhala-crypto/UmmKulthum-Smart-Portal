@@ -348,6 +348,7 @@ textarea{min-height:90px;resize:vertical}
 </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
+<script type="module" src="assets/js/competition-other.js"></script>
 <script>
     const SUPABASE_URL = "https://ulqwkxzjwdmkspsjzvup.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
@@ -408,6 +409,7 @@ async function prepareRecord(){
         alert('رفع المرفقات في هذه الخدمة غير مفعّل. استخدمي التوثيق الجديد بنوع «مسابقة وإنجاز طلابي» لحفظ الصور والتقرير.');
         return;
     }
+    let specified;try{if(!window.competitionOther)throw new Error('جار تجهيز الحقول. أعيدي المحاولة بعد لحظة.');specified=window.competitionOther();}catch(e){alert(e.message);return;}
     const students = [...document.querySelectorAll(".student-row")].map(row => ({
         name: row.querySelector(".student-name").value.trim(),
         class: row.querySelector(".student-class").value.trim()
@@ -432,17 +434,17 @@ async function prepareRecord(){
         .insert({
             competition_name: name,
             competition_type: type,
-            department: department,
+            department: specified.department,
             competition_date: competitionDate,
             organizer: type === "خارجية" ? organizer : null,
             host: type === "خارجية" ? host : null,
-            competition_level: type === "خارجية" ? competitionLevel : null,
+            competition_level: type === "خارجية" ? specified.competitionLevel : null,
             stage: stage,
             grade: grade,
             supervisor: supervisor,
             student_count: enteredCount,
             students: students,
-            result: result.value,
+            result: specified.result,
             award_details: document.getElementById("awardDetails").value.trim() || null,
             awards_count: enteredAwards,
             notes: document.getElementById("notes").value.trim() || null,

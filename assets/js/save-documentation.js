@@ -1,3 +1,4 @@
+import {displayChoices,validateOtherChoices} from './documentation-choices.js';
 import {validateNewDetails} from './recognition-model.js';
 // Immutable submission + request_id make retries safe after a lost response.
 export const PHOTO_BUCKET = 'school-documentation-images';
@@ -16,7 +17,7 @@ export async function findSubmission(client, userId, requestId) {
 }
 
 export function databaseRecord(userId, submission) {
-    const d = submission.data;
+    const d = displayChoices(submission.data);
     return {
         execution_scope:d.executionScope||null,organizing_entity:d.executionScope==='external'?d.organizingEntity||null:null,hosting_entity:d.executionScope==='external'?d.hostingEntity||null:null,
         created_by: userId, request_id: submission.requestId,
@@ -39,7 +40,7 @@ export function databaseRecord(userId, submission) {
         workshop_type:d.type==='ورشة تدريبية'?(d.workshopType||null):null,executing_agency:d.type==='ورشة تدريبية'&&d.workshopType==='external'?(d.executingAgency||null):null,
         support_program_id: d.type==='ورشة تدريبية'?(d.centerProgramId||null):null,
         training_beneficiaries: d.type==='ورشة تدريبية'&&d.trainingBeneficiaries!=null&&d.trainingBeneficiaries!==''?Number(d.trainingBeneficiaries):null,
-        attachment_files:submission.uploadedAttachments||[],details: d, photo_files: submission.uploaded || []
+        attachment_files:submission.uploadedAttachments||[],details: submission.data, photo_files: submission.uploaded || []
     };
 }
 
@@ -76,7 +77,7 @@ export async function preparePhoto(file) {
 }
 
 export async function saveSubmission(client, userId, submission, checkpoint, progress = () => {}) {
-    validateNewDetails(submission.data);
+    validateOtherChoices(submission.data);validateNewDetails(submission.data);
     if (!submission.data.activity?.trim()) throw new Error('اكتبي اسم الفعالية أو النشاط.');
     if (submission.files.length > 10) throw new Error('يمكن إرفاق 10 صور كحد أقصى.');
     await checkSaveSchema(client);
