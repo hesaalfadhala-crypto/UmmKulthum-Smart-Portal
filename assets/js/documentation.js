@@ -1,7 +1,8 @@
+import {editContext,editableData,saveReportEdit} from './edit-documentation.js';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js';
 import {validateNewDetails} from './recognition-model.js';
-import { client, requireUser, element } from './portal-data.js';
+import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js';
 import { checkSaveSchema, saveSubmission } from './save-documentation.js';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
@@ -15,6 +16,8 @@ const clearButton = document.getElementById('clear');
 const editButton = document.getElementById('editDraft');
 const status = document.getElementById('saveStatus');
 const groups = { areas: 'areas', projects: 'project', committees: 'committee', targets: 'target', assistants: 'assistant' };
+const editId=new URLSearchParams(location.search).get('edit');
+let originalReport=null, retainedPhotos=[], retainedAttachments=[], existingPhotos=[], draftKey;
 let user, attachments = [], files = [], pending = null, saving = false, ready = false, previewUrls = [];
 let requestId = crypto.randomUUID(), writeQueue = Promise.resolve();
 let centerPrograms=[];
@@ -29,11 +32,12 @@ function freeze() {
     images.disabled = !ready || saving || !!pending;document.getElementById('attachments').disabled=images.disabled;
     saveButton.disabled = !ready || saving;
     clearButton.disabled = !ready || saving || !!pending?.sent;
+    document.querySelectorAll('#retainedFiles button').forEach(b=>b.disabled=!ready||saving||!!pending);
     editButton.hidden = !pending || !!pending.sent || saving;
-    saveButton.textContent = saving ? 'جار الحفظ…' : pending ? 'إعادة محاولة الحفظ' : 'حفظ في الأرشيف وعرض التقرير';
+    saveButton.textContent = saving ? 'جار الحفظ…' : pending ? 'إعادة محاولة الحفظ' : editId ? 'حفظ التغييرات على التقرير الأصلي' : 'حفظ في الأرشيف وعرض التقرير';
 }
 function collect() {
-    const data = {};
+    const data = editId?{...originalReport?.details,academicYear:originalReport?.academic_year}:{};
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => { data[el.id] = el.value.trim(); });
     for (const [key, cls] of Object.entries(groups))
         data[key] = [...form.querySelectorAll('.' + cls + '-checks input:checked')].map(el => el.value);
@@ -83,9 +87,12 @@ function previewPhotos() {
         figure.append(img, element('figcaption', 'الصورة ' + (i + 1)));
         box.append(figure);
     });
-    document.getElementById('imageCount').textContent = files.length ? files.length + ' صور مرفقة' : 'لم تُرفق صور بعد';
+    document.getElementById('imageCount').textContent = (retainedPhotos.length+files.length) ? (retainedPhotos.length+files.length) + ' صور مرفقة' : 'لم تُرفق صور بعد';
+    if(editId)previewExisting();
 }
 function restore(data) {
+    if(editId){for(const el of fields.filter(el=>el.tagName==='SELECT'))if(data[el.id]&&!Array.from(el.options).some(o=>o.value===String(data[el.id]))){const o=element('option',String(data[el.id]));o.value=String(data[el.id]);el.append(o);}
+    for(const [key,cls]of Object.entries(groups))for(const value of data[key]||[])if(!Array.from(form.querySelectorAll('.'+cls+'-checks input')).some(i=>i.value===value)){const label=element('label'),input=element('input');input.type='checkbox';input.value=value;label.append(input,document.createTextNode(value));form.querySelector('.'+cls+'-checks')?.append(label);}}
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => {
         if (data[el.id] !== undefined) el.value = data[el.id];
     });
@@ -95,11 +102,11 @@ function restore(data) {
 }
 function persist(snapshot) {
     const copy = structuredClone(snapshot);
-    const job = writeQueue.catch(() => {}).then(() => writeDraft(user.id, copy));
+    const job = writeQueue.catch(() => {}).then(() => writeDraft(draftKey, copy));
     writeQueue = job;
     return job;
 }
-function draft() { return { requestId, data: collect(), files, attachments, pending }; }
+function draft() { return { requestId, data: collect(), files, attachments, pending, retainedPhotos, retainedAttachments, version:originalReport?.edit_version }; }
 async function autosave() {
     if (!ready || saving || pending) return;
     try {
@@ -111,12 +118,13 @@ form.addEventListener('input', () => { preview(); void autosave(); });
 form.addEventListener('change', () => { preview(); void autosave(); });
 images.addEventListener('change', () => {
     const selected = [...images.files];
-    if (selected.length > 10 || selected.some(file => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 15 * 1024 * 1024)) {
+    if (selected.length+(editId?retainedPhotos.length+files.length:0) > 10 || selected.some(file => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 15 * 1024 * 1024)) {
         message('اختاري حتى 10 صور JPG أو PNG أو WebP، بحجم لا يتجاوز 15 ميجابايت للصورة. الصور السابقة باقية.', true);
         images.value = '';
         return;
     }
-    files = selected;
+    files = editId?[...files,...selected]:selected;
+    if(editId)images.value='';
     previewPhotos();
     void autosave();
 });
@@ -134,12 +142,12 @@ saveButton.addEventListener('click', async () => {
         const currentUser = await requireUser();
         if (currentUser.id !== user.id) throw new Error('تغيّر حساب الدخول. أعيدي تحميل الصفحة قبل الحفظ.');
         await checkSaveSchema(client);
-        pending ||= { requestId, data: collect(), files, attachments, uploaded: [], uploadedAttachments:[], sent: false };
+        pending ||= { requestId, data: collect(), files, attachments, uploaded: [], uploadedAttachments:[], sent: false, ...(editId?{id:originalReport.id,version:originalReport.edit_version,retainedPhotos,retainedAttachments}:{} ) };
         await persist(draft());
-        const row = await saveSubmission(client, user.id, pending, () => persist(draft()), message);
+        const row = await (editId?saveReportEdit:saveSubmission)(client, user.id, pending, () => persist(draft()), message);
         message('تم تأكيد الحفظ في الأرشيف. جار فتح التقرير النهائي…');
         // If local cleanup fails, request_id still recovers the saved server record on retry.
-        try { await removeDraft(user.id); } catch { /* server record is already confirmed */ }
+        try { await removeDraft(draftKey); } catch { /* server record is already confirmed */ }
         location.assign('report.html?id=' + encodeURIComponent(String(row.id)));
     } catch (e) { message(e.message, true); }
     finally { saving = false; freeze(); }
@@ -153,12 +161,13 @@ editButton.addEventListener('click', async () => {
     await autosave();
 });
 clearButton.addEventListener('click', async () => {
-    if (saving || pending?.sent || !confirm('مسح هذه المسودة وبدء توثيق جديد؟')) return;
+    if (saving || pending?.sent || !confirm(editId?'إلغاء مسودة التعديل والعودة للتقرير دون تغيير النسخة المحفوظة؟':'مسح هذه المسودة وبدء توثيق جديد؟')) return;
     saving = true;
     freeze();
     try {
         await writeQueue.catch(() => {});
-        await removeDraft(user.id);
+        await removeDraft(draftKey);
+        if(editId){location.assign('report.html?id='+encodeURIComponent(editId));return;}
         fields.forEach(el => {
             if (el.type === 'checkbox') el.checked = false;
             else if (el.tagName === 'SELECT') el.selectedIndex = 0;
@@ -177,17 +186,29 @@ document.getElementById('centerProgramId').addEventListener('change',()=>{const 
 freeze();
 try {
     user = await requireUser();
+    draftKey=editId?user.id+':report:'+editId:user.id;
     await loadExtensionAccess();
     const {data:programs,error:programError}=await client.from('support_programs').select('id,title,starts_at,status,workshop_type,executing_agency,hosting_entity').order('starts_at',{ascending:false});
     if(!programError){centerPrograms=(programs||[]).filter(p=>p.status!=='cancelled');for(const p of centerPrograms){const option=element('option',p.title);option.value=p.id;document.getElementById('centerProgramId').append(option);}}
+    if(editId){
+        originalReport=await fetchRecord(editId);
+        if(!(await editContext(client,editId)).can_edit)throw new Error('ليست لديكِ صلاحية تعديل هذا التقرير.');
+        retainedPhotos=structuredClone(originalReport.photo_files||[]);retainedAttachments=structuredClone(originalReport.attachment_files||[]);
+        existingPhotos=await loadPhotos(originalReport);
+        restore(editableData(originalReport,normalize(originalReport)));
+        document.querySelector('h1').textContent='تعديل التقرير';clearButton.textContent='إلغاء مسودة التعديل';
+        message('تعديل التقرير رقم '+originalReport.id+'؛ الحفظ يحدّث النسخة الأصلية. إزالة صورة تفصلها عن التقرير ولا تحذف الملف المخزن.');
+    }
     let saved;
-    try { saved = await readDraft(user.id); }
+    try { saved = await readDraft(draftKey); }
     catch (e) { message(e.message, true); }
+    if(saved&&editId&&saved.version!==originalReport.edit_version&&!saved.pending?.sent)throw new Error('توجد مسودة لتعديل نسخة سابقة. افتحي التقرير الأحدث؛ المسودة محفوظة.');
     if (saved) {
+        if(editId){retainedPhotos=saved.retainedPhotos||[];retainedAttachments=saved.retainedAttachments||[];}
         requestId = saved.requestId; files = saved.files || [];attachments=saved.attachments||[];document.getElementById('attachmentCount').textContent=attachments.length+' ملفات PDF مرفقة'; pending = saved.pending || null;
         restore(saved.data || {});
         message(pending ? 'استُعيدت محاولة الحفظ السابقة. أعيدي الحفظ للتحقق من الأرشيف دون إنشاء نسخة مكررة.' : 'استُعيدت المسودة وصورها من هذا الجهاز.');
-    } else {const params=new URLSearchParams(location.search),program=centerPrograms.find(p=>p.id===params.get('center_program'));if(program||params.get('type')==='workshop'){document.getElementById('type').value='ورشة تدريبية';if(program){document.getElementById('centerProgramId').value=program.id;document.getElementById('activity').value=program.title;document.getElementById('executionScope').value=program.workshop_type||'';document.getElementById('organizingEntity').value=program.executing_agency||'';document.getElementById('hostingEntity').value=program.hosting_entity||'';const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(program.starts_at));const d=Object.fromEntries(parts.map(p=>[p.type,p.value]));document.getElementById('date').value=d.year+'-'+d.month+'-'+d.day;}}preview();}
+    } else if(!editId){const params=new URLSearchParams(location.search),program=centerPrograms.find(p=>p.id===params.get('center_program'));if(program||params.get('type')==='workshop'){document.getElementById('type').value='ورشة تدريبية';if(program){document.getElementById('centerProgramId').value=program.id;document.getElementById('activity').value=program.title;document.getElementById('executionScope').value=program.workshop_type||'';document.getElementById('organizingEntity').value=program.executing_agency||'';document.getElementById('hostingEntity').value=program.hosting_entity||'';const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(program.starts_at));const d=Object.fromEntries(parts.map(p=>[p.type,p.value]));document.getElementById('date').value=d.year+'-'+d.month+'-'+d.day;}}preview();}
     if(!saved&&new URLSearchParams(location.search).get('project')==='recognition'){document.querySelector('#recognitionProjectOption input').checked=true;document.getElementById('type').value='فعالية';preview();}
     previewPhotos(); ready = true; freeze();
 } catch (e) {
@@ -197,4 +218,14 @@ try {
     status.append(document.createTextNode(' '), login);
 }
 
-document.getElementById('attachments').addEventListener('change',()=>{const picked=[...document.getElementById('attachments').files];if(picked.length>5||picked.some(f=>f.size>8388608||!f.name.toLowerCase().endsWith('.pdf'))){message('اختاري حتى 5 ملفات PDF، بحجم 8 ميغابايت لكل ملف.',true);document.getElementById('attachments').value='';return;}attachments=picked;document.getElementById('attachmentCount').textContent=attachments.length+' ملفات PDF مرفقة';void autosave();});
+document.getElementById('attachments').addEventListener('change',()=>{const picked=[...document.getElementById('attachments').files];if(picked.length+(editId?retainedAttachments.length+attachments.length:0)>5||picked.some(f=>f.size>8388608||!f.name.toLowerCase().endsWith('.pdf'))){message('اختاري حتى 5 ملفات PDF، بحجم 8 ميغابايت لكل ملف.',true);document.getElementById('attachments').value='';return;}attachments=editId?[...attachments,...picked]:picked;if(editId){document.getElementById('attachments').value='';previewExisting();}document.getElementById('attachmentCount').textContent=(attachments.length+retainedAttachments.length)+' ملفات PDF مرفقة';void autosave();});
+
+function previewExisting(){
+ let box=document.getElementById('retainedFiles');if(!box){box=element('section');box.id='retainedFiles';images.parentElement.after(box);}box.replaceChildren();
+ const item=(label,remove)=>{const b=element('button','إزالة '+label);b.type='button';b.disabled=saving||!!pending;b.addEventListener('click',()=>{remove();previewPhotos();void autosave();});return b;};
+ retainedPhotos.forEach((p,i)=>{const f=element('figure'),photo=existingPhotos.find(x=>x.path===p.path);if(photo){const img=element('img');img.src=photo.url;img.alt='صورة محفوظة '+(i+1);img.style.maxWidth='160px';f.append(img);}f.append(item('الصورة المحفوظة '+(i+1),()=>retainedPhotos=retainedPhotos.filter(x=>x.path!==p.path)));box.append(f);});
+ files.forEach((f,i)=>box.append(item('الصورة الجديدة '+(i+1),()=>files.splice(i,1))));
+ retainedAttachments.forEach(f=>box.append(item('المرفق '+f.name,()=>retainedAttachments=retainedAttachments.filter(x=>x.path!==f.path))));
+ attachments.forEach((f,i)=>box.append(item('المرفق الجديد '+f.name,()=>attachments.splice(i,1))));
+ document.getElementById('attachmentCount').textContent=(retainedAttachments.length+attachments.length)+' ملفات PDF مرفقة';
+}
