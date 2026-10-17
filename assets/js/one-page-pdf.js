@@ -1,7 +1,7 @@
-import {drawSignatures} from './report-signatures.js?v=20261017-multisupervision';
+import {drawSignatures} from './report-signatures.js?v=20261017-compact-supervision';
 import {appendAttachments} from './pdf-attachments.js?v=20261017-edit-complete';
 import {extraSections} from './recognition-model.js?v=20261017-edit-complete';
-import {packPDF} from './pdf-export.js?v=20261017-edit-complete';
+import {packPDF} from './pdf-export.js?v=20261017-compact-supervision';
 async function image(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('تعذر تحميل صور التقرير. أعيدي المحاولة.');const src=URL.createObjectURL(await r.blob());try{const img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('تعذر قراءة صورة التقرير.'));img.src=src;});return img;}finally{URL.revokeObjectURL(src);}}
 export async function renderOnePagePDF(record){
  await document.fonts.ready;

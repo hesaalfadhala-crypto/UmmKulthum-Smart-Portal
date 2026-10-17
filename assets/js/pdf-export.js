@@ -1,4 +1,4 @@
-import {drawSignatures} from './report-signatures.js?v=20261017-multisupervision';
+import {drawSignatures} from './report-signatures.js?v=20261017-compact-supervision';
 import {appendAttachments} from './pdf-attachments.js?v=20261017-edit-complete';
 import {extraSections} from './recognition-model.js?v=20261017-edit-complete';
 // Rasterized canvas preserves Arabic shaping and embeds every image. No external services.

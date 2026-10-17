@@ -1,4 +1,4 @@
-import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261017-multisupervision';
+import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261017-compact-supervision';
 import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-edit-complete';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261017-edit-complete';
