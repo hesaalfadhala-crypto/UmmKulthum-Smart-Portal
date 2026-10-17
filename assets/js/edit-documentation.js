@@ -1,6 +1,6 @@
-import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js?v=20261017-motivation';
+import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js?v=20261017-edit-complete';
 import {validateOtherChoices} from './documentation-choices.js';
-import {validateNewDetails} from './recognition-model.js?v=20261017-motivation';
+import {validateNewDetails} from './recognition-model.js?v=20261017-edit-complete';
 
 export async function editContext(client,id){
  const {data,error}=await client.rpc('report_edit_context',{report_id:id});

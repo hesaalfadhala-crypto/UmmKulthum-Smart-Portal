@@ -1,4 +1,4 @@
-import {client,requireUser} from './portal-data.js';
+import {client,requireUser} from './portal-data.js?v=20261017-edit-complete';
 export {client};
 export async function rpc(name,args={}){const {data,error}=await client.rpc(name,args);if(error){const e=new Error(error.code==='40001'?'تم تعديل الخطة من جلسة أخرى. أعيدي تحميلها قبل الحفظ.':error.message||'تعذر تنفيذ الإجراء.');e.code=error.code;throw e;}return data;}
 export async function rows(table,order='id'){let all=[];for(let n=0;;n+=200){const {data,error}=await client.from(table).select('*').order(order).order('id').range(n,n+199);if(error)throw new Error('تعذر قراءة الخطط المحفوظة. حاولي مجددًا.');all.push(...data);if(data.length<200)return all;}}

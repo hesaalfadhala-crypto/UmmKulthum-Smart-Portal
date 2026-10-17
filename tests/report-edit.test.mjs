@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {database,as,admin,id} from './complete/fixture.mjs';
 const migration=await fs.readFile(new URL('../backend/report_editing.sql',import.meta.url),'utf8');
-async function setup(){const db=await database();await db.exec(await fs.readFile(new URL('../supabase/migrations/20261015050341_execution_scope_and_recognition.sql',import.meta.url),'utf8'));await db.exec(await fs.readFile(new URL('../backend/support_center_other_choices.sql',import.meta.url),'utf8'));await db.query("update auth.users set email='e.k.abdulla@moe.bh' where id=$1",[id(3)]);await db.query("update profiles set role='coordinator' where id=$1",[id(3)]);await db.exec(migration);await db.query('insert into documentation_private.report_editors(user_id,manage_center) values($1,true)',[id(3)]);return db;}
-test('designated coordinator updates original, keeps old media, adds her media on delegated report, no deletion or role expansion',async()=>{
+async function setup(){const db=await database();await db.exec(await fs.readFile(new URL('../supabase/migrations/20261015050341_execution_scope_and_recognition.sql',import.meta.url),'utf8'));await db.exec(await fs.readFile(new URL('../backend/support_center_other_choices.sql',import.meta.url),'utf8'));await db.query("update auth.users set email='e.k.abdulla@moe.bh' where id=$1",[id(3)]);await db.query("update profiles set role='coordinator' where id=$1",[id(3)]);await db.exec(migration);await db.exec(await fs.readFile(new URL('../backend/report-edit-audit-and-admin-authority.sql',import.meta.url),'utf8'));await db.query('insert into documentation_private.report_editors(user_id,manage_center) values($1,true)',[id(3)]);return db;}
+test('designated coordinator updates original, keeps old media, adds her media on delegated report, owner edits and existing delegation, without delete grants',async()=>{
  const db=await setup();try{
  await as(db,5);const originalPath=id(5)+'/'+id(9010)+'/'+id(9011)+'.jpg';
  await db.query("insert into storage.objects(name,bucket_id,owner_id,metadata) values($1,'school-documentation-images',$2,'{\"size\":100}')",[originalPath,id(5)]);
@@ -21,8 +21,8 @@ test('designated coordinator updates original, keeps old media, adds her media o
  // Detaching one photo retains the blob and records a recoverable previous snapshot.
  await db.query('update documentations set photo_files=$1,last_edit_request=$2 where id=$3 and edit_version=1',[[oldPhoto],id(9030),row.id]);
  await as(db,4);assert.equal((await db.query('select report_edit_context($1) context',[row.id])).rows[0].context.can_edit,false);assert.equal((await db.query('update documentations set activity=$1,last_edit_request=$2 where id=$3 returning id',['ممنوع',id(9031),row.id])).rows.length,0);
- await as(db,5);assert.equal((await db.query('update documentations set activity=$1,last_edit_request=$2 where id=$3 returning id',['ممنوع',id(9032),row.id])).rows.length,0);
- await admin(db);assert.equal((await db.query('select count(*) n from documentations')).rows[0].n,2);assert.equal((await db.query('select count(*) n from documentation_private.report_edit_history')).rows[0].n,2);assert.equal((await db.query('select count(*) n from storage.objects')).rows[0].n,3);
+ await as(db,5);assert.equal((await db.query('update documentations set activity=$1,last_edit_request=$2 where id=$3 returning id',["تعديل المالكة",id(9032),row.id])).rows.length,1);
+ await admin(db);assert.equal((await db.query('select count(*) n from documentations')).rows[0].n,2);assert.equal((await db.query('select count(*) n from documentation_private.report_edit_history')).rows[0].n,3);assert.equal((await db.query('select count(*) n from storage.objects')).rows[0].n,3);
  }finally{await db.close();}
 });
 

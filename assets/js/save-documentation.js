@@ -1,5 +1,5 @@
 import {displayChoices,validateOtherChoices} from './documentation-choices.js';
-import {validateNewDetails} from './recognition-model.js?v=20261017-motivation';
+import {validateNewDetails} from './recognition-model.js?v=20261017-edit-complete';
 // Immutable submission + request_id make retries safe after a lost response.
 export const PHOTO_BUCKET = 'school-documentation-images';
 

@@ -1,10 +1,10 @@
 import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261017-multisupervision';
-import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-motivation';
+import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-edit-complete';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
-import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261017-motivation';
-import {validateNewDetails} from './recognition-model.js?v=20261017-motivation';
-import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261017-multisupervision';
-import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261017-motivation';
+import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261017-edit-complete';
+import {validateNewDetails} from './recognition-model.js?v=20261017-edit-complete';
+import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261017-edit-complete';
+import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261017-edit-complete';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
@@ -18,6 +18,7 @@ const editButton = document.getElementById('editDraft');
 const status = document.getElementById('saveStatus');
 const groups = { areas: 'areas', projects: 'project', committees: 'committee', targets: 'target', reportSupervisors:'supervisor' };
 const editId=new URLSearchParams(location.search).get('edit');
+if(editId){saveButton.classList.add('save-edits');document.body.classList.add('editing-report');}
 let originalReport=null, retainedPhotos=[], retainedAttachments=[], existingPhotos=[], draftKey;
 let profile, user, attachments = [], files = [], pending = null, saving = false, ready = false, previewUrls = [];
 let requestId = crypto.randomUUID(), writeQueue = Promise.resolve();
@@ -25,7 +26,7 @@ let centerPrograms=[];
 
 function message(text, error = false) {
     status.textContent = text;
-    status.classList.toggle('error', error);
+    status.classList.toggle('error', error);status.classList.toggle('success',!error&&text==='تم حفظ التعديلات بنجاح');
 }
 function freeze() {
     fields.forEach(el => { el.disabled = !ready || saving || !!pending; });
@@ -35,7 +36,7 @@ function freeze() {
     clearButton.disabled = !ready || saving || !!pending?.sent;
     document.querySelectorAll('#retainedFiles button').forEach(b=>b.disabled=!ready||saving||!!pending);
     editButton.hidden = !pending || !!pending.sent || saving;
-    saveButton.textContent = saving ? 'جار الحفظ…' : pending ? 'إعادة محاولة الحفظ' : editId ? 'حفظ التغييرات على التقرير الأصلي' : 'حفظ في الأرشيف وعرض التقرير';
+    saveButton.textContent = saving ? 'جار الحفظ…' : pending ? 'إعادة محاولة الحفظ' : editId ? 'حفظ التعديلات' : 'حفظ في الأرشيف وعرض التقرير';
 }
 function collect() {
     const data = editId?{...originalReport?.details,academicYear:originalReport?.academic_year}:{};data.assistants ||= [];
@@ -78,7 +79,8 @@ function previewPhotos() {
     previewUrls = [];
     const box = document.getElementById('reportImages');
     box.replaceChildren();
-    document.getElementById('photosReport').style.display = files.length ? 'block' : 'none';
+    document.getElementById('photosReport').style.display = files.length+retainedPhotos.length ? 'block' : 'none';
+    for(const [i,p] of retainedPhotos.entries()){const photo=existingPhotos.find(x=>x.path===p.path);if(!photo)continue;const figure=element('figure'),img=element('img');img.src=photo.url;img.alt='صورة محفوظة '+(i+1);figure.append(img,element('figcaption','الصورة المحفوظة '+(i+1)));box.append(figure);}
     files.forEach((file, i) => {
         const figure = element('figure'), img = element('img');
         const url = URL.createObjectURL(file);
@@ -92,7 +94,7 @@ function previewPhotos() {
     if(editId)previewExisting();
 }
 function restore(data) {
-    data={...data,reportSupervisors:selectedSupervisors(data)};
+    data={...data,executingEntity:data.executingEntity??data.executingAgency??'',reportSupervisors:selectedSupervisors(data)};
     if(editId){for(const el of fields.filter(el=>el.tagName==='SELECT'))if(data[el.id]&&!Array.from(el.options).some(o=>o.value===String(data[el.id]))){const o=element('option',String(data[el.id]));o.value=String(data[el.id]);el.append(o);}
     for(const [key,cls]of Object.entries(groups))for(const value of data[key]||[])if(!Array.from(form.querySelectorAll('.'+cls+'-checks input')).some(i=>i.value===value)){const label=element('label'),input=element('input');input.type='checkbox';input.value=value;label.append(input,document.createTextNode(value));form.querySelector('.'+cls+'-checks')?.append(label);}}
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => {
@@ -113,7 +115,7 @@ async function autosave() {
     if (!ready || saving || pending) return;
     try {
         await persist(draft());
-        message('المسودة محفوظة على هذا الجهاز. اضغطي «حفظ في الأرشيف» لإتمام التوثيق.');
+        message(editId?'مسودة التعديلات محفوظة على هذا الجهاز. اضغطي «حفظ التعديلات» لتحديث التقرير الأصلي.':'المسودة محفوظة على هذا الجهاز. اضغطي «حفظ في الأرشيف» لإتمام التوثيق.');
     } catch (e) { message(e.message + ' أبقي الصفحة مفتوحة حتى تحفظي في الأرشيف.', true); }
 }
 form.addEventListener('input', () => { preview(); void autosave(); });
@@ -147,10 +149,10 @@ saveButton.addEventListener('click', async () => {
         pending ||= { requestId, data: collect(), files, attachments, uploaded: [], uploadedAttachments:[], sent: false, ...(editId?{id:originalReport.id,version:originalReport.edit_version,retainedPhotos,retainedAttachments}:{} ) };
         await persist(draft());
         const row = await (editId?saveReportEdit:saveSubmission)(client, user.id, pending, () => persist(draft()), message);
-        message('تم تأكيد الحفظ في الأرشيف. جار فتح التقرير النهائي…');
+        message(editId?'تم حفظ التعديلات بنجاح':'تم تأكيد الحفظ في الأرشيف. جار فتح التقرير النهائي…');
         // If local cleanup fails, request_id still recovers the saved server record on retry.
         try { await removeDraft(draftKey); } catch { /* server record is already confirmed */ }
-        location.assign('report.html?id=' + encodeURIComponent(String(row.id)));
+        location.assign('report.html?id=' + encodeURIComponent(String(row.id))+(editId?'&saved_edit='+encodeURIComponent(pending.requestId):''));
     } catch (e) { message(e.message, true); }
     finally { saving = false; freeze(); }
 });

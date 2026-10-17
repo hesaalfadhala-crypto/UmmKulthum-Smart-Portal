@@ -1,0 +1,7 @@
+/* Report editing: consistent actions for desktop and mobile. */
+.edit-report-button,#editReport{display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#2563a6!important;border-color:#2563a6!important;color:#fff!important;font-weight:bold;text-decoration:none;border-radius:8px;padding:10px 18px}
+#save.save-edits{background:#23774f;border-color:#23774f;color:#fff;min-height:48px}
+.save-success,#saveStatus.success{background:#e8f5ec;color:#165b39;border:1px solid #a9d4b6;border-radius:9px;padding:15px;font-weight:bold;line-height:1.8}
+#retainedFiles{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px}#retainedFiles figure{margin:0;display:flex;flex-direction:column;gap:8px;max-width:100%}#retainedFiles button{min-height:44px;white-space:normal;overflow-wrap:anywhere}#retainedFiles img{width:160px;max-width:100%;height:120px;object-fit:contain;border:1px solid #dce5e3;border-radius:6px}
+@media(max-width:650px){.toolbar{flex-wrap:wrap}.toolbar>div{flex-wrap:wrap}.edit-report-button,#editReport{width:100%}.editing-report .actions{display:flex;flex-direction:column;gap:10px}.editing-report .actions>*{width:100%;min-height:44px;text-align:center}.save-success{margin:12px 0}#retainedFiles{gap:10px}#retainedFiles figure{flex:1 1 135px}}
+@media print{.save-success{display:none}}
