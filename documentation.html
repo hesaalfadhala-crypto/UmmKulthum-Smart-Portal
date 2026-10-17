@@ -181,6 +181,17 @@ textarea{
     border:0;
     margin-top:10px;
 }
+.upload .photo-picker{
+    display:block;
+    padding:12px;
+    margin:0;
+    cursor:pointer;
+    color:#28675d;
+}
+.upload .photo-picker span{display:block;margin-top:8px;font-size:14px}
+.upload:focus-within{outline:2px solid #28675d;outline-offset:3px}
+.upload:has(input:disabled) .photo-picker{cursor:wait;opacity:.6}
+.upload input[type=file]{max-width:100%;box-sizing:border-box}
 
 .actions{
     display:flex;
@@ -746,11 +757,17 @@ button:disabled{opacity:.6;cursor:wait}
                     <div class="field"><label for="trainingBeneficiaries">عدد المستفيدات / المشاركات الفعلي (اختياري)</label><input id="trainingBeneficiaries" type="number" min="0" max="10000" step="1"><p>اتركيه فارغًا إذا لم يُحصر العدد؛ لن نعتبره صفرًا.</p></div>
                 </div>
                 <div class="field">
-<label>صور التوثيق (حتى 10 صور)</label>
+<label for="images">صور التوثيق (حتى 10 صور)</label>
                     <div class="upload">
-                        📷<br>
-                        إرفاق صور الفعالية
-<input id="images" type="file" multiple accept="image/jpeg,image/png,image/webp"><label for="attachments">مرفقات التقرير (PDF، حتى 5 ملفات، 8 ميغابايت لكل ملف)</label><input id="attachments" type="file" accept="application/pdf,.pdf" multiple><p id="attachmentCount">لم تُرفق ملفات PDF بعد</p><p id="imageCount" role="status">لم تُرفق صور بعد</p>                    </div>
+                        <label for="images" class="photo-picker" id="photoPicker">📷<br>إرفاق صور الفعالية<span>اضغطي هنا لاختيار الصور من جهازكِ</span></label>
+                        <input id="images" type="file" aria-label="اختيار صور التوثيق" aria-describedby="imageCount" multiple accept="image/jpeg,image/png,image/webp">
+                        <p id="imageCount" role="status">لم تُرفق صور بعد</p>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="attachments">مرفقات التقرير (PDF، حتى 5 ملفات، 8 ميغابايت لكل ملف)</label>
+                    <input id="attachments" type="file" accept="application/pdf,.pdf" multiple>
+                    <p id="attachmentCount">لم تُرفق ملفات PDF بعد</p>
                 </div>
 
                 <div class="actions">
