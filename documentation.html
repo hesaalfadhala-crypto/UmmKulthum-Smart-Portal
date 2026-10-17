@@ -549,6 +549,7 @@ button:disabled{opacity:.6;cursor:wait}
     <div class="check-title">المشروع أو المبادرة المرتبطة</div>
 
     <div class="checks project-checks">
+<label class="check"><input type="checkbox" value="تحفيز المعلمات"> تحفيز المعلمات</label>
         <label class="check"><input type="checkbox" value="التعليم الأخضر"> التعليم الأخضر</label>
         <label class="check"><input type="checkbox" value="اليونسكو"> اليونسكو</label>
         <label class="check"><input type="checkbox" value="التمكين الرقمي"> التمكين الرقمي</label>
@@ -704,6 +705,7 @@ button:disabled{opacity:.6;cursor:wait}
 <div class="field"><label for="reportPreparedBy">معدّة التقرير</label><input id="reportPreparedBy" type="text" maxlength="300"></div>
 <fieldset class="field"><legend>الإشراف على التقرير — يمكن اختيار أكثر من مشرفة</legend><div class="checks supervisor-checks">
 <label class="check"><input type="checkbox" value="assistant"> المديرة المساعدة: أ. حصه سند الفضاله</label><label class="check"><input type="checkbox" value="aisha"> المديرة المساعدة: أ. عايشة محمد يعقوب</label><label class="check"><input type="checkbox" value="hiba"> المديرة المساعدة: أ. هبة علي حسين</label><label class="check"><input type="checkbox" value="services"> رئيسة الخدمات: أ. حصه خليفة الظهراني</label></div></fieldset>
+<div class="field" id="motivationFields" hidden><label for="motivationBeneficiaries">عدد المعلمات المستفيدات من التحفيز (اختياري)</label><input id="motivationBeneficiaries" type="number" min="0" max="10000" step="1"><p>اتركيه فارغًا عند عدم حصر العدد. قد تتكرر المعلمة بين تقارير مختلفة.</p></div>
 <div class="field"><label for="executingEntity">الجهة المنفذة</label><input id="executingEntity" maxlength="300"></div>
                 <div class="field">
                     <label>الفئة المستهدفة</label>
@@ -884,7 +886,7 @@ button:disabled{opacity:.6;cursor:wait}
 </main>
 
 
-<script type="module" src="assets/js/documentation.js?v=20261017-multisupervision"></script>
+<script type="module" src="assets/js/documentation.js?v=20261017-motivation"></script>
 
 </body>
 </html>

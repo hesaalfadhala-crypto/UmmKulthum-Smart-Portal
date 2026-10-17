@@ -1,10 +1,10 @@
 import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261017-multisupervision';
-import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-multisupervision';
+import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-motivation';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
-import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261017-multisupervision';
-import {validateNewDetails} from './recognition-model.js?v=20261017-multisupervision';
+import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261017-motivation';
+import {validateNewDetails} from './recognition-model.js?v=20261017-motivation';
 import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261017-multisupervision';
-import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261017-multisupervision';
+import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261017-motivation';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
@@ -52,7 +52,7 @@ function output(id, value) {
     el.classList.toggle('empty', !text);
 }
 function preview() {
-    const raw = collect(),d=displayChoices(raw);otherChoices.update();renderSignatures(document.getElementById('previewSignatures'),d);
+    const raw = collect(),d=displayChoices(raw);document.getElementById('motivationFields').hidden=!raw.projects.includes('تحفيز المعلمات');otherChoices.update();renderSignatures(document.getElementById('previewSignatures'),d);
     for (const [key, id] of Object.entries({ activity: 'pActivity', semester: 'pSemester', type: 'pType',
         department: 'pDepartment', executor: 'pExecutor', date: 'pDate', location: 'pLocation',
         goal: 'pGoal', implementation: 'pImplementation', impact: 'pImpact', recommendations: 'pRecommendations',

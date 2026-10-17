@@ -1,5 +1,5 @@
 import {element,client} from './portal-data.js?v=20261017-multisupervision';
-import {RECOGNITION_PROJECT,SCOPED_TYPES,RECOGNITION_KINDS,AWARDS,extraSections} from './recognition-model.js?v=20261017-multisupervision';
+import {RECOGNITION_PROJECT,SCOPED_TYPES,RECOGNITION_KINDS,AWARDS,extraSections} from './recognition-model.js?v=20261017-motivation';
 const $=id=>document.getElementById(id);let staff=[],allowed=false;
 export function installExtensions(){
  const type=$('type');if(![...type.options].some(o=>o.value==='ملتقى'))type.add(new Option('ملتقى','ملتقى'));
