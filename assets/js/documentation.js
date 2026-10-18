@@ -1,10 +1,11 @@
+import {agendaEvent} from './agenda-data.js';
 import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261017-compact-supervision';
 import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-edit-complete';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261017-edit-complete';
 import {validateNewDetails} from './recognition-model.js?v=20261017-edit-complete';
 import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261017-edit-complete';
-import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261017-edit-complete';
+import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261018-agenda';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
@@ -22,7 +23,7 @@ if(editId){saveButton.classList.add('save-edits');document.body.classList.add('e
 let originalReport=null, retainedPhotos=[], retainedAttachments=[], existingPhotos=[], draftKey;
 let profile, user, attachments = [], files = [], pending = null, saving = false, ready = false, previewUrls = [];
 let requestId = crypto.randomUUID(), writeQueue = Promise.resolve();
-let centerPrograms=[];
+let centerPrograms=[];let agendaSource=null;const agendaId=new URLSearchParams(location.search).get('agenda_event');
 
 function message(text, error = false) {
     status.textContent = text;
@@ -43,7 +44,7 @@ function collect() {
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => { data[el.id] = el.value.trim(); });
     for (const [key, cls] of Object.entries(groups))
         data[key] = [...form.querySelectorAll('.' + cls + '-checks input:checked')].map(el => el.value);
-    return otherChoices.collect(collectExtensions(data));
+    const result=otherChoices.collect(collectExtensions(data));if(agendaSource)result.agendaEventId=agendaSource.id;return result;
 }
 function output(id, value) {
     const el = document.getElementById(id);
@@ -145,6 +146,7 @@ saveButton.addEventListener('click', async () => {
     try {
         const currentUser = await requireUser();
         if (currentUser.id !== user.id) throw new Error('تغيّر حساب الدخول. أعيدي تحميل الصفحة قبل الحفظ.');
+        if(agendaSource){const latest=await agendaEvent(agendaSource.id);if(latest.report_id){location.assign('report.html?id='+encodeURIComponent(latest.report_id));return;}}
         await checkSaveSchema(client);
         pending ||= { requestId, data: collect(), files, attachments, uploaded: [], uploadedAttachments:[], sent: false, ...(editId?{id:originalReport.id,version:originalReport.edit_version,retainedPhotos,retainedAttachments}:{} ) };
         await persist(draft());
@@ -153,7 +155,7 @@ saveButton.addEventListener('click', async () => {
         // If local cleanup fails, request_id still recovers the saved server record on retry.
         try { await removeDraft(draftKey); } catch { /* server record is already confirmed */ }
         location.assign('report.html?id=' + encodeURIComponent(String(row.id))+(editId?'&saved_edit='+encodeURIComponent(pending.requestId):''));
-    } catch (e) { message(e.message, true); }
+    } catch (e) { if(agendaSource){try{const latest=await agendaEvent(agendaSource.id);if(latest.report_id){location.assign('report.html?id='+encodeURIComponent(latest.report_id));return;}}catch{}}message(e.message, true); }
     finally { saving = false; freeze(); }
 });
 editButton.addEventListener('click', async () => {
@@ -196,7 +198,8 @@ try {
     document.querySelector('.supervisor-checks input[value=assistant]').checked=true;
     if(profileError)throw new Error('تعذر تحميل اسم المستخدمة. أعيدي المحاولة.');
     document.getElementById('reportPreparedBy').value=profile?.full_name||user.user_metadata?.full_name||'';
-    draftKey=editId?user.id+':report:'+editId:user.id;
+    if(agendaId&&!editId){agendaSource=await agendaEvent(agendaId);if(agendaSource.report_id){location.replace('report.html?id='+encodeURIComponent(agendaSource.report_id));throw new Error('جار فتح التقرير الأصلي.');}}
+    draftKey=editId?user.id+':report:'+editId:agendaSource?user.id+':agenda:'+agendaSource.id:user.id;
     await loadExtensionAccess();
     const {data:programs,error:programError}=await client.from('support_programs').select('id,title,starts_at,status,workshop_type,executing_agency,hosting_entity').order('starts_at',{ascending:false});
     if(!programError){centerPrograms=(programs||[]).filter(p=>p.status!=='cancelled');for(const p of centerPrograms){const option=element('option',p.title);option.value=p.id;document.getElementById('centerProgramId').append(option);}}
@@ -219,6 +222,7 @@ try {
         restore(saved.data || {});
         message(pending ? 'استُعيدت محاولة الحفظ السابقة. أعيدي الحفظ للتحقق من الأرشيف دون إنشاء نسخة مكررة.' : 'استُعيدت المسودة وصورها من هذا الجهاز.');
     } else if(!editId){const params=new URLSearchParams(location.search),program=centerPrograms.find(p=>p.id===params.get('center_program'));if(program||params.get('type')==='workshop'){document.getElementById('type').value='ورشة تدريبية';if(program){document.getElementById('centerProgramId').value=program.id;document.getElementById('activity').value=program.title;document.getElementById('executionScope').value=program.workshop_type||'';document.getElementById('organizingEntity').value=program.executing_agency||'';document.getElementById('hostingEntity').value=program.hosting_entity||'';const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(program.starts_at));const d=Object.fromEntries(parts.map(p=>[p.type,p.value]));document.getElementById('date').value=d.year+'-'+d.month+'-'+d.day;}}preview();}
+    if(!saved&&agendaSource){const e=agendaSource;for(const [id,value]of Object.entries({activity:e.title,date:e.event_date,executor:e.responsible_names.join(' • '),location:e.location,type:e.kind==='workshop'?'ورشة تدريبية':'فعالية',executionScope:'internal'}))document.getElementById(id).value=value;const dep=document.getElementById('department');if(![...dep.options].some(o=>o.value===e.department)){dep.add(new Option(e.department,e.department));}dep.value=e.department;preview();}
     if(!saved&&new URLSearchParams(location.search).get('project')==='recognition'){document.querySelector('#recognitionProjectOption input').checked=true;document.getElementById('type').value='فعالية';preview();}
     previewPhotos(); ready = true; freeze();
 } catch (e) {

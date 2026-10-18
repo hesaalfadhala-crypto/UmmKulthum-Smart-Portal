@@ -1,0 +1,7 @@
+import {client,requireUser} from './portal-data.js?v=20261017-edit-complete';
+export async function agendaContext(){await requireUser();const {data,error}=await client.rpc('agenda_context');if(error||!data?.member)throw Error('تعذر تحميل صلاحيات الأجندة. يلزم حساب المدرسة.');return data;}
+export async function agendaRows(from,to){await requireUser();let out=[];for(let start=0;;start+=200){let q=client.from('agenda_events').select('*').order('event_date').order('id').range(start,start+199);if(from)q=q.gte('event_date',from);if(to)q=q.lte('event_date',to);const {data,error}=await q;if(error)throw Error('تعذر تحميل فعاليات الأسبوع: '+error.message);out.push(...data);if(data.length<200)return out;}}
+export async function agendaEvent(id){if(!/^[0-9a-f-]{36}$/.test(id))throw Error('معرّف فعالية غير صالح.');const {data,error}=await client.from('agenda_events').select('*').eq('id',id).single();if(error||!data)throw Error('الفعالية غير متاحة لهذا الحساب.');return data;}
+export async function agendaStaff(){const {data,error}=await client.rpc('agenda_staff');if(error)throw Error('تعذر تحميل أسماء المسؤولات.');return data;}
+export async function saveEvent(payload){const {data,error}=await client.rpc('save_agenda_event',{payload});if(error)throw Error(error.message);return data;}
+export async function reviewEvent(args){const {data,error}=await client.rpc('review_agenda_event',args);if(error)throw Error(error.message);return data;}

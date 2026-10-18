@@ -1,0 +1,18 @@
+export const KINDS={school_head:'زيارة رئيس المدارس أ. سامي العمادي',supervision:'زيارة الإشراف التربوي',parents:'حضور أولياء الأمور',event:'فعالية',workshop:'ورشة',honor:'تكريم',other:'أخرى'};
+export const SLOTS={assembly:'الطابور الصباحي',break:'الفسحة المدرسية',both:'الطابور الصباحي والفسحة المدرسية',other:'وقت آخر'};
+export const STATES={pending:'بانتظار الاعتماد',approved:'معتمدة',needs_changes:'تحتاج تعديل'};
+export const DAYS=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
+export const COLORS={school_head:'#dce9f8',supervision:'#e4e1f5',parents:'#f5e8d4',event:'#dceee8',workshop:'#e1eff4',honor:'#f6e2eb',other:'#e9ece7'};
+export const official=e=>['school_head','supervision','parents'].includes(e.kind);
+export const today=(now=new Date())=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+export function addDays(date,n){const d=new Date(date+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);}
+export function weekStart(date){const d=new Date(date+'T12:00:00Z');return addDays(date,-d.getUTCDay());}
+export const nextWeek=(now=new Date())=>addDays(weekStart(today(now)),7);
+export function dayName(date){return DAYS[new Date(date+'T12:00:00Z').getUTCDay()]||'خارج أيام الدوام';}
+export const kindName=e=>e.kind==='other'?e.kind_other:KINDS[e.kind];
+export function inSlot(e,slot){return e.slot===slot||e.slot==='both'&&['assembly','break'].includes(slot);}
+export function filterEvents(rows,f={}){return rows.filter(e=>(!f.week||e.event_date>=f.week&&e.event_date<=addDays(f.week,4))&&(!f.department||e.department===f.department)&&(!f.kind||e.kind===f.kind)&&(!f.slot||inSlot(e,f.slot))&&(!f.status||e.status===f.status)&&(!f.query||[e.title,e.description,e.location,...e.responsible_names].join(' ').includes(f.query)));}
+export function printable(rows,{studentsOnly=false,showOther=true}={}){return rows.filter(e=>e.status==='approved'&&(!studentsOnly||e.student_visible&&!official(e))&&(showOther||e.slot!=='other')).sort((a,b)=>a.event_date.localeCompare(b.event_date)||(a.starts_at||'').localeCompare(b.starts_at||'')||a.title.localeCompare(b.title,'ar'));}
+export function conflicts(event,rows){const key=s=>s.trim().replace(/\s+/g,' ').toLowerCase();return rows.filter(e=>e.id!==event.id&&e.event_date===event.event_date&&(e.status==='approved'||e.status==='pending')&&((e.slot==='other'&&event.slot==='other'?event.starts_at<e.ends_at&&event.ends_at>e.starts_at:(e.slot===event.slot||e.slot==='both'||event.slot==='both'||e.slot==='other'||event.slot==='other')))).map(e=>({event:e,place:key(e.location)===key(event.location),uncertain:(e.slot==='other')!==(event.slot==='other')}));}
+export function stats(rows){return {total:rows.length,pending:rows.filter(e=>e.status==='pending').length,approved:rows.filter(e=>e.status==='approved').length,official:rows.filter(official).length,documented:rows.filter(e=>e.report_id).length};}
+export function validateEvent(e){if(!Object.hasOwn(KINDS,e.kind)||!e.title?.trim()||!e.event_date||!DAYS[new Date(e.event_date+'T12:00:00Z').getUTCDay()]||!Object.hasOwn(SLOTS,e.slot)||!e.department?.trim()||!e.responsible_ids?.length||!e.location?.trim()||!e.audience?.trim()||!e.description?.trim())throw Error('أكملي الحقول المطلوبة، واختاري يومًا من الأحد إلى الخميس.');if(e.kind==='other'&&!e.kind_other?.trim())throw Error('يرجى تحديد نوع الفعالية أو الزيارة.');if(e.slot==='other'&&(!e.starts_at||!e.ends_at||e.ends_at<=e.starts_at))throw Error('وقت النهاية يجب أن يكون بعد البداية.');if(e.repeat_until&&(e.repeat_until<e.event_date||e.repeat_until>addDays(e.event_date,364)))throw Error('حددي نهاية تكرار خلال سنة من تاريخ البداية.');if(official(e))e.student_visible=false;return e;}
