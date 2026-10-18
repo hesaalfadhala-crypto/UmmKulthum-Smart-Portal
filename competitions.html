@@ -145,7 +145,7 @@ textarea{min-height:90px;resize:vertical}
     .student-row{grid-template-columns:1fr 1fr 45px}
 }
 </style>
-</head>
+<link rel="stylesheet" href="assets/competitions.css"></head>
 
 <body>
 
@@ -172,7 +172,7 @@ textarea{min-height:90px;resize:vertical}
 
 <div class="field">
 <label>نوع المسابقة *</label>
-<select id="competitionType" onchange="toggleExternalFields()">
+<select id="competitionType">
 <option value="">اختاري</option>
 <option value="داخلية">داخلية – داخل المدرسة</option>
 <option value="خارجية">خارجية</option>
@@ -263,7 +263,7 @@ textarea{min-height:90px;resize:vertical}
 
 <div class="field">
 <label>عدد الطالبات المشاركات</label>
-<input id="studentCount" type="number" min="1">
+<input id="studentCount" type="number" readonly aria-label="عدد الطالبات المحتسب تلقائيًا">
 </div>
 
 </div>
@@ -271,15 +271,9 @@ textarea{min-height:90px;resize:vertical}
 <div class="field">
 <label>أسماء الطالبات المشاركات</label>
 
-<div id="students">
-<div class="student-row">
-<input type="text" class="student-name" placeholder="اسم الطالبة">
-<input type="text" class="student-class" placeholder="الصف / الشعبة">
-<button type="button" class="remove-btn" onclick="removeStudent(this)">×</button>
-</div>
-</div>
+<div id="students"></div>
 
-<button type="button" class="add-btn" onclick="addStudent()">
+<div class="import-actions"><button type="button" id="importStudents">استيراد أسماء الطالبات من Excel</button><input id="studentExcel" type="file" accept=".xlsx,.xls" hidden><a class="template-link" href="assets/templates/competition-students.xlsx" download>تحميل قالب أسماء الطالبات</a><button type="button" id="exportStudents">تنزيل قائمة الطالبات Excel</button></div><section id="importPanel" hidden><h3>معاينة الطالبات قبل الاستيراد</h3><select id="importSheet" aria-label="ورقة العمل"></select><p id="importSummary" role="status"></p><div class="table-scroll"><table><thead><tr><th>صف الملف</th><th>اسم الطالبة</th><th>الصف</th><th>الشعبة</th><th>الملاحظة</th></tr></thead><tbody id="importRows"></tbody></table></div><button type="button" id="confirmImport">تأكيد استيراد الطالبات</button><button type="button" id="cancelImport">إلغاء الاستيراد</button></section><button type="button" class="add-btn" id="addStudent">
 + إضافة طالبة
 </button>
 
@@ -326,189 +320,28 @@ textarea{min-height:90px;resize:vertical}
 
 <div class="field">
 <label>إرفاق صور أو شهادات</label>
-<input id="attachments" type="file" accept="image/*,.pdf" multiple>
+<select id="fileCategory" aria-label="نوع المرفق"><option value="general">صور / مرفقات المسابقة</option><option value="participation">شهادة مشاركة</option><option value="winner">شهادة فوز</option></select><input id="attachments" type="file" accept="image/jpeg,image/png,image/webp,.pdf" multiple><div id="filePreview" class="file-preview"></div>
 </div>
 
 <div class="note">
-يمكن إرفاق صور المشاركة أو شهادات الطالبات أو خطاب إعلان النتيجة. وسيتم ربط رفع الملفات بالتخزين المركزي في المرحلة التالية.
+حتى 10 صور (JPEG أو PNG أو WebP؛ تُضغط تلقائيًا) و5 ملفات PDF بحد 8 ميجابايت للملف. المرفقات محفوظة بصورة خاصة. إزالة مرفق من هذا السجل لا تحذف بقية المرفقات.
 </div>
 </div>
 
-<div class="actions">
+<p id="saveStatus" role="status" aria-live="polite"></p><div class="actions"><button type="button" id="newCompetition" class="secondary">مسابقة جديدة</button>
 <button type="button" class="secondary" onclick="window.location.href='index.html'">العودة للبوابة</button>
-<button type="button" class="primary" id="saveCompetitionButton" onclick="prepareRecord()">حفظ سجل المسابقة</button>
+<button type="button" class="primary" id="saveCompetitionButton">حفظ سجل المسابقة</button>
 </div>
 <div class="card" id="competitionReportsSection" style="margin-top:25px;">
     <h2>📊 تقارير المسابقات والإنجازات الطلابية</h2>
     <p style="color:#666;">السجلات المحفوظة حسب صلاحية المستخدم</p>
 
-    <div id="competitionReports">
+    <div class="grid"><input id="competitionSearch" placeholder="البحث باسم المسابقة"><select id="filterDepartment"><option value="">جميع الأقسام</option></select><select id="filterType"><option value="">كل الأنواع</option><option>داخلية</option><option>خارجية</option></select><label>من <input id="filterFrom" type="date"></label><label>إلى <input id="filterTo" type="date"></label></div><div id="competitionReports">
         <p>جاري تحميل السجلات...</p>
     </div>
 </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
-<script type="module" src="assets/js/competition-other.js"></script>
-<script>
-    const SUPABASE_URL = "https://ulqwkxzjwdmkspsjzvup.supabase.co";
-const SUPABASE_KEY = "sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV";
-
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-function toggleExternalFields(){
-    const type=document.getElementById("competitionType").value;
-    document.getElementById("externalFields").classList.toggle(
-        "hidden",
-        type!=="خارجية"
-    );
-}
-
-function addStudent(){
-    const container=document.getElementById("students");
-    const row=document.createElement("div");
-    row.className="student-row";
-    row.innerHTML=`
-        <input type="text" class="student-name" placeholder="اسم الطالبة">
-        <input type="text" class="student-class" placeholder="الصف / الشعبة">
-        <button type="button" class="remove-btn" onclick="removeStudent(this)">×</button>
-    `;
-    container.appendChild(row);
-}
-
-function removeStudent(button){
-    const rows=document.querySelectorAll(".student-row");
-    if(rows.length>1){
-        button.parentElement.remove();
-    }else{
-        button.parentElement.querySelectorAll("input").forEach(i=>i.value="");
-    }
-}
-
-let competitionSaveBusy=false;
-async function prepareRecord(){
-    if(competitionSaveBusy)return;
-
-    const name = document.getElementById("competitionName").value.trim();
-    const type = document.getElementById("competitionType").value;
-    const department = document.getElementById("department").value;
-    const competitionDate = document.getElementById("competitionDate").value || null;
-    const organizer = document.getElementById("organizer").value.trim() || null;
-    const host = document.getElementById("host").value.trim() || null;
-    const competitionLevel = document.getElementById("competitionLevel").value || null;
-    const stage = document.getElementById("stage").value || null;
-    const grade = document.getElementById("grade").value.trim() || null;
-    const supervisor = document.getElementById("supervisor").value.trim();
-    const studentCount = document.getElementById("studentCount").value || null;
-    const result = document.querySelector('input[name="result"]:checked');
-
-    if(!name || !type || !department || !supervisor || !result){
-        alert("يرجى استكمال الحقول المطلوبة قبل الحفظ");
-        return;
-    }
-
-    if(document.getElementById('attachments').files.length){
-        alert('رفع المرفقات في هذه الخدمة غير مفعّل. استخدمي التوثيق الجديد بنوع «مسابقة وإنجاز طلابي» لحفظ الصور والتقرير.');
-        return;
-    }
-    let specified;try{if(!window.competitionOther)throw new Error('جار تجهيز الحقول. أعيدي المحاولة بعد لحظة.');specified=window.competitionOther();}catch(e){alert(e.message);return;}
-    const students = [...document.querySelectorAll(".student-row")].map(row => ({
-        name: row.querySelector(".student-name").value.trim(),
-        class: row.querySelector(".student-class").value.trim()
-    })).filter(student => student.name || student.class);
-
-    const { data: { user }, error: userError } =
-        await supabaseClient.auth.getUser();
-
-    if(userError || !user){
-        alert("يرجى تسجيل الدخول أولاً");
-        window.location.href = "login.html";
-        return;
-    }
-
-    const enteredCount=studentCount ? Number(studentCount) : students.length;
-    const enteredAwards=Number(document.getElementById('awardsCount').value||0);
-    if(!Number.isSafeInteger(enteredCount)||enteredCount<students.length||enteredCount<0||!Number.isSafeInteger(enteredAwards)||enteredAwards<0){alert('تحققي من عدد الطالبات والجوائز: يجب إدخال أعداد صحيحة غير سالبة، ولا يقل عدد الطالبات عن الأسماء المدخلة.');return;}
-    competitionSaveBusy=true;document.getElementById('saveCompetitionButton').disabled=true;
-    try {
-    const { error } = await supabaseClient
-        .from("competitions")
-        .insert({
-            competition_name: name,
-            competition_type: type,
-            department: specified.department,
-            competition_date: competitionDate,
-            organizer: type === "خارجية" ? organizer : null,
-            host: type === "خارجية" ? host : null,
-            competition_level: type === "خارجية" ? specified.competitionLevel : null,
-            stage: stage,
-            grade: grade,
-            supervisor: supervisor,
-            student_count: enteredCount,
-            students: students,
-            result: specified.result,
-            award_details: document.getElementById("awardDetails").value.trim() || null,
-            awards_count: enteredAwards,
-            notes: document.getElementById("notes").value.trim() || null,
-            created_by: user.id,
-            status: "draft",
-            updated_at: new Date().toISOString(),
-            attachments: []
-        });
-
-    if(error){
-        console.error(error);
-        alert("حدث خطأ أثناء حفظ سجل المسابقة");
-        return;
-    }
-
-
-await loadCompetitionReports();
-alert("🏆 تم حفظ سجل المسابقة بنجاح");
-    }catch{alert("تعذر الاتصال. لم يُؤكد الحفظ؛ تحققي من القائمة قبل إعادة المحاولة.");}
-    finally{competitionSaveBusy=false;document.getElementById("saveCompetitionButton").disabled=false;}
-}
-
-async function loadCompetitionReports() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-
-    if (!user) {
-        window.location.href = "login.html";
-        return;
-    }
-
-    let data=[],error=null;
-    try{for(let start=0;;start+=200){const result=await supabaseClient.from('competitions').select('*').order('created_at',{ascending:false}).order('id',{ascending:false}).range(start,start+199);if(result.error){error=result.error;break;}data.push(...(result.data||[]));if(!result.data||result.data.length<200)break;}}
-    catch{error=new Error('network');}
-
-    const container = document.getElementById("competitionReports");
-
-    if (error) {
-        console.error("Error loading competitions:", error);
-        container.innerHTML = "<p>تعذر تحميل سجلات المسابقات.</p>";
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        container.innerHTML = "<p>لا توجد مسابقات مسجلة حتى الآن.</p>";
-        return;
-    }
-
-    container.replaceChildren();
-    for (const item of data) {
-        const card=document.createElement('article');
-        card.style.cssText='border:1px solid #ddd;border-radius:14px;padding:18px;margin-bottom:14px;background:#fff';
-        const title=document.createElement('h3'); title.textContent='🏆 '+(item.competition_name||'مسابقة'); card.append(title);
-        for(const [label,key] of [['نوع المسابقة','competition_type'],['القسم','department'],['التاريخ','competition_date'],['المرحلة','stage'],['الصف','grade'],['المعلمة المشرفة','supervisor'],['عدد الطالبات','student_count'],['النتيجة','result'],['الجهة المنظمة','organizer'],['الجهة المستضيفة','host'],['المستوى','competition_level'],['تفاصيل الإنجاز','award_details'],['ملاحظات','notes']]){
-            const line=document.createElement('p'),strong=document.createElement('strong'); strong.textContent=label+': '; line.append(strong,document.createTextNode(String(item[key]??'—')));card.append(line);
-        }
-        for(const student of (Array.isArray(item.students)?item.students:[])){
-            const line=document.createElement('p'); line.textContent='الطالبة: '+String(student.name||'—')+' · الصف: '+String(student.class||'—');card.append(line);
-        }
-        container.append(card);
-    }
-}
-
-loadCompetitionReports();
-    
-</script>
-</body>
-</html>
+<script src="assets/vendor/xlsx-0.20.3.min.js"></script>
+<script type="module" src="assets/js/competitions.js?v=20261018-competitions"></script>
+</body></html>
