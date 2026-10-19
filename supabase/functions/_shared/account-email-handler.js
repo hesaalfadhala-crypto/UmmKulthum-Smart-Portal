@@ -37,7 +37,7 @@ export function createAccountEmailHandler({createClient,nodemailer,env,now=()=>n
  let transport;
  try{
   transport=nodemailer.createTransport({host:'smtp.gmail.com',port:465,secure:true,auth:{user:sender,pass:smtpPassword.replace(/\s/g,'')},connectionTimeout:15000,socketTimeout:20000});
-  const result=await transport.sendMail({from:{name:'بوابة أم كلثوم الذكية',address:sender},to:recipient,subject:mode==='test'?'اختبار رسالة الترحيب — بوابة أم كلثوم الذكية':'بيانات تسجيل الدخول — بوابة أم كلثوم الذكية',...accountMessage(email,password)});
+  const result=await transport.sendMail({from:{name:'بوابة أم كلثوم الذكية',address:sender},to:recipient,subject:mode==='test'?'اختبار رسالة الترحيب — بوابة أم كلثوم الذكية':'بيانات الدخول إلى بوابة أم كلثوم الذكية',...accountMessage(email,password)});
   if(!result.accepted?.some(address=>String(address).toLowerCase()===recipient.toLowerCase()))throw new Error('SMTP did not accept recipient');
   const {error}=await db.from('account_email_deliveries').update({status:'accepted',finished_at:now().toISOString()}).eq('id',input.operation_id);
   return reply(error?202:200,error?'قبل Gmail الرسالة، لكن تعذر تحديث السجل. تحققي من الوصول قبل أي محاولة أخرى.':'قبل Gmail الرسالة. يلزم تأكيد وصولها داخل صندوق البريد.',{delivery_id:input.operation_id,recipient,status:error?'uncertain':'accepted'});

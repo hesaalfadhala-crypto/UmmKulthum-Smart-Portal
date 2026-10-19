@@ -1,3 +1,4 @@
+import {staffTitle} from './staff-display.js?v=20261019-staff';
 import {client,requireUser,fetchRecords,normalize} from './portal-data.js';
 const message=document.getElementById('dashboardStatus');
 const roles={principal:'مديرة المدرسة',assistant_principal:'مديرة مساعدة',coordinator:'منسقة',first_teacher:'معلمة أولى',teacher:'معلمة'};
@@ -10,10 +11,10 @@ document.getElementById('logout').addEventListener('click',async()=>{
 async function load(){
  try{
   const user=await requireUser();
-  const {data:profile,error}=await client.from('profiles').select('full_name,role,department,school_access').eq('id',user.id).single();
+  const {data:profile,error}=await client.from('profiles').select('full_name,job_title,role,department,school_access').eq('id',user.id).single();
   if(error||!profile)throw new Error('تعذر قراءة صلاحيات الحساب.');
-  set('userName',profile.full_name||'');set('userRole',roles[profile.role]||profile.role||'');
-  set('sidebarUser',profile.full_name+' · '+(roles[profile.role]||''));
+  set('userName',profile.full_name||'');set('userRole',staffTitle(profile));
+  set('sidebarUser',[profile.full_name,staffTitle(profile)].filter(Boolean).join(' · '));
   const records=await fetchRecords(),data=records.map(r=>normalize(r).data);
   set('stat-total',records.length);set('stat-saved',records.length);
   set('stat-projects',records.filter(r=>normalize(r).data.projects.length||r.activity_type==='مبادرة').length);

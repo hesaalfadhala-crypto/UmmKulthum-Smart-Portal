@@ -1,3 +1,4 @@
+import {suggestDepartment} from './staff-display.js?v=20261019-staff';
 import {agendaEvent} from './agenda-data.js';
 import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261019-cairo';
 import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-edit-complete';
@@ -182,7 +183,7 @@ clearButton.addEventListener('click', async () => {
         document.querySelectorAll('#recognitionStaff input').forEach(i=>i.checked=false);
         files = [];attachments=[];document.getElementById('attachments').value=''; pending = null; requestId = crypto.randomUUID(); images.value = '';
         document.getElementById('reportPreparedBy').value=profile?.full_name||user.user_metadata?.full_name||'';
-        preview(); previewPhotos(); message('ابدئي توثيقًا جديدًا.');
+        suggestDepartment(document.getElementById('department'),profile);preview(); previewPhotos(); message('ابدئي توثيقًا جديدًا.');
     } catch (e) { message(e.message, true); }
     finally { saving = false; freeze(); }
 });
@@ -193,7 +194,7 @@ document.getElementById('centerProgramId').addEventListener('change',()=>{const 
 freeze();
 try {
     user = await requireUser();
-    const {data:loadedProfile,error:profileError}=await client.from('profiles').select('full_name').eq('id',user.id).single();
+    const {data:loadedProfile,error:profileError}=await client.from('profiles').select('full_name,job_title,department,departments').eq('id',user.id).single();
     profile=loadedProfile;
     document.querySelector('.supervisor-checks input[value=assistant]').checked=true;
     if(profileError)throw new Error('تعذر تحميل اسم المستخدمة. أعيدي المحاولة.');
@@ -224,6 +225,7 @@ try {
     } else if(!editId){const params=new URLSearchParams(location.search),program=centerPrograms.find(p=>p.id===params.get('center_program'));if(program||params.get('type')==='workshop'){document.getElementById('type').value='ورشة تدريبية';if(program){document.getElementById('centerProgramId').value=program.id;document.getElementById('activity').value=program.title;document.getElementById('executionScope').value=program.workshop_type||'';document.getElementById('organizingEntity').value=program.executing_agency||'';document.getElementById('hostingEntity').value=program.hosting_entity||'';const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(program.starts_at));const d=Object.fromEntries(parts.map(p=>[p.type,p.value]));document.getElementById('date').value=d.year+'-'+d.month+'-'+d.day;}}preview();}
     if(!saved&&agendaSource){const e=agendaSource;for(const [id,value]of Object.entries({activity:e.title,date:e.event_date,executor:e.responsible_names.join(' • '),location:e.location,type:e.kind==='workshop'?'ورشة تدريبية':'فعالية',executionScope:'internal'}))document.getElementById(id).value=value;const dep=document.getElementById('department');if(![...dep.options].some(o=>o.value===e.department)){dep.add(new Option(e.department,e.department));}dep.value=e.department;preview();}
     if(!saved&&new URLSearchParams(location.search).get('project')==='recognition'){document.querySelector('#recognitionProjectOption input').checked=true;document.getElementById('type').value='فعالية';preview();}
+    if(!saved&&!editId&&!agendaSource){suggestDepartment(document.getElementById('department'),profile);preview();}
     previewPhotos(); ready = true; freeze();
 } catch (e) {
     message(e.message, true);
