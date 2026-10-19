@@ -1,11 +1,12 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';
 import {createCanvas,GlobalFonts,loadImage} from '@napi-rs/canvas';
 import {analyze,compare,distribution} from '../../assets/js/visit-analysis.js';
-import {reportCanvases} from '../../assets/js/visit-pdf.js';
-import {packPDF} from '../../assets/js/pdf-export.js';
+globalThis.window={supabase:{createClient:()=>({})}};
+const {reportCanvases}=await import('../../assets/js/visit-pdf.js');
+const {packPDF}=await import('../../assets/js/pdf-export.js');
 import {renderExcel} from '../../assets/js/visit-excel.js';
 import {CRITERIA,DOMAINS} from '../../assets/js/visit-criteria.js';
-GlobalFonts.registerFromPath('assets/fonts/NotoNaskhArabic-Regular.ttf','Portal Arabic');GlobalFonts.registerFromPath('assets/fonts/NotoNaskhArabic-Bold.ttf','Portal Arabic');
+GlobalFonts.registerFromPath('assets/fonts/Cairo-Regular.ttf','Cairo');GlobalFonts.registerFromPath('assets/fonts/Cairo-Bold.ttf','Cairo');
 const snapshot=JSON.parse(await fs.readFile('.test-output/synthetic-snapshot.json','utf8'));const a=analyze(snapshot);const r={id:'00000000-0000-4000-8000-000000999999',creator_name:'معدة اختبار — بيانات تجريبية',issued_at:'2026-10-11T00:00:00Z',filters:{scope:'school',academic_year:'2026-2027',from:'2026-09-01',to:'2026-12-31'},analysis_type:'unified-percent',supervisor_name:'مشرفة اختبار'};
 test('official criteria, raw proportions, no-data and comparison',()=>{assert.equal(CRITERIA.length,18);assert.equal(DOMAINS.length,5);assert.deepEqual(DOMAINS.flatMap(d=>d.ids),CRITERIA.map(c=>c.id));assert.equal(distribution([null,undefined,'4',0,5]).percent,null);const x=distribution([1,1,4]);assert.ok(Math.abs(x.percent.reduce((s,n)=>s+n,0)-100)<1e-10);const c=compare(a,analyze({...snapshot,ratings:[]}));assert.equal(c.criteria[0].change,null);});
 test('same export renderer creates an A4 landscape official table and native XLSX bytes',async()=>{const logo=await loadImage('school-logo.png'),pages=reportCanvases(r,a,null,{logo,createCanvas});assert.equal(pages.length,1,'reference matrix fits a single A4 landscape page');const encoded=pages.map(c=>c.encodeSync('jpeg',96));const bytes=packPDF(encoded,2480,1754,841.89,595.28);assert.ok(new TextDecoder().decode(bytes.slice(0,20)).startsWith('%PDF'));const xlsx=renderExcel(r,a);assert.equal(new DataView(xlsx.buffer).getUint32(0,true),0x04034b50);await fs.writeFile('.test-output/UmmKulthum-visits-test.pdf',bytes);await fs.writeFile('.test-output/UmmKulthum-visits-test.xlsx',xlsx);await fs.writeFile('.test-output/report-model.json',JSON.stringify({record:r,analysis:a}));});

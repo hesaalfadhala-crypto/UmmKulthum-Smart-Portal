@@ -1,7 +1,7 @@
 import {client,requireUser,element} from './portal-data.js?v=20261017-edit-complete';
 import {agendaContext,agendaRows,agendaStaff,saveEvent,reviewEvent} from './agenda-data.js';
 import {KINDS,SLOTS,STATES,DAYS,COLORS,official,today,nextWeek,weekStart,addDays,dayName,kindName,inSlot,filterEvents,stats,validateEvent} from './agenda-model.js';
-import {renderAgenda,downloadAgendaPDF} from './agenda-pdf.js';
+import {renderAgenda,downloadAgendaPDF} from './agenda-pdf.js?v=20261019-cairo';
 import {readDraft,writeDraft,removeDraft} from './draft-store.js';
 const $=id=>document.getElementById(id),keys=['kind','kind_other','title','event_date','slot','starts_at','ends_at','department','location','audience','description','notes'];let user,ctx,staff=[],rows=[],editing=null,pending=null,busy=false,ready=false,saveTimer,conflictSequence=0,loadSequence=0;
 const message=(s,error=false)=>{$('status').textContent=s;$('status').classList.toggle('error',error);};

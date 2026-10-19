@@ -31,16 +31,15 @@ export function renderSignatures(container,d) {
   container.append(box);
  });
 }
-export function drawSignatures(ctx,d,width,margin,top,size=24,font='Tahoma, Arial',draw=true){
- const total=width-2*margin,gap=16,unit=(total-2*gap)/4.2,centerWidth=unit*2.2;
- const center=width/2,left=margin+unit/2,right=width-margin-unit/2;
- ctx.direction='rtl';ctx.textAlign='center';let height=0;
- const fit=(value,maxWidth,fontSize,bold)=>{let n=fontSize;ctx.font=(bold?'bold ':'')+n+'px '+font;while(ctx.measureText(value).width>maxWidth&&n>12){n-=.5;ctx.font=(bold?'bold ':'')+n+'px '+font;}return n;};
- const line=(value,x,y,maxWidth,fontSize,bold=false)=>{if(!value)return 0;const n=fit(value,maxWidth,fontSize,bold);if(draw){ctx.fillStyle='#174f4b';ctx.fillText(value,x,y+n);}return n*1.5;};
- const data=signatures(d),groups=supervisionGroups(d);
- for(const [i,x]of [[0,right],[2,left]]){let y=top;y+=line(data[i][0],x,y,unit,size*.9,true)+5;y+=line(data[i][1],x,y,unit,size*.85);height=Math.max(height,y-top);}
- let y=top;if(data[1][0])y+=line('بإشراف',center,y,centerWidth,size*.9,true)+5;
- if(groups.assistants.length){y+=line(groups.assistants.length>1?'المديرات المساعدات':'المديرة المساعدة',center,y,centerWidth,size*.76,true)+3;const slot=centerWidth/groups.assistants.length,namesSize=Math.min(...groups.assistants.map(s=>fit(s.name,slot-12,Math.min(18,size*.76),false)));let rowHeight=0;groups.assistants.forEach((s,i)=>{rowHeight=Math.max(rowHeight,line(s.name,center+centerWidth/2-slot*(i+.5),y,slot-12,namesSize));});y+=rowHeight+7;}
- if(groups.services){y+=line('رئيسة الخدمات',center,y,centerWidth,size*.76,true)+3;y+=line(groups.services.name,center,y,centerWidth,Math.min(18,size*.76));}
+export function drawSignatures(ctx,d,width,margin,top,size=24,font='Cairo, Tahoma, Arial',draw=true){
+ const gap=20,total=width-2*margin,unit=(total-2*gap)/4.2,cw=unit*2.2,center=width/2;
+ ctx.direction='rtl';ctx.textAlign='center';
+ const lines=(value,max,bold=false)=>{ctx.font=(bold?'bold ':'')+(bold?24:22)+'px '+font;const out=[];for(const para of String(value).split('\n')){let line='';for(const word of para.split(/\s+/)){if(line&&ctx.measureText(line+' '+word).width>max){out.push(line);line=word;}else line+=(line?' ':'')+word;}out.push(line);}return out;};
+ const text=(value,x,y,max,bold=false)=>{const ls=lines(value,max,bold);if(draw){ctx.fillStyle=bold?'#18574D':'#000000';for(let i=0;i<ls.length;i++)ctx.fillText(ls[i],x,y+24+i*32);}return ls.length*32;};
+ const data=signatures(d),groups=supervisionGroups(d);let height=0;
+ for(const [i,x]of [[0,width-margin-unit/2],[2,margin+unit/2]]){let y=top;y+=text(data[i][0],x,y,unit,true)+4;y+=text(data[i][1],x,y,unit);height=Math.max(height,y-top);}
+ let y=top;if(data[1][0])y+=text('بإشراف',center,y,cw,true)+4;
+ if(groups.assistants.length){y+=text(groups.assistants.length>1?'المديرات المساعدات':'المديرة المساعدة',center,y,cw,true)+4;const sw=cw/groups.assistants.length;let h=0;groups.assistants.forEach((s,i)=>{h=Math.max(h,text(s.name,center+cw/2-sw*(i+.5),y,sw-12));});y+=h+6;}
+ if(groups.services){y+=text('رئيسة الخدمات',center,y,cw,true)+4;y+=text(groups.services.name,center,y,cw);}
  ctx.textAlign='right';return Math.max(height,y-top);
 }

@@ -1,7 +1,7 @@
 import {context,report,status,showIdentity,handleError} from './visit-data.js';
 import {analyze,compare} from './visit-analysis.js';
 import {renderReport} from './visit-view.js';
-import {renderVisitPDF} from './visit-pdf.js';
+import {renderVisitPDF} from './visit-pdf.js?v=20261019-cairo';
 import {renderExcel} from './visit-excel.js';
 let record,a,b;const buttons=['pdf','excel','print'].map(id=>document.getElementById(id));
 function download(bytes,type,name){const url=URL.createObjectURL(new Blob([bytes],{type}));const link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}

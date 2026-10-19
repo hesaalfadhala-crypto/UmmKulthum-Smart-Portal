@@ -1,7 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {JSDOM} from 'jsdom';import {createCanvas,GlobalFonts,loadImage} from '@napi-rs/canvas';
 import {testExcelBytes} from './template.mjs';
-import {weeklyCanvases} from '../../assets/js/weekly-pdf.js';import {packPDF} from '../../assets/js/pdf-export.js';import {missingExcel} from '../../assets/js/weekly-excel.js';import {workbookXML,importTemplate} from '../../assets/js/weekly-import.js';import {monitoring,statistics,planHTML,PERIODS} from '../../assets/js/weekly-model.js';
-GlobalFonts.registerFromPath('assets/fonts/NotoNaskhArabic-Regular.ttf','Portal Arabic');GlobalFonts.registerFromPath('assets/fonts/NotoNaskhArabic-Bold.ttf','Portal Arabic');
+globalThis.window={supabase:{createClient:()=>({})}};
+const {weeklyCanvases}=await import('../../assets/js/weekly-pdf.js');const {packPDF}=await import('../../assets/js/pdf-export.js');import {missingExcel} from '../../assets/js/weekly-excel.js';import {workbookXML,importTemplate} from '../../assets/js/weekly-import.js';import {monitoring,statistics,planHTML,PERIODS} from '../../assets/js/weekly-model.js';
+GlobalFonts.registerFromPath('assets/fonts/Cairo-Regular.ttf','Cairo');GlobalFonts.registerFromPath('assets/fonts/Cairo-Bold.ttf','Cairo');
 const period={id:'test-week',week_number:7,academic_year:'2026-2027',semester:1,starts_on:'2026-10-11',ends_on:'2026-10-15',due_at:'2026-10-12T12:00:00+03:00'};
 test('import supplied native Excel, preserve 40 tasks, export Arabic A4 PDF with logos, and protect read-only HTML',async()=>{
  const template=testExcelBytes(),Parser=new JSDOM().window.DOMParser;

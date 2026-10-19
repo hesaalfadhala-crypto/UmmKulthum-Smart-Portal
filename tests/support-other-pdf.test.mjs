@@ -1,8 +1,10 @@
+globalThis.FontFace=class{async load(){return this;}};
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {createCanvas,Image as NativeImage,GlobalFonts} from '@napi-rs/canvas';import {PDFDocument} from 'pdf-lib';
-GlobalFonts.registerFromPath('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf','Tahoma');GlobalFonts.registerFromPath('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf','Portal Arabic');
+GlobalFonts.registerFromPath('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf','Tahoma');GlobalFonts.registerFromPath('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf','Cairo');
+for(const w of ['Regular','Bold'])GlobalFonts.registerFromPath(new URL('../assets/fonts/Cairo-'+w+'.ttf',import.meta.url).pathname,'Cairo');
 const objects=new Map();let i=0;URL.createObjectURL=b=>{const key='blob:qa'+i++;objects.set(key,b);return key;};URL.revokeObjectURL=u=>objects.delete(u);globalThis.window={PDFLib:{PDFDocument},supabase:{createClient:()=>({storage:{from:()=>({download:async()=>({data:new Blob([attachment])})})}})}};
 globalThis.Image=function(){const im=new NativeImage(),descriptor=Object.getOwnPropertyDescriptor(NativeImage.prototype,'src');Object.defineProperty(im,'src',{set(v){const b=objects.get(v);if(b)b.arrayBuffer().then(b=>descriptor.set.call(im,Buffer.from(b)));else descriptor.set.call(im,v);}});return im;};
-globalThis.document={fonts:{ready:Promise.resolve(),load:async()=>{}},createElement(tag){assert.equal(tag,'canvas');return createCanvas(1,1);}};
+globalThis.document={fonts:{add(){},ready:Promise.resolve(),load:async()=>{}},createElement(tag){assert.equal(tag,'canvas');return createCanvas(1,1);}};
 const attachmentDoc=await PDFDocument.create();attachmentDoc.addPage([595,842]);const attachment=await attachmentDoc.save();const photo=createCanvas(300,200);photo.getContext('2d').fillStyle='#ffdddd';photo.getContext('2d').fillRect(0,0,300,200);const photoBytes=photo.toBuffer('image/jpeg');globalThis.fetch=async url=>new Response(url==='qa:photo'?photoBytes:await fs.readFile(new URL('../school-logo.png',import.meta.url)));
 const {renderPDF}=await import('../assets/js/pdf-export.js'),{renderOnePagePDF}=await import('../assets/js/one-page-pdf.js'),{appendAttachments}=await import('../assets/js/pdf-attachments.js');
 const {displayChoices}=await import('../assets/js/documentation-choices.js');

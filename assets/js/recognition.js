@@ -1,7 +1,7 @@
 import {client,requireUser,fetchRecords,normalize,element,reportContext} from './portal-data.js';
 import {recognitionStats,RECOGNITION_KINDS,RECOGNITION_PROJECT} from './recognition-model.js';
 import {tabularExcel} from './tabular-excel.js';
-import {exportPDF} from './pdf-export.js';
+import {exportPDF} from './pdf-export.js?v=20261019-cairo';
 const $=id=>document.getElementById(id);let all=[],filtered=[],summary,loaded=false,userId,admin=false,readAll=false;
 function table(title,head,rows){const section=element('section',undefined,'panel');section.style.overflowX='auto';section.append(element('h2',title));const t=element('table');t.style.width='100%';const h=element('tr');head.forEach(v=>h.append(element('th',v)));t.append(h);rows.forEach(row=>{const tr=element('tr');row.forEach(v=>tr.append(element('td',String(v))));t.append(tr);});section.append(t);$('tables').append(section);}
 function breakdown(map){return map.map(([k,v])=>[k,v.events,v.ids.size,v.beneficiaries,Math.round(v.hours*100)/100]);}

@@ -1,5 +1,5 @@
 import {agendaEvent} from './agenda-data.js';
-import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261017-compact-supervision';
+import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261019-cairo';
 import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-edit-complete';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261017-edit-complete';

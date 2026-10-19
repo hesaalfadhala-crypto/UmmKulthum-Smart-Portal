@@ -1,6 +1,6 @@
 import {listCompetitions,deleteCompetition} from './competition-data.js';
 import {motivationStats} from './motivation-model.js';
-import {SUPERVISORS,selectedSupervisors} from './report-signatures.js?v=20261017-compact-supervision';
+import {SUPERVISORS,selectedSupervisors} from './report-signatures.js?v=20261019-cairo';
 import {RECOGNITION_KINDS} from './recognition-model.js?v=20261017-edit-complete';
 import {fetchRecords,normalize,element,requireUser,client,reportContext,setDeleted,fetchDeletedRecords,academicYear} from './portal-data.js?v=20261017-edit-complete';
 import {rows} from './weekly-data.js?v=20261017-edit-complete';

@@ -1,4 +1,5 @@
-import {drawSignatures} from './report-signatures.js?v=20261017-compact-supervision';
+import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
+import {drawSignatures} from './report-signatures.js?v=20261019-cairo';
 import {appendAttachments} from './pdf-attachments.js?v=20261017-edit-complete';
 import {extraSections} from './recognition-model.js?v=20261017-edit-complete';
 // Rasterized canvas preserves Arabic shaping and embeds every image. No external services.
@@ -36,7 +37,7 @@ export function packPDF(pages, width = 1240, height = 1754, pageWidth = 595.28, 
     }
     return output;
 }
-export async function renderPDF(record) {
+export async function renderPDF(record) {await ensureReportFonts();
     await document.fonts.ready;
     const d = record.data;
     const logo = await loadImage('school-logo.png');
@@ -46,7 +47,7 @@ export async function renderPDF(record) {
     const W = 1240, H = 1754, M = 74, limit = 1560;
     const canvases = [];
     let c, ctx, y = 0;
-    const start = () => { c = document.createElement('canvas'); c.width = W; c.height = H; ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.direction = 'rtl'; ctx.textAlign = 'right'; ctx.fillStyle = '#174f4b'; ctx.font = 'bold 26px Tahoma, Arial'; ctx.fillText('بوابة أم كلثوم الذكية', W - M, 60); ctx.fillStyle = '#60736f'; ctx.font = '20px Tahoma, Arial'; ctx.direction = 'ltr'; ctx.textAlign = 'left'; ctx.fillText(d.academicYear||'غير مسجل', M, 60); ctx.direction = 'rtl'; ctx.textAlign = 'right'; canvases.push(c); y = 100; };
+    const start = () => { c = document.createElement('canvas'); c.width = W; c.height = H; ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.direction = 'rtl'; ctx.textAlign = 'right'; ctx.fillStyle = '#18574D'; ctx.font = 'bold 26px "Cairo", Tahoma, Arial'; ctx.fillText('بوابة أم كلثوم الذكية', W - M, 60); ctx.fillStyle = '#000000'; ctx.font = '20px "Cairo", Tahoma, Arial'; ctx.direction = 'ltr'; ctx.textAlign = 'left'; ctx.fillText(d.academicYear||'غير مسجل', M, 60); ctx.direction = 'rtl'; ctx.textAlign = 'right'; canvases.push(c); y = 100; };
     const ensure = (n) => { if (y + n > limit)
         start(); };
     const wrap = (value, maxWidth) => { const lines = []; for (const paragraph of value.split('\n')) {
@@ -74,14 +75,14 @@ export async function renderPDF(record) {
         lines.push(line);
     } return lines; };
     const section = (label, value) => { if (!value?.length)
-        return; const s = Array.isArray(value) ? value.join(' • ') : String(value); ctx.font = '24px Tahoma, Arial'; const lines = wrap(s, W - 2 * M - 285); ctx.font = 'bold 24px Tahoma, Arial'; const labels = wrap(label, 255); ensure(Math.max(80, labels.length * 35)); const count = Math.max(lines.length, labels.length); for (let i = 0; i < count; i++) {
+        return; const s = Array.isArray(value) ? value.join(' • ') : String(value); ctx.font = '24px "Cairo", Tahoma, Arial'; const lines = wrap(s, W - 2 * M - 285); ctx.font = 'bold 24px "Cairo", Tahoma, Arial'; const labels = wrap(label, 255); ensure(Math.max(80, labels.length * 35)); const count = Math.max(lines.length, labels.length); for (let i = 0; i < count; i++) {
         ensure(36);
-        ctx.fillStyle = '#174f4b';
-        ctx.font = 'bold 24px Tahoma, Arial';
+        ctx.fillStyle = '#18574D';
+        ctx.font = 'bold 24px "Cairo", Tahoma, Arial';
         if (labels[i])
             ctx.fillText(labels[i], W - M, y + 25);
-        ctx.fillStyle = '#263d39';
-        ctx.font = '24px Tahoma, Arial';
+        ctx.fillStyle = '#000000';
+        ctx.font = '24px "Cairo", Tahoma, Arial';
         if (lines[i])
             ctx.fillText(lines[i], W - M - 285, y + 25);
         y += 35;
@@ -90,16 +91,16 @@ export async function renderPDF(record) {
     const logoH = (W - 2 * M) * logo.height / logo.width;
     ctx.drawImage(logo, M, y, W - 2 * M, logoH);
     y += logoH + 36;
-    ctx.font = '22px Tahoma, Arial';
-    ctx.fillStyle = '#60736f';
+    ctx.font = '22px "Cairo", Tahoma, Arial';
+    ctx.fillStyle = '#000000';
     ctx.fillText(d.semester, W - M, y);
     y += 52;
-    ctx.fillStyle = '#174f4b';
-    ctx.font = 'bold 37px Tahoma, Arial';
+    ctx.fillStyle = '#18574D';
+    ctx.font = 'bold 37px "Cairo", Tahoma, Arial';
     for (const line of wrap(d.activity, W - 2 * M)) {
         ensure(50);
-        ctx.font = 'bold 37px Tahoma, Arial';
-        ctx.fillStyle = '#174f4b';
+        ctx.font = 'bold 37px "Cairo", Tahoma, Arial';
+        ctx.fillStyle = '#18574D';
         ctx.fillText(line, W - M, y);
         y += 48;
     }
@@ -109,12 +110,12 @@ export async function renderPDF(record) {
     const meta = [['نوع الفعالية', d.type], ['القسم', d.department], ['المنفذة', d.executor], ['التاريخ', d.date], ['مكان التنفيذ', d.location]];
     for (const [k, v] of meta)
         if (v) {
-            ctx.font = '24px Tahoma, Arial';
+            ctx.font = '24px "Cairo", Tahoma, Arial';
             const ls = wrap(k + ': ' + v, W - 2 * M);
             for (const l of ls) {
                 ensure(35);
-                ctx.font = '24px Tahoma, Arial';
-                ctx.fillStyle = '#263d39';
+                ctx.font = '24px "Cairo", Tahoma, Arial';
+                ctx.fillStyle = '#000000';
                 ctx.fillText(l, W - M, y);
                 y += 35;
             }
@@ -122,7 +123,7 @@ export async function renderPDF(record) {
     y += 16;
     for (const [k, v] of [['المجالات المرتبطة', d.areas], ['المشاريع والمبادرات', d.projects], ['اللجان المرتبطة', d.committees], ['الفئات المستهدفة', d.targets], ['تفاصيل الفئة المستهدفة', d.target]])
         section(k, v);
-    for(const [k,v]of extraSections(d))section(k,v);
+    for(const [k,v]of extraSections(d).filter(([label])=>!['آخر تعديل','عدّلته'].includes(label)))section(k,v);
     if(d.type==='ورشة تدريبية'&&!d.executionScope){section('نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':'غير مسجل');section('الجهة المنفذة',d.executingAgency);}if(record.attachment_files?.length)section('المرفقات',record.attachment_files.map(f=>f.name).join(' • '));if (d.type === 'ورشة تدريبية') section('المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'غير مسجلة':String(d.trainingBeneficiaries));
     if (d.type === 'مسابقة وإنجاز طلابي')
         for (const [k, v] of [['اسم المسابقة', d.docCompetitionName], ['نوع المسابقة', d.docCompetitionType], ['الجهة المنظمة', d.docCompetitionOrganizer], ['الجهة المستضيفة', d.docCompetitionHost], ['المستوى', d.docCompetitionLevel], ['الطالبات المشاركات', d.docCompetitionStudents], ['النتيجة / المركز', d.docCompetitionResult], ['تفاصيل الإنجاز', d.docCompetitionDetails]])
@@ -134,8 +135,8 @@ export async function renderPDF(record) {
         section(k, v);
     if (images.length) {
         ensure(470);
-        ctx.fillStyle = '#174f4b';
-        ctx.font = 'bold 28px Tahoma, Arial';
+        ctx.fillStyle = '#18574D';
+        ctx.font = 'bold 28px "Cairo", Tahoma, Arial';
         ctx.fillText('صور التوثيق', W - M, y + 26);
         y += 50;
         for (let i = 0; i < images.length; i += 2) {
@@ -147,17 +148,17 @@ export async function renderPDF(record) {
                 ctx.fillStyle = '#f3f6f5';
                 ctx.fillRect(x, y, boxW, boxH);
                 ctx.drawImage(img, x + (boxW - img.width * scale) / 2, y + (boxH - img.height * scale) / 2, img.width * scale, img.height * scale);
-                ctx.font = '20px Tahoma, Arial';
-                ctx.fillStyle = '#60736f';
+                ctx.font = '20px "Cairo", Tahoma, Arial';
+                ctx.fillStyle = '#000000';
                 ctx.fillText('الصورة ' + (i + j + 1), x + boxW, y + 372);
             }
             y += 400;
         }
     }
-    const signatureHeight=drawSignatures(ctx,d,W,M,0,24,'Tahoma, Arial',false);
+    const signatureHeight=drawSignatures(ctx,d,W,M,0,24,'"Cairo", Tahoma, Arial',false);
     ensure(signatureHeight+28);y=Math.max(y+22,limit-signatureHeight);
     drawSignatures(ctx,d,W,M,y,24);
-    canvases.forEach((canvas, i) => { const g = canvas.getContext('2d'); g.strokeStyle = '#dce5e3'; g.beginPath(); g.moveTo(M, 1640); g.lineTo(W - M, 1640); g.stroke(); g.fillStyle = '#60736f'; g.font = '19px Tahoma, Arial'; g.direction = 'rtl'; g.textAlign = 'right'; g.fillText('رقم التوثيق: ' + String(record.id).slice(0, 8), W - M, 1675); g.textAlign = 'left'; g.fillText('صفحة ' + (i + 1) + ' من ' + canvases.length, M, 1675); });
+    canvases.forEach((canvas, i) => { const g = canvas.getContext('2d'); g.strokeStyle = '#dce5e3'; g.beginPath(); g.moveTo(M, 1640); g.lineTo(W - M, 1640); g.stroke(); g.fillStyle = '#000000'; g.font = '19px "Cairo", Tahoma, Arial'; g.direction = 'rtl'; g.textAlign = 'right'; g.fillText('رقم التوثيق: ' + String(record.id).slice(0, 8), W - M, 1675); g.textAlign = 'left'; g.fillText('صفحة ' + (i + 1) + ' من ' + canvases.length, M, 1675); });
     const pages = canvases.map(c => Uint8Array.from(atob(c.toDataURL('image/jpeg', .94).split(',')[1]), x => x.charCodeAt(0)));
     return packPDF(pages);
 }
