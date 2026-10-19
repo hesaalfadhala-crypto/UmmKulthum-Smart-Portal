@@ -1,0 +1,3 @@
+// Identity-based replacement: namesakes remain distinct and refresh never appends old rows.
+export function uniqueRows(rows,key='id'){const map=new Map();for(const row of rows){const id=row[key];if(!id)continue;const prior=map.get(id);if(!prior||String(row.updated_at||'')>=String(prior.updated_at||''))map.set(id,row);}return [...map.values()];}
+export function groupPlans(plans){const groups=new Map();for(const p of uniqueRows(plans)){const key=p.staff_id||p.created_by||p.id;if(!groups.has(key))groups.set(key,{id:key,name:p.owner_name,plans:[]});groups.get(key).plans.push(p);}return [...groups.values()];}

@@ -1,4 +1,4 @@
-import {state,rpc,one,client,message,handle} from './weekly-data.js';import {dayDate,DAYS,PERIODS,CATEGORIES,STATES,blankBody,planHTML,timestamp,esc} from './weekly-model.js';import {workbookXML,importTemplate} from './weekly-import.js';
+import {state,rpc,one,client,message,handle} from './weekly-data.js?v=20261020-sharing';import {dayDate,DAYS,PERIODS,CATEGORIES,STATES,blankBody,planHTML,timestamp,esc} from './weekly-model.js';import {workbookXML,importTemplate} from './weekly-import.js';
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search);let data,plan,period,staff,fileMime=null,kind=params.get('kind')||'staff',fileId=null,busy=false,pending=null;
 const recoveryKey=()=> 'weekly-save:'+data.ctx.user_id+':'+plan.id;
 function lock(value){busy=value;for(const b of document.querySelectorAll('#planForm button'))b.disabled=value;}

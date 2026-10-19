@@ -18,7 +18,8 @@ export async function database(){
  alter table storage.objects enable row level security;grant select,insert,delete on storage.objects to authenticated;
  `);
  await db.exec(await fs.readFile(new URL('../../supabase/migrations/'+migration,import.meta.url),'utf8'));
- for(let n=1;n<=9;n++){await db.query('insert into auth.users values($1,$2,now())',[id(n),'qa'+n+'@school.invalid']);if(n<9)await db.query('insert into profiles values($1,$2,$3,$4,$5)',[id(n),'مستخدمة اختبار '+n,n===1?'principal':n===2||n===3?'assistant_principal':n===4?'first_teacher':'teacher',n===3||n===4?'الرياضيات':'',n<3?'all':'own']);}
+ await db.exec("alter table profiles add column departments text[] not null default '{}';");await db.exec(await fs.readFile(new URL('../../supabase/migrations/20261019222107_weekly_shared_visibility.sql',import.meta.url),'utf8'));
+ for(let n=1;n<=9;n++){await db.query('insert into auth.users values($1,$2,now())',[id(n),'qa'+n+'@school.invalid']);if(n<9)await db.query('insert into profiles(id,full_name,role,department,school_access) values($1,$2,$3,$4,$5)',[id(n),'مستخدمة اختبار '+n,n===1?'principal':n===2||n===3?'assistant_principal':n===4?'first_teacher':'teacher',n===3||n===4?'الرياضيات':'',n<3?'all':'own']);}
  await db.query("insert into observation_access values($1,'الرياضيات',true,'{}'),($2,'الرياضيات',true,'{}')",[id(3),id(4)]);
  for(const [n,dept,bound] of [[5,'الرياضيات',true],[6,'الرياضيات',true],[7,'اللغة العربية',true],[8,'الرياضيات',false]])await db.query('insert into weekly_staff(id,user_id,full_name,department,author_enabled,required_by_default) values($1,$2,$3,$4,true,true)',[id(100+n),bound?id(n):null,'معلمة اختبار '+n,dept]);
  await as(db,1);
