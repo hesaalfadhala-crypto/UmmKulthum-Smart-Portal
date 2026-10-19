@@ -1,4 +1,4 @@
-import {installAchievementReview} from './achievement-review.js?v=20261020';
+import {installAchievementReview} from './achievement-review.js?v=20261020-auto';
 import {renderSignatures} from './report-signatures.js?v=20261019-cairo';
 import {editContext} from './edit-documentation.js?v=20261017-edit-complete';
 import {extraSections} from './recognition-model.js?v=20261017-edit-complete';
