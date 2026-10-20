@@ -1,4 +1,4 @@
-import {client,requireUser,element} from './portal-data.js';
+import {client,requireUser,element} from './portal-data.js?v=20261021-unified';
 import {academicStart,academicMonths,monthlyMatrix,chartWidth,rules} from './achievement-model.js?v=20261020-privacy';
 const $=id=>document.getElementById(id),num=n=>Number(n||0).toLocaleString('ar-BH');let snapshot=null,loading=false;
 $('rules').textContent=rules;

@@ -1,4 +1,4 @@
-import {client,requireUser,element} from './portal-data.js?v=20261017-edit-complete';
+import {client,requireUser,element} from './portal-data.js?v=20261021-unified';
 import {agendaContext,agendaRows,agendaStaff,saveEvent,reviewEvent} from './agenda-data.js';
 import {KINDS,SLOTS,STATES,DAYS,COLORS,official,today,nextWeek,weekStart,addDays,dayName,kindName,inSlot,filterEvents,stats,validateEvent} from './agenda-model.js';
 import {renderAgenda,downloadAgendaPDF} from './agenda-pdf.js?v=20261019-cairo';

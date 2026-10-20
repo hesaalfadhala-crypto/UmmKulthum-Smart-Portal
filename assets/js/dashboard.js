@@ -1,5 +1,5 @@
 import {staffTitle} from './staff-display.js?v=20261019-staff';
-import {client,requireUser,fetchRecords,normalize} from './portal-data.js';
+import {client,requireUser,fetchRecords,normalize} from './portal-data.js?v=20261021-unified';
 const message=document.getElementById('dashboardStatus');
 const roles={principal:'مديرة المدرسة',assistant_principal:'مديرة مساعدة',coordinator:'منسقة',first_teacher:'معلمة أولى',teacher:'معلمة'};
 const set=(id,value)=>document.getElementById(id).textContent=value;

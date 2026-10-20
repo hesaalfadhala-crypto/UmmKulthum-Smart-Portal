@@ -1,4 +1,4 @@
-import {client,requireUser,element} from './portal-data.js';
+import {client,requireUser,element} from './portal-data.js?v=20261021-unified';
 export {client,element};
 export const anon=window.supabase.createClient('https://ulqwkxzjwdmkspsjzvup.supabase.co','sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV',{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 export async function rpc(name,args={},sdk=client){const {data,error}=await sdk.rpc(name,args);if(error)throw Object.assign(new Error(error.message||'تعذر الاتصال.'),{code:error.code});return data;}

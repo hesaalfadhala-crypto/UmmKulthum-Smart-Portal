@@ -1,4 +1,4 @@
-import {client,element} from './portal-data.js';
+import {client,element} from './portal-data.js?v=20261021-unified';
 export async function installAchievementReview(row){
  const {data:ctx,error}=await client.rpc('achievement_report_context',{report_id:row.id});if(error||!ctx?.can_review)return;
  const box=element('section',undefined,'achievement-review no-print');box.style.cssText='padding:16px;margin:16px 0;border:1px solid #cddcd7;background:#f4f8f5';

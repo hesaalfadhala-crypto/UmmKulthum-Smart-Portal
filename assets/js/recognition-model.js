@@ -1,7 +1,7 @@
 import {validateMotivation} from './motivation-model.js';
 export const RECOGNITION_PROJECT='أنتِ تستحقين الشكر';
 export const RECOGNITION_TITLE='أنتِ تستحقين الشكر – تكريم المعلمات';
-export const isRecognition=d=>!!d?.projects?.includes(RECOGNITION_PROJECT)||!!d?.recognition;
+export const isRecognition=d=>d?.type!=='مسابقة وإنجاز طلابي'&&(!!d?.projects?.includes(RECOGNITION_PROJECT)||!!d?.recognition);
 export const recipientHours=(r,p)=>r.schemaVersion===2?Number(p.hours)||0:Number(r.hours)||0;
 export const SCOPED_TYPES=['فعالية','ورشة تدريبية','مبادرة','ملتقى'];
 export const RECOGNITION_KINDS=['مبادرة متميزة','تميز في الأداء الوظيفي','جهود استثنائية','تفعيل الأنشطة والفعاليات','تعاون ومساندة الزميلات','تحقيق إنجاز أو مركز متقدم','أخرى'];

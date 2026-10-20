@@ -1,5 +1,5 @@
 import {staffTitle} from './staff-display.js?v=20261019-staff';
-import {client,requireUser,element} from './portal-data.js';
+import {client,requireUser,element} from './portal-data.js?v=20261021-unified';
 import {rpc,message,handle} from './weekly-data.js';
 import {accountMessage,TEMPLATE_VERSION} from './account-email-template.js?v=20261019-staff';
 const $=id=>document.getElementById(id),roles={teacher:'معلمة',first_teacher:'معلمة أولى',coordinator:'منسقة',assistant_principal:'مديرة مساعدة',principal:'مديرة المدرسة'};

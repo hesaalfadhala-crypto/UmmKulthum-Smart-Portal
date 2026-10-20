@@ -5,12 +5,13 @@ import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=202
 import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261021-recognition';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-spacing';
-import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-recognition';
-import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261017-edit-complete';
+import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-unified';
+import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261021-unified';
 import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261021-recognition';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
+for(const label of ['مسابقة','إنجاز'])document.getElementById('type').add(new Option(label,label));
 const form = document.querySelector('.form');
 const otherChoices=installOtherChoices(form);
 const fields = [...form.querySelectorAll('input:not([type=file]),select,textarea')];
@@ -121,6 +122,11 @@ async function autosave() {
         message(editId?'مسودة التعديلات محفوظة على هذا الجهاز. اضغطي «حفظ التعديلات» لتحديث التقرير الأصلي.':'المسودة محفوظة على هذا الجهاز. اضغطي «حفظ في الأرشيف» لإتمام التوثيق.');
     } catch (e) { message(e.message + ' أبقي الصفحة مفتوحة حتى تحفظي في الأرشيف.', true); }
 }
+document.getElementById('type').addEventListener('change',async()=>{
+ const choice=document.getElementById('type').value;
+ if(!ready||saving||pending||!['مسابقة','إنجاز','مسابقة وإنجاز طلابي'].includes(choice))return;
+ try{await writeDraft(user.id+':competition-entry',{data:collect(),files,attachments,sourceRequestId:requestId});location.assign('competitions.html?entry=documentation&kind='+(choice==='إنجاز'?'achievement':'competition'));}catch(e){message('تعذر نقل المسودة إلى النموذج الموحد: '+e.message,true);}
+});
 form.addEventListener('input', () => { preview(); void autosave(); });
 form.addEventListener('change', () => { preview(); void autosave(); });
 images.addEventListener('change', () => {
@@ -206,6 +212,7 @@ try {
     const {data:programs,error:programError}=await client.from('support_programs').select('id,title,starts_at,status,workshop_type,executing_agency,hosting_entity').order('starts_at',{ascending:false});
     if(!programError){centerPrograms=(programs||[]).filter(p=>p.status!=='cancelled');for(const p of centerPrograms){const option=element('option',p.title);option.value=p.id;document.getElementById('centerProgramId').append(option);}}
     if(editId){
+        const link=await client.rpc('competition_document_link',{document_id:editId});if(link.error)throw Error('تعذر التحقق من رابط التقرير الموحد.');if(link.data?.id){location.replace('competitions.html?edit='+encodeURIComponent(link.data.id));throw {redirect:true};}
         originalReport=await fetchRecord(editId);
         if(!(await editContext(client,editId)).can_edit)throw new Error('ليست لديكِ صلاحية تعديل هذا التقرير.');
         retainedPhotos=structuredClone(originalReport.photo_files||[]);retainedAttachments=structuredClone(originalReport.attachment_files||[]);
@@ -229,10 +236,10 @@ try {
     if(!saved&&!editId&&!agendaSource){suggestDepartment(document.getElementById('department'),profile);preview();}
     previewPhotos(); ready = true; freeze();
 } catch (e) {
-    message(e.message, true);
+    if(e.redirect){}else{message(e.message, true);
     const login = element('a', 'تسجيل الدخول');
     login.href = 'login.html';
-    status.append(document.createTextNode(' '), login);
+    status.append(document.createTextNode(' '), login);}
 }
 
 document.getElementById('attachments').addEventListener('change',()=>{const picked=[...document.getElementById('attachments').files];if(picked.length+(editId?retainedAttachments.length+attachments.length:0)>5||picked.some(f=>f.size>8388608||!f.name.toLowerCase().endsWith('.pdf'))){message('اختاري حتى 5 ملفات PDF، بحجم 8 ميغابايت لكل ملف.',true);document.getElementById('attachments').value='';return;}attachments=editId?[...attachments,...picked]:picked;if(editId)document.getElementById('attachments').value='';previewExisting();document.getElementById('attachmentCount').textContent=(attachments.length+retainedAttachments.length)+' ملفات PDF مرفقة';void autosave();});

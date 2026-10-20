@@ -1,4 +1,4 @@
-import {fetchRecords,normalize,element} from './portal-data.js';
+import {fetchRecords,normalize,element} from './portal-data.js?v=20261021-unified';
 const cards=[...document.querySelectorAll('.project')],search=document.querySelector('.search');
 search.addEventListener('input',()=>cards.forEach(card=>card.hidden=!card.querySelector('h3').textContent.toLowerCase().includes(search.value.trim().toLowerCase())));
 async function load(){try{

@@ -1,6 +1,6 @@
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
 import {drawSignatures} from './report-signatures.js?v=20261021-spacing';
-import {extraSections,isRecognition,reportFields} from './recognition-model.js?v=20261021-recognition';
+import {extraSections,isRecognition,reportFields} from './recognition-model.js?v=20261021-unified';
 import {packPDF} from './pdf-export.js?v=20261021-spacing';
 // Canvas pixels scale to A4 at 0.48 pt/px: 14px ≈ 6.7pt; 12px ≈ 5.8pt; 22px ≈ 10.6pt.
 export const REPORT_SPACING=Object.freeze({lineHeight:1.7,paragraph:14,heading:12,section:22});
@@ -13,7 +13,7 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
  const d=record.data;
  const fields=[['المرفقات',(record.attachment_files||[]).map(f=>f.name)],...(isRecognition(d)?reportFields(d):[['النوع / القسم',[d.type,d.department]],['المنفذة / التاريخ',[d.executor,d.date,d.location]],...reportFields(d)])];
  if(!isRecognition(d)&&d.type==='ورشة تدريبية'&&!d.executionScope){fields.push(['نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':'غير مسجل'],['الجهة المنفذة',d.executingAgency]);}if(!isRecognition(d)&&d.type==='ورشة تدريبية')fields.push(['المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'غير مسجلة':String(d.trainingBeneficiaries)]);
- if(!isRecognition(d)&&d.type==='مسابقة وإنجاز طلابي')fields.push(...[['اسم المسابقة',d.docCompetitionName],['نوع المسابقة',d.docCompetitionType],['الجهة المنظمة',d.docCompetitionOrganizer],['الجهة المستضيفة',d.docCompetitionHost],['المستوى',d.docCompetitionLevel],['الطالبات المشاركات',d.docCompetitionStudents],['النتيجة / المركز',d.docCompetitionResult],['تفاصيل الإنجاز',d.docCompetitionDetails]]);
+ if(!isRecognition(d)&&d.type==='مسابقة وإنجاز طلابي')fields.push(...[['نوع التوثيق',d.reportTypeLabel||'مسابقة'],['اسم المسابقة أو الإنجاز',d.docCompetitionName],['المدرسة أو الجهة الخارجية',d.externalSchool],['نوع المسابقة',d.docCompetitionType],['الجهة المنظمة',d.docCompetitionOrganizer],['الجهة المستضيفة',d.docCompetitionHost],['المستوى',d.docCompetitionLevel],['الطالبات المشاركات',d.docCompetitionStudents],['النتيجة / المركز',d.docCompetitionResult],['تفاصيل الإنجاز',d.docCompetitionDetails]]);
  if(!isRecognition(d)&&d.type==='حصة احتياط')fields.push(...[['الصف / الشعبة',d.reserveClass],['رقم الحصة',d.reservePeriod],['المعلمة الغائبة',d.originalTeacher],['ما تم تنفيذه',d.reserveImplementation]]);
 
  const measure=createCanvas(W,H).getContext('2d');
@@ -35,15 +35,23 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
  for(const [label,value]of fields){const s=Array.isArray(value)?value.filter(Boolean).join(' • '):value;if(!s)continue;heading(label);addText(s);space(REPORT_SPACING.section);}
  if(photos.length){heading('صور التوثيق');const columns=2;for(let i=0;i<photos.length;i+=columns)blocks.push({height:272,images:photos.slice(i,i+columns),offset:i,columns});}
  measure.font='bold 36px '+font;
- const titleLines=wrap(measure,isRecognition(d)?d.activity:'تقرير '+d.type+' — '+d.activity,W-2*M);
+ const titleLines=wrap(measure,isRecognition(d)?d.activity:'تقرير '+(d.reportTypeLabel||d.type)+' — '+d.activity,W-2*M);
  const top=190+titleLines.length*42+48;
  const signatureHeight=drawSignatures(measure,d,W,M,0,size,font,false)+30;
- const total=blocks.reduce((n,b)=>n+b.height,0),oneCap=BOTTOM-top-signatureHeight;
- let count=mode==='two'?2:total<=oneCap?1:2;if(mode==='one'&&total>oneCap)throw overflow();
- const cap1=BOTTOM-top,cap2=BOTTOM-top-signatureHeight;
- if(top>600||total>(count===1?oneCap:cap1+cap2))throw overflow();
- let pages=[blocks];
- if(count===2){let best=null,score=Infinity,used=0;for(let i=1;i<blocks.length;i++){used+=blocks[i-1].height;const rest=total-used;if(used>cap1||rest>cap2||blocks[i-1].keepWithNext||!rest)continue;const diff=Math.abs(used-(rest+signatureHeight));if(diff<score){best=i;score=diff;}}if(best===null)throw overflow();pages=[blocks.slice(0,best),blocks.slice(best)];}
+ const prefix=[0];for(const b of blocks)prefix.push(prefix.at(-1)+b.height);
+ const total=prefix.at(-1),oneCap=BOTTOM-top-signatureHeight,cap1=BOTTOM-top,cap2=BOTTOM-top-signatureHeight;
+ const maxPages=record.allowExtraPage?3:2;
+ function partition(count){
+  if(count===1)return total<=oneCap?[blocks]:null;
+  const target=(total+signatureHeight)/count;let best=null,bestScore=Infinity;
+  function visit(start,page,parts,score){const last=page===count-1,capacity=last?cap2:cap1;
+   if(last){const h=total-prefix[start];if(h<=0||h>capacity)return;const final=score+Math.abs(h+signatureHeight-target);if(final<bestScore){bestScore=final;best=[...parts,blocks.slice(start)];}return;}
+   for(let end=start+1;end<blocks.length;end++){const h=prefix[end]-prefix[start];if(h>capacity)break;if(blocks[end-1].keepWithNext)continue;visit(end,page+1,[...parts,blocks.slice(start,end)],score+Math.abs(h-target));}
+  }visit(0,0,[],0);return best;
+ }
+ let pages=null;if(top>600)throw overflow();
+ if(mode==='one')pages=partition(1);else if(mode==='two')pages=partition(2);else for(let count=1;count<=maxPages&&!pages;count++)pages=partition(count);
+ if(!pages)throw new Error(record.allowExtraPage?'لا يتسع المحتوى في التنسيق المختار بصورة مقروءة. يسمح التلقائي حتى ثلاث صفحات للمسابقات والإنجازات؛ قلّلي النصوص أو الصور عند الحاجة. لم يُحذف أي محتوى.':overflow().message);
  return pages.map((items,page)=>{const c=createCanvas(W,H),g=c.getContext('2d');g.fillStyle='white';g.fillRect(0,0,W,H);g.direction='rtl';g.textAlign='right';
  const scale=Math.min((W-2*M)/logo.width,115/logo.height);g.drawImage(logo,(W-logo.width*scale)/2,30,logo.width*scale,logo.height*scale);
  g.fillStyle='#18574D';g.font='bold 36px '+font;let ty=190;for(const line of titleLines){g.fillText(line,W-M,ty);ty+=42;}g.font='24px '+font;g.fillStyle='#000000';g.fillText('العام الدراسي '+(d.academicYear||'غير مسجل')+' · '+(d.semester||''),W-M,ty+8);

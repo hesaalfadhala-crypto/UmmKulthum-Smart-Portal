@@ -1,4 +1,4 @@
-import {client} from './portal-data.js';
+import {client} from './portal-data.js?v=20261021-unified';
 const form=document.getElementById('resetForm'),status=document.getElementById('status'),button=document.getElementById('savePassword');let recovery=false,busy=false;
 // An existing normal login is insufficient; only a valid recovery link exposes the form.
 client.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY'){recovery=true;form.hidden=false;status.textContent='أدخلي كلمة مرور جديدة ثم أكديها.';}});

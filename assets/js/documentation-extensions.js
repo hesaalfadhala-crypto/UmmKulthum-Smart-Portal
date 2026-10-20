@@ -1,6 +1,6 @@
 import {appendReportText} from './report-text.js?v=20261021-spacing';
-import {element,client} from './portal-data.js?v=20261017-edit-complete';
-import {RECOGNITION_PROJECT,SCOPED_TYPES,RECOGNITION_KINDS,AWARDS,extraSections,RECOGNITION_TITLE,isRecognition} from './recognition-model.js?v=20261021-recognition';
+import {element,client} from './portal-data.js?v=20261021-unified';
+import {RECOGNITION_PROJECT,SCOPED_TYPES,RECOGNITION_KINDS,AWARDS,extraSections,RECOGNITION_TITLE,isRecognition} from './recognition-model.js?v=20261021-unified';
 const $=id=>document.getElementById(id);let staff=[],allowed=false,wasRecognition=false;
 export function installExtensions(){
  const type=$('type');if(![...type.options].some(o=>o.value==='ملتقى'))type.add(new Option('ملتقى','ملتقى'));

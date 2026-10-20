@@ -1,5 +1,5 @@
 import {isCenterReport,isWorkshop,resolveOther,SUPPORT_CENTER} from './documentation-choices.js?v=20261021-recognition';
-import {client,academicYear} from './portal-data.js';import {catalog} from './catalog-values.js';
+import {client,academicYear} from './portal-data.js?v=20261021-unified';import {catalog} from './catalog-values.js';
 import {context,load,rpc,sameUser,node,option,STATUS,AUDIENCE,date,schoolDate} from './support-data.js';
 import * as drafts from './support-drafts.js';
 const sections={needs:['الاحتياجات التدريبية','سجّلي احتياجكِ، وتابعي حالته. مسؤولة المركز ترى الاحتياجات المرسلة إليها.'],programs:['البرامج والورش','البرامج التي اعتمدها المركز، وتقارير تنفيذها المرتبطة.'],proposal:['تقديم ورشة','ارسلي مقترح ورشة ومواعيدها إلى مسؤولة المركز لاعتماده وإضافته إلى البرامج.'],booking:['حجز موعد','اطلبي موعدًا للتنسيق أو استخدام المركز، وتابعي قرار مسؤولة المركز هنا.'],reports:['تقارير مركز الدعم والتطوير المهني','التوثيقات والصور والتقارير النهائية المحفوظة في الأرشيف.'],impact:['قياس الأثر','سجّلي ما طُبق بعد التدريب وأدلته والمتابعة المطلوبة.']};

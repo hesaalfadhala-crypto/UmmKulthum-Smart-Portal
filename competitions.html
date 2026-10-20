@@ -145,7 +145,7 @@ textarea{min-height:90px;resize:vertical}
     .student-row{grid-template-columns:1fr 1fr 45px}
 }
 </style>
-<link rel="stylesheet" href="assets/competitions.css"></head>
+<link rel="stylesheet" href="assets/competitions.css?v=20261021-unified"></head>
 
 <body>
 
@@ -156,22 +156,27 @@ textarea{min-height:90px;resize:vertical}
 
 <div class="container">
 
-<div class="note">
+<section class="card" id="competitionDashboard"><h2>لوحة المسابقات والإنجازات</h2><button id="addCompetitionEntry" type="button" class="primary">إضافة مسابقة أو إنجاز جديد</button><div class="dashboard-filters grid">
+<label>العام الدراسي<select id="filterYear"><option value="">جميع الأعوام</option></select></label><label>الفصل الدراسي<select id="filterSemester"><option value="">الفصلان</option><option>الفصل الدراسي الأول</option><option>الفصل الدراسي الثاني</option></select></label>
+<label>نوع التوثيق<select id="filterEntryKind"><option value="">مسابقات وإنجازات</option><option value="competition">مسابقة</option><option value="achievement">إنجاز</option></select></label>
+</div><div class="grid"><input id="competitionSearch" placeholder="بحث بالعنوان أو القسم أو أسماء الطالبات في السجلات المتاحة"><select id="filterDepartment"><option value="">جميع الأقسام</option></select><select id="filterType"><option value="">كل الأنواع</option><option>داخلية</option><option>خارجية</option></select><label>من <input id="filterFrom" type="date"></label><label>إلى <input id="filterTo" type="date"></label></div><div id="competitionStats" class="competition-stats"></div><p id="statisticsNote"></p><button id="refreshCompetitions" type="button">تحديث الإحصائيات</button> <button id="allDepartments" type="button">عرض جميع الأقسام</button><p id="statisticsUpdated" role="status"></p>
+<h2>إنجازات الأقسام</h2><div id="departmentStats" class="table-scroll"></div><div id="competitionCharts" class="competition-charts"></div></section>
+<details id="competitionEditor"><summary>نموذج تسجيل المسابقة أو الإنجاز</summary><div class="note">
 يُستخدم هذا النموذج لتسجيل مشاركات الطالبات في المسابقات وتوثيق المراكز والإنجازات المحققة على مستوى المدرسة وخارجها.
 </div>
 
 <div class="card">
-<div class="card-title">بيانات المسابقة</div>
+<div class="card-title" id="editorTitle">إضافة مسابقة أو إنجاز</div><div class="grid"><label>نوع التوثيق<select id="entryKind"><option value="competition">مسابقة</option><option value="achievement">إنجاز</option></select></label><label>العام الدراسي<input id="academicYear" value="2026-2027" maxlength="20"></label><label>الفصل الدراسي<select id="semester"><option>الفصل الدراسي الأول</option><option>الفصل الدراسي الثاني</option></select></label></div>
 
 <div class="grid">
 
 <div class="field">
-<label>اسم المسابقة *</label>
+<label>عنوان المسابقة أو الإنجاز *</label>
 <input id="competitionName" type="text" placeholder="اكتبي اسم المسابقة">
 </div>
 
 <div class="field">
-<label>نوع المسابقة *</label>
+<label>نطاق التنفيذ *</label>
 <select id="competitionType">
 <option value="">اختاري</option>
 <option value="داخلية">داخلية – داخل المدرسة</option>
@@ -196,26 +201,27 @@ textarea{min-height:90px;resize:vertical}
 <option>المجالات</option>
 <option>التربية الأسرية</option>
 <option>الحاسوب</option>
-<option>الأنشطة والفعاليات</option>
+<option>الأنشطة والفعاليات</option><option>الإدارة المدرسية</option><option>مركز الدعم والتطوير المهني</option>
 <option>أخرى</option>
 </select>
 </div>
 
 <div class="field">
-<label>تاريخ المسابقة</label>
+<label>تاريخ المسابقة أو الإنجاز</label>
 <input id="competitionDate" type="date">
 </div>
 
 </div>
 
-<div id="externalFields" class="hidden">
-
-<div class="grid">
-
 <div class="field">
 <label>الجهة المنظمة</label>
 <input id="organizer" type="text" placeholder="مثال: وزارة التربية والتعليم">
 </div>
+<div id="externalFields" class="hidden"><label>المدرسة أو الجهة الخارجية المشاركة<input id="externalSchool" maxlength="300"></label>
+
+<div class="grid">
+
+
 
 <div class="field">
 <label>المدرسة / الجهة المستضيفة</label>
@@ -240,7 +246,87 @@ textarea{min-height:90px;resize:vertical}
 </div>
 
 <div class="card">
-<div class="card-title">بيانات المشاركة</div>
+<div class="card-title">تفاصيل التوثيق</div><div class="field"><label>المجال المرتبط بالتوثيق</label><div class="checks areas-checks">
+        <label class="check">
+            <input type="checkbox" value="التعليم والتعلم والتقويم">
+            التعليم والتعلم والتقويم
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="الإنجاز الأكاديمي">
+            الإنجاز الأكاديمي
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="التطور الشخصي والمسئولية الاجتماعية">
+            التطور الشخصي والمسئولية الاجتماعية
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="القيادة والإدارة">
+            القيادة والإدارة
+        </label>
+    </div></div><div class="field"><label>المشروع أو المبادرة المرتبطة</label><div class="checks project-checks">
+<label class="check"><input type="checkbox" value="تحفيز المعلمات"> تحفيز المعلمات</label>
+        <label class="check"><input type="checkbox" value="التعليم الأخضر"> التعليم الأخضر</label>
+        <label class="check"><input type="checkbox" value="اليونسكو"> اليونسكو</label>
+        <label class="check"><input type="checkbox" value="التمكين الرقمي"> التمكين الرقمي</label>
+        <label class="check"><input type="checkbox" value="بصمات رقمية"> بصمات رقمية</label>
+        <label class="check"><input type="checkbox" value="بيدك الخير"> بيدك الخير</label>
+        <label class="check"><input type="checkbox" value="غرس"> غرس</label>
+        <label class="check"><input type="checkbox" value="English and Beyond"> English and Beyond</label>
+        <label class="check"><input type="checkbox" value="لغتي هويتي"> لغتي هويتي</label>
+        <label class="check"><input type="checkbox" value="الخوارزمي"> الخوارزمي</label>
+        <label class="check"><input type="checkbox" value="أصيل"> أصيل</label>
+        <label class="check"><input type="checkbox" value="حاملات المسك"> حاملات المسك</label>
+        <label class="check"><input type="checkbox" value="Fitness Queen"> Fitness Queen</label>
+        <label class="check"><input type="checkbox" value="بمهاراتي أرتقي"> بمهاراتي أرتقي</label>
+        <label class="check"><input type="checkbox" value="تحدي القراءة العربي"> تحدي القراءة العربي</label>
+        <label class="check"><input type="checkbox" value="TIMSS"> TIMSS</label>
+        <label class="check"><input type="checkbox" value="الامتحانات الوطنية"> الامتحانات الوطنية</label>
+        <label class="check"><input type="checkbox" value="أخرى"> أخرى</label>
+        <label class="check"><input type="checkbox" value="غير مرتبطة"> غير مرتبطة</label>
+    <label class="check"><input type="checkbox" value="مشروع أثر التعليم في البيئة المدرسية"> مشروع أثر التعليم في البيئة المدرسية</label></div></div><div class="field"><label>مشروع آخر — يرجى التحديد</label><input id="projectOther" maxlength="300"></div><div class="field"><label>الفئة المستهدفة</label><div class="checks target-checks">
+        <label class="check">
+            <input type="checkbox" value="المتفوقات (دانة أم كلثوم)">
+            المتفوقات (دانة أم كلثوم)
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="متوسطات التحصيل (حصادي)">
+            متوسطات التحصيل (حصادي)
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="منخفضات التحصيل (خذ بيدي)">
+            منخفضات التحصيل (خذ بيدي)
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="صعوبات التعلم والحالات الخاصة (نعم نستطيع)">
+            صعوبات التعلم والحالات الخاصة (نعم نستطيع)
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="الموهوبات">
+            الموهوبات
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="جميع الطالبات">
+            جميع الطالبات
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="طالبات محددات">
+            طالبات محددات
+        </label>
+
+        <label class="check">
+            <input type="checkbox" value="أخرى">
+            أخرى
+        </label>
+    </div></div><div class="field"><label>فئة مستهدفة أخرى — يرجى التحديد<input id="targetOther" maxlength="300"></label></div><label>تفاصيل الفئة المستهدفة<textarea id="target"></textarea></label><label>الهدف من المسابقة أو الإنجاز<textarea id="goal" maxlength="12000"></textarea></label><label>وصف التنفيذ<textarea id="implementation" maxlength="12000"></textarea></label><label>النتائج والأثر<textarea id="impact" maxlength="12000"></textarea></label><label>التوصيات<textarea id="recommendations" maxlength="12000"></textarea></label><label>معدّة التقرير<input id="reportPreparedBy" maxlength="300"></label><fieldset><legend>الإشراف على التقرير</legend><div class="checks supervisor-checks"><label><input type="checkbox" value="assistant">أ. حصه سند الفضاله</label><label><input type="checkbox" value="aisha">أ. عايشة محمد يعقوب</label><label><input type="checkbox" value="hiba">أ. هبة علي حسين</label><label><input type="checkbox" value="services">رئيسة الخدمات أ. حصه خليفة الظهراني</label></div></fieldset></div><div class="card"><div class="card-title">بيانات المشاركة</div><aside id="legacyRosterNotice" class="note" hidden><h3>بيانات المشاركات والمراكز السابقة</h3><p id="legacyStudentsText"></p><p id="legacyResultsText"></p><label><input id="rosterReviewed" type="checkbox">راجعت القائمة والمراكز وأكملت بيانات الطالبات المنظمة أدناه</label></aside>
 
 <div class="grid">
 
@@ -287,7 +373,7 @@ textarea{min-height:90px;resize:vertical}
 <div class="card-title">النتيجة والإنجاز</div>
 
 <div class="field">
-<label>نتيجة المشاركة *</label>
+<label>النتيجة العامة (اختياري)</label>
 <div class="radio-group">
 <label class="radio-option"><input type="radio" name="result" value="المركز الأول">🥇 المركز الأول</label>
 <label class="radio-option"><input type="radio" name="result" value="المركز الثاني">🥈 المركز الثاني</label>
@@ -331,20 +417,20 @@ textarea{min-height:90px;resize:vertical}
 </div>
 </div>
 
-<p id="saveStatus" role="status" aria-live="polite"></p><div class="actions"><button type="button" id="newCompetition" class="secondary">مسابقة جديدة</button>
+<p id="saveStatus" role="status" aria-live="polite"></p><div class="actions"><button type="button" id="newCompetition" class="secondary">إضافة مسابقة أو إنجاز جديد</button>
 <button type="button" class="secondary" onclick="window.location.href='index.html'">العودة للبوابة</button>
-<button type="button" class="primary" id="saveCompetitionButton">حفظ سجل المسابقة</button>
+<button type="button" class="primary" id="saveCompetitionButton">حفظ التوثيق</button>
 </div>
-<div class="card" id="competitionReportsSection" style="margin-top:25px;">
+</details><div class="card" id="competitionReportsSection" style="margin-top:25px;">
     <h2>📊 تقارير المسابقات والإنجازات الطلابية</h2>
-    <p style="color:#666;">السجلات المحفوظة حسب صلاحية المستخدم</p>
+    <p id="filteredSummary"></p>
 
-    <div class="grid"><input id="competitionSearch" placeholder="البحث باسم المسابقة"><select id="filterDepartment"><option value="">جميع الأقسام</option></select><select id="filterType"><option value="">كل الأنواع</option><option>داخلية</option><option>خارجية</option></select><label>من <input id="filterFrom" type="date"></label><label>إلى <input id="filterTo" type="date"></label></div><div id="competitionReports">
+    <div id="competitionReports">
         <p>جاري تحميل السجلات...</p>
     </div>
 </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
 <script src="assets/vendor/xlsx-0.20.3.min.js"></script>
-<script type="module" src="assets/js/competitions.js?v=20261018-competitions"></script>
-</body></html>
+<script type="module" src="assets/js/competitions.js?v=20261021-unified"></script>
+<datalist id="studentPlaces"><option value="المركز الأول"><option value="المركز الثاني"><option value="المركز الثالث"><option value="مراكز أخرى"><option value="مشاركة"></datalist></body></html>
