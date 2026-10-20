@@ -1,12 +1,12 @@
 import {suggestDepartment} from './staff-display.js?v=20261019-staff';
 import {agendaEvent} from './agenda-data.js';
 import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261019-cairo';
-import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261017-edit-complete';
-import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js';
-import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261017-edit-complete';
-import {validateNewDetails} from './recognition-model.js?v=20261017-edit-complete';
+import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261021-recognition';
+import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
+import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-recognition';
+import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-recognition';
 import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261017-edit-complete';
-import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261018-agenda';
+import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261021-recognition';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
@@ -22,7 +22,7 @@ const groups = { areas: 'areas', projects: 'project', committees: 'committee', t
 const editId=new URLSearchParams(location.search).get('edit');
 if(editId){saveButton.classList.add('save-edits');document.body.classList.add('editing-report');}
 let originalReport=null, retainedPhotos=[], retainedAttachments=[], existingPhotos=[], draftKey;
-let profile, user, attachments = [], files = [], pending = null, saving = false, ready = false, previewUrls = [];
+let profile, user, attachments = [], files = [], pending = null, saving = false, ready = false, previewUrls = [], attachmentPreviewUrls=[];
 let requestId = crypto.randomUUID(), writeQueue = Promise.resolve();
 let centerPrograms=[];let agendaSource=null;const agendaId=new URLSearchParams(location.search).get('agenda_event');
 
@@ -32,7 +32,7 @@ function message(text, error = false) {
 }
 function freeze() {
     fields.forEach(el => { el.disabled = !ready || saving || !!pending; });
-    document.querySelectorAll('#recognitionStaff input').forEach(el=>el.disabled=!ready||saving||!!pending);
+    document.querySelectorAll('#recognitionStaff input,#recipientDetails input,#recipientDetails textarea').forEach(el=>el.disabled=!ready||saving||!!pending);
     images.disabled = !ready || saving || !!pending;document.getElementById('attachments').disabled=images.disabled;
     saveButton.disabled = !ready || saving;
     clearButton.disabled = !ready || saving || !!pending?.sent;
@@ -67,14 +67,14 @@ function preview() {
         reserveClass: 'pReserveClass', reservePeriod: 'pReservePeriod', originalTeacher: 'pOriginalTeacher',
         reserveImplementation: 'pReserveImplementation' })) output(id, d[key]);
     output('pTarget', [...d.targets, d.target].filter(Boolean).join(' • '));
-    const competition = d.type === 'مسابقة وإنجاز طلابي', reserve = d.type === 'حصة احتياط';
+    const competition = !isRecognition(d)&&d.type === 'مسابقة وإنجاز طلابي', reserve = !isRecognition(d)&&d.type === 'حصة احتياط';
     document.getElementById('trainingDocumentationFields').hidden=d.type!=='ورشة تدريبية';updateExtensions(raw);
     document.getElementById('competitionDocumentationFields').style.display = competition ? 'block' : 'none';
     document.getElementById('competitionReport').style.display = competition ? 'block' : 'none';
     document.getElementById('reserveClassFields').style.display = reserve ? 'block' : 'none';
     document.getElementById('reserveClassReport').style.display = reserve ? 'block' : 'none';
     document.getElementById('assistantsReport').style.display = 'none';
-    document.querySelector('.report-title').textContent = 'معاينة تقرير ' + d.type;
+    document.querySelector('.report-title').textContent = isRecognition(d)?d.recognition?.title||d.activity:'معاينة تقرير ' + d.type;
 }
 function previewPhotos() {
     previewUrls.forEach(url => URL.revokeObjectURL(url));
@@ -93,7 +93,7 @@ function previewPhotos() {
         box.append(figure);
     });
     document.getElementById('imageCount').textContent = (retainedPhotos.length+files.length) ? (retainedPhotos.length+files.length) + ' صور مرفقة' : 'لم تُرفق صور بعد';
-    if(editId)previewExisting();
+    previewExisting();
 }
 function restore(data) {
     data={...data,executingEntity:data.executingEntity??data.executingAgency??'',reportSupervisors:selectedSupervisors(data)};
@@ -180,7 +180,7 @@ clearButton.addEventListener('click', async () => {
             else if (el.tagName === 'SELECT') el.selectedIndex = 0;
             else el.value = '';
         });
-        document.querySelectorAll('#recognitionStaff input').forEach(i=>i.checked=false);
+        document.querySelectorAll('#recognitionStaff input,#recipientDetails input,#recipientDetails textarea').forEach(i=>i.checked=false);
         files = [];attachments=[];document.getElementById('attachments').value=''; pending = null; requestId = crypto.randomUUID(); images.value = '';
         document.getElementById('reportPreparedBy').value=profile?.full_name||user.user_metadata?.full_name||'';
         suggestDepartment(document.getElementById('department'),profile);preview(); previewPhotos(); message('ابدئي توثيقًا جديدًا.');
@@ -234,14 +234,15 @@ try {
     status.append(document.createTextNode(' '), login);
 }
 
-document.getElementById('attachments').addEventListener('change',()=>{const picked=[...document.getElementById('attachments').files];if(picked.length+(editId?retainedAttachments.length+attachments.length:0)>5||picked.some(f=>f.size>8388608||!f.name.toLowerCase().endsWith('.pdf'))){message('اختاري حتى 5 ملفات PDF، بحجم 8 ميغابايت لكل ملف.',true);document.getElementById('attachments').value='';return;}attachments=editId?[...attachments,...picked]:picked;if(editId){document.getElementById('attachments').value='';previewExisting();}document.getElementById('attachmentCount').textContent=(attachments.length+retainedAttachments.length)+' ملفات PDF مرفقة';void autosave();});
+document.getElementById('attachments').addEventListener('change',()=>{const picked=[...document.getElementById('attachments').files];if(picked.length+(editId?retainedAttachments.length+attachments.length:0)>5||picked.some(f=>f.size>8388608||!f.name.toLowerCase().endsWith('.pdf'))){message('اختاري حتى 5 ملفات PDF، بحجم 8 ميغابايت لكل ملف.',true);document.getElementById('attachments').value='';return;}attachments=editId?[...attachments,...picked]:picked;if(editId)document.getElementById('attachments').value='';previewExisting();document.getElementById('attachmentCount').textContent=(attachments.length+retainedAttachments.length)+' ملفات PDF مرفقة';void autosave();});
 
 function previewExisting(){
+ attachmentPreviewUrls.forEach(u=>URL.revokeObjectURL(u));attachmentPreviewUrls=[];
  let box=document.getElementById('retainedFiles');if(!box){box=element('section');box.id='retainedFiles';images.parentElement.after(box);}box.replaceChildren();
  const item=(label,remove)=>{const b=element('button','إزالة '+label);b.type='button';b.disabled=saving||!!pending;b.addEventListener('click',()=>{remove();previewPhotos();void autosave();});return b;};
  retainedPhotos.forEach((p,i)=>{const f=element('figure'),photo=existingPhotos.find(x=>x.path===p.path);if(photo){const img=element('img');img.src=photo.url;img.alt='صورة محفوظة '+(i+1);img.style.maxWidth='160px';f.append(img);}f.append(item('الصورة المحفوظة '+(i+1),()=>retainedPhotos=retainedPhotos.filter(x=>x.path!==p.path)));box.append(f);});
  files.forEach((f,i)=>box.append(item('الصورة الجديدة '+(i+1),()=>files.splice(i,1))));
  retainedAttachments.forEach(f=>box.append(item('المرفق '+f.name,()=>retainedAttachments=retainedAttachments.filter(x=>x.path!==f.path))));
- attachments.forEach((f,i)=>box.append(item('المرفق الجديد '+f.name,()=>attachments.splice(i,1))));
+ attachments.forEach((f,i)=>{const row=element('div'),a=element('a','معاينة '+f.name);const url=URL.createObjectURL(f);attachmentPreviewUrls.push(url);a.href=url;a.target='_blank';a.rel='noopener';row.append(a,document.createTextNode(' '),item('المرفق الجديد '+f.name,()=>attachments.splice(i,1)));box.append(row);});
  document.getElementById('attachmentCount').textContent=(retainedAttachments.length+attachments.length)+' ملفات PDF مرفقة';
 }

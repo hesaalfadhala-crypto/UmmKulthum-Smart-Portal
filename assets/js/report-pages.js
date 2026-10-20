@@ -1,6 +1,6 @@
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
 import {drawSignatures} from './report-signatures.js?v=20261019-cairo';
-import {extraSections} from './recognition-model.js?v=20261017-edit-complete';
+import {extraSections,isRecognition,reportFields} from './recognition-model.js?v=20261021-recognition';
 import {packPDF} from './pdf-export.js?v=20261019-cairo';
 export const PAGE_MODES=['auto','one','two'];
 const W=1240,H=1754,M=65,BOTTOM=1600;
@@ -9,21 +9,20 @@ function wrap(g,value,width){const lines=[];for(const para of String(value).spli
 export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]}){
  if(!PAGE_MODES.includes(mode))throw Error('تنسيق الصفحات غير صالح.');
  const d=record.data;
- const fields=[['المرفقات',(record.attachment_files||[]).map(f=>f.name)],['النوع / القسم',[d.type,d.department]],['المنفذة / التاريخ',[d.executor,d.date,d.location]],['المجالات',d.areas],['المشاريع والمبادرات',d.projects],['اللجان',d.committees],['الفئات المستهدفة',[...(d.targets||[]),d.target].filter(Boolean)],['الهدف',d.goal],['وصف التنفيذ',d.implementation],['النتائج والأثر',d.impact],['التوصيات',d.recommendations]];
- fields.push(...extraSections(d).filter(([label])=>!['آخر تعديل','عدّلته'].includes(label)));
- if(d.type==='ورشة تدريبية'&&!d.executionScope){fields.push(['نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':'غير مسجل'],['الجهة المنفذة',d.executingAgency]);}if(d.type==='ورشة تدريبية')fields.push(['المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'غير مسجلة':String(d.trainingBeneficiaries)]);
- if(d.type==='مسابقة وإنجاز طلابي')fields.push(...[['اسم المسابقة',d.docCompetitionName],['نوع المسابقة',d.docCompetitionType],['الجهة المنظمة',d.docCompetitionOrganizer],['الجهة المستضيفة',d.docCompetitionHost],['المستوى',d.docCompetitionLevel],['الطالبات المشاركات',d.docCompetitionStudents],['النتيجة / المركز',d.docCompetitionResult],['تفاصيل الإنجاز',d.docCompetitionDetails]]);
- if(d.type==='حصة احتياط')fields.push(...[['الصف / الشعبة',d.reserveClass],['رقم الحصة',d.reservePeriod],['المعلمة الغائبة',d.originalTeacher],['ما تم تنفيذه',d.reserveImplementation]]);
+ const fields=[['المرفقات',(record.attachment_files||[]).map(f=>f.name)],...(isRecognition(d)?reportFields(d):[['النوع / القسم',[d.type,d.department]],['المنفذة / التاريخ',[d.executor,d.date,d.location]],...reportFields(d)])];
+ if(!isRecognition(d)&&d.type==='ورشة تدريبية'&&!d.executionScope){fields.push(['نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':'غير مسجل'],['الجهة المنفذة',d.executingAgency]);}if(!isRecognition(d)&&d.type==='ورشة تدريبية')fields.push(['المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'غير مسجلة':String(d.trainingBeneficiaries)]);
+ if(!isRecognition(d)&&d.type==='مسابقة وإنجاز طلابي')fields.push(...[['اسم المسابقة',d.docCompetitionName],['نوع المسابقة',d.docCompetitionType],['الجهة المنظمة',d.docCompetitionOrganizer],['الجهة المستضيفة',d.docCompetitionHost],['المستوى',d.docCompetitionLevel],['الطالبات المشاركات',d.docCompetitionStudents],['النتيجة / المركز',d.docCompetitionResult],['تفاصيل الإنجاز',d.docCompetitionDetails]]);
+ if(!isRecognition(d)&&d.type==='حصة احتياط')fields.push(...[['الصف / الشعبة',d.reserveClass],['رقم الحصة',d.reservePeriod],['المعلمة الغائبة',d.originalTeacher],['ما تم تنفيذه',d.reserveImplementation]]);
 
  const measure=createCanvas(W,H).getContext('2d');
  const size=24,lh=34,font='"Cairo", Tahoma, Arial';measure.font=size+'px '+font;
  const blocks=[];
  const addText=(value,bold=false)=>{measure.font=(bold?'bold ':'')+(bold?26:size)+'px '+font;for(const para of String(value).split('\n')){const bullet=!bold&&para.match(/^\s*([•●▪-])\s+(.+)$/);const lines=wrap(measure,bullet?bullet[2]:para,W-2*M-(bullet?30:0));lines.forEach((text,i)=>blocks.push({height:lh,text,bold,indent:bullet?30:0,bullet:!!bullet&&i===0}));}};
- addText('يوثّق هذا التقرير النشاط المدرسي وأهدافه وتنفيذه ونتائجه وأثره.');
+ if(!isRecognition(d))addText('يوثّق هذا التقرير النشاط المدرسي وأهدافه وتنفيذه ونتائجه وأثره.');
  for(const [label,value]of fields){const s=Array.isArray(value)?value.filter(Boolean).join(' • '):value;if(!s)continue;addText(label,true);addText(s);blocks.push({height:6});}
  if(photos.length){addText('صور التوثيق',true);for(let i=0;i<photos.length;i+=2)blocks.push({height:254,images:photos.slice(i,i+2),offset:i});}
  measure.font='bold 36px '+font;
- const titleLines=wrap(measure,'تقرير '+d.type+' — '+d.activity,W-2*M);
+ const titleLines=wrap(measure,isRecognition(d)?d.activity:'تقرير '+d.type+' — '+d.activity,W-2*M);
  const top=190+titleLines.length*42+48;
  const signatureHeight=drawSignatures(measure,d,W,M,0,size,font,false)+30;
  const total=blocks.reduce((n,b)=>n+b.height,0),oneCap=BOTTOM-top-signatureHeight;

@@ -1,4 +1,4 @@
-import {displayChoices} from './documentation-choices.js';
+import {displayChoices} from './documentation-choices.js?v=20261021-recognition';
 // Existing school project and session. Public browser key; never add a service key here.
 export const client = window.supabase.createClient('https://ulqwkxzjwdmkspsjzvup.supabase.co','sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV');
 export async function requireUser(){const {data,error}=await client.auth.getUser();if(error||!data?.user)throw new Error('يرجى تسجيل الدخول إلى البوابة أولًا.');return data.user;}

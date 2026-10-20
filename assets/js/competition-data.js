@@ -1,5 +1,5 @@
 import {client,requireUser} from './portal-data.js?v=20261017-edit-complete';
-import {preparePhoto} from './save-documentation.js';
+import {preparePhoto} from './save-documentation.js?v=20261021-recognition';
 export const BUCKET='school-competition-files';
 export async function listCompetitions(){await requireUser();const out=[];for(let start=0;;start+=200){const {data,error}=await client.from('competitions').select('*').order('created_at',{ascending:false}).order('id',{ascending:false}).range(start,start+199);if(error)throw new Error('تعذر تحميل المسابقات: '+error.message);out.push(...data);if(data.length<200)return out;}}
 export async function getCompetition(id){if(!/^\d{1,18}$/.test(String(id)))throw new Error('رقم المسابقة غير صالح.');await requireUser();const {data,error}=await client.from('competitions').select('*').eq('id',id).single();if(error||!data)throw new Error('المسابقة غير موجودة أو لا تملكين صلاحية الاطلاع عليها.');return data;}

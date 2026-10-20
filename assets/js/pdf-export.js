@@ -1,7 +1,7 @@
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
 import {drawSignatures} from './report-signatures.js?v=20261019-cairo';
 import {appendAttachments} from './pdf-attachments.js?v=20261017-edit-complete';
-import {extraSections} from './recognition-model.js?v=20261017-edit-complete';
+import {extraSections} from './recognition-model.js?v=20261021-recognition';
 // Rasterized canvas preserves Arabic shaping and embeds every image. No external services.
 async function loadImage(url) { const res = await fetch(url, { cache: 'no-store' }); if (!res.ok)
     throw new Error('تعذر تحميل إحدى صور التقرير؛ أعيدي المحاولة.'); const blob = await res.blob(); const src = URL.createObjectURL(blob); try {

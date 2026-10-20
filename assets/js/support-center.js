@@ -1,4 +1,4 @@
-import {isCenterReport,isWorkshop,resolveOther,SUPPORT_CENTER} from './documentation-choices.js';
+import {isCenterReport,isWorkshop,resolveOther,SUPPORT_CENTER} from './documentation-choices.js?v=20261021-recognition';
 import {client,academicYear} from './portal-data.js';import {catalog} from './catalog-values.js';
 import {context,load,rpc,sameUser,node,option,STATUS,AUDIENCE,date,schoolDate} from './support-data.js';
 import * as drafts from './support-drafts.js';

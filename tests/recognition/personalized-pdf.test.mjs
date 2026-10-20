@@ -1,0 +1,17 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {createCanvas,loadImage,GlobalFonts} from '@napi-rs/canvas';import {PDFDocument} from 'pdf-lib';
+globalThis.window={supabase:{createClient:()=>({})}};
+for(const w of ['Regular','Bold'])GlobalFonts.registerFromPath(new URL('../../assets/fonts/Cairo-'+w+'.ttf',import.meta.url).pathname,'Cairo');
+const {reportCanvases,reportPDF}=await import('../../assets/js/report-pages.js');
+const logo=await loadImage(new URL('../../school-logo.png',import.meta.url).pathname),photo=createCanvas(700,400);const g=photo.getContext('2d');g.fillStyle='#e5f2ee';g.fillRect(0,0,700,400);g.fillStyle='black';g.font='36px Cairo';g.textAlign='center';g.fillText('صورة تكريم تجريبية',350,210);
+const data={activity:'أنتِ تستحقين الشكر – تكريم المعلمات',type:'فعالية',projects:['أنتِ تستحقين الشكر'],academicYear:'2026-2027',semester:'الفصل الدراسي الأول',goal:'عبارة مخفية لا تظهر',implementation:'وصف مخفي',impact:'أثر مخفي',recommendations:'توصية مخفية',executingEntity:'جهة مخفية',targets:['فئة مخفية'],target:'تفاصيل مخفية',reportPreparedBy:'معدّة تجريبية',reportSupervisors:['assistant','aisha','hiba','services'],recognition:{schemaVersion:2,date:'2026-10-21',awards:['ساعات سعادة','شهادة شكر وتقدير'],recipients:[{id:'a',name:'معلمة تجريبية أولى',department:'العلوم',reason:'المبادرة في دعم الزميلات والتعاون في تنفيذ النشاط.',hours:1},{id:'b',name:'معلمة تجريبية ثانية',department:'الرياضيات',reason:'تنظيم فعالية مدرسية وتقديم أفكار متميزة.',hours:2}]}};
+test('Cairo recognition PDF with 1/5/10 photos: two-page limit, individual reasons, no general fields, last-page footer once and overflow alert',async()=>{
+ await fs.mkdir('.test-output/recognition-personalized',{recursive:true});
+ for(const count of [1,5,10]){const texts=[],colors=[];const pages=reportCanvases({id:'تجريبي',data,attachment_files:[{name:'شهادة تجريبية.pdf'}]},'auto',{logo,photos:Array(count).fill(photo),createCanvas(w,h){const c=createCanvas(w,h),ctx=c.getContext('2d'),fill=ctx.fillText.bind(ctx),lines=[];texts.push(lines);ctx.fillText=(t,x,y)=>{assert.ok(y<1690);lines.push(t);colors.push([ctx.font,ctx.fillStyle]);fill(t,x,y);};return c;}});
+ assert.ok(pages.length<=2);const flat=texts.flat();assert.equal(flat.filter(t=>t==='بإشراف').length,1);assert.ok(texts.at(-1).includes('بإشراف'));assert.ok(flat.some(t=>t.includes('المبادرة في دعم')));assert.ok(flat.some(t=>t.includes('تنظيم فعالية')));
+ for(const hidden of ['الجهة المنفذة','الفئات المستهدفة','الهدف','وصف التنفيذ','النتائج والأثر','التوصيات'])assert.ok(!flat.includes(hidden));assert.ok(!flat.some(t=>/مخفي|آخر تعديل|عدّلته/.test(t)));
+ for(const [font,color]of colors){assert.match(font,/Cairo/);assert.equal(color.toLowerCase(),font.startsWith('bold')?'#18574d':'#000000');}
+ const pdf=await PDFDocument.load(reportPDF(pages));assert.equal(pdf.getPageCount(),pages.length);for(const p of pdf.getPages())assert.equal(p.getWidth(),595.28);
+ await fs.writeFile(`.test-output/recognition-personalized/${count}.pdf`,reportPDF(pages));for(let i=0;i<pages.length;i++)await fs.writeFile(`.test-output/recognition-personalized/${count}-${i+1}.png`,pages[i].toBuffer('image/png'));
+ }
+ const excess=structuredClone(data);excess.recognition.recipients[0].reason='نص مطول '.repeat(2000);assert.throws(()=>reportCanvases({id:'QA',data:excess},'auto',{logo,photos:[],createCanvas}),/لم يُحذف/);
+});
