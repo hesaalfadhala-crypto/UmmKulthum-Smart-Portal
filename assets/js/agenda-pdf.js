@@ -1,6 +1,6 @@
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
 import {DAYS,COLORS,addDays,printable,inSlot,kindName} from './agenda-model.js';
-import {packPDF} from './pdf-export.js?v=20261019-cairo';
+import {packPDF} from './pdf-export.js?v=20261021-spacing';
 function wrap(ctx,text,width){const out=[];for(const paragraph of String(text).split('\n')){let line='';for(const word of paragraph.split(/\s+/)){let part='';for(const ch of word){if(ctx.measureText(part+ch).width>width&&part){if(line){out.push(line);line='';}out.push(part);part=ch;}else part+=ch;}const candidate=line?line+' '+part:part;if(ctx.measureText(candidate).width>width&&line){out.push(line);line=part;}else line=candidate;}out.push(line);}return out;}
 const slotLabel={assembly:'الطابور الصباحي',break:'الفسحة المدرسية',other:'فعاليات وزيارات في أوقات أخرى'};
 function eventText(e,department){return e.title+'\n'+kindName(e)+(e.slot==='other'?' · '+e.starts_at.slice(0,5)+'–'+e.ends_at.slice(0,5):'')+(department?'\nالقسم: '+e.department:'');}

@@ -1,3 +1,22 @@
 @font-face{font-family:Cairo;src:url("fonts/Cairo-Regular.ttf") format("truetype");font-style:normal;font-weight:400;font-display:block}@font-face{font-family:Cairo;src:url("fonts/Cairo-Bold.ttf") format("truetype");font-style:normal;font-weight:700;font-display:block}
 
 article.report,article.readonly,article#report,.read-only-preview{font-family:Cairo,Tahoma,Arial,sans-serif;direction:rtl;text-align:right;color:#000000;background:#fff}article.report :is(p,li,td,span,small),article.readonly :is(p,li,td,span,small),article#report :is(p,li,td,span,small){font-family:Cairo,Tahoma,Arial,sans-serif;color:#000000;font-weight:400}article.report :is(h1,h2,h3,h4,strong,th),article.readonly :is(h1,h2,h3,h4,strong,th),article#report :is(h1,h2,h3,h4,strong,th){font-family:Cairo,Tahoma,Arial,sans-serif;color:#18574D;font-weight:700}article :is(h2,h3,h4){break-after:avoid;page-break-after:avoid}
+
+/* Shared screen, archive and print typography; never compress paragraphs to fit a page. */
+article.report,article.readonly,article#report,.read-only-preview{line-height:1.7;font-size:11.5pt}
+article.report :is(p,li,td),article.readonly :is(p,li,td),article#report :is(p,li,td){line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal}
+article.report p,article.readonly p,article#report p{margin:0 0 7pt}
+article.report :is(h2,h3,h4),article.readonly :is(h2,h3,h4),article#report :is(h2,h3,h4){line-height:1.7;margin:0 0 6pt;break-after:avoid;page-break-after:avoid}
+article.report .report-section,article#report #sections>section,article.readonly>section{margin:0 0 11pt;padding:0}
+article.report #extensionPreview>p{margin:0 0 11pt}
+article.report .report-section p,article#report #sections>section p{margin:0;line-height:1.7}
+article.report :is(ul,ol),article#report :is(ul,ol){padding-inline-start:20pt;margin:7pt 0 11pt}
+article.report li,article#report li{margin:0 0 7pt}
+article.report :is(table,figure),article#report :is(table,figure){margin-block:11pt}
+article.report .info,article#report .meta{line-height:1.7;gap:11pt;margin-bottom:11pt}
+article#report .meta b{color:#18574D;font-weight:700;margin-bottom:6pt}
+@media print{article.report,article#report,article.readonly{font-size:11.5pt;line-height:1.7}article.report p,article#report section p,article.readonly p{font-size:11.5pt;line-height:1.7}}
+
+article.report .report-paragraph,article#report .report-paragraph,article.readonly .report-paragraph{display:block;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+article.report .report-paragraph+.report-paragraph,article#report .report-paragraph+.report-paragraph,article.readonly .report-paragraph+.report-paragraph{margin-top:7pt}
+article .report-paragraph.report-bullet{padding-inline-start:14pt;text-indent:-14pt}

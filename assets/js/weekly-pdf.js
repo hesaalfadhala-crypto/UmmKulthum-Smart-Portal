@@ -1,5 +1,5 @@
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
-import {packPDF} from './pdf-export.js?v=20261019-cairo';import {SCHOOL,DAYS,PERIODS,CATEGORIES,STATES,dayDate,timestamp} from './weekly-model.js';
+import {packPDF} from './pdf-export.js?v=20261021-spacing';import {SCHOOL,DAYS,PERIODS,CATEGORIES,STATES,dayDate,timestamp} from './weekly-model.js';
 export function weeklyCanvases(plan,period,{logo,createCanvas,missing=null}){const W=2480,H=1754,M=70,limit=H-105,canvases=[];let ctx,y;
  const bidi=value=>String(value).replace(/[A-Za-z0-9][A-Za-z0-9@._:/+-]*/g,v=>'\u2066'+v+'\u2069');
  const font=(size=30,bold=false)=>{ctx.font=(bold?'bold ':'')+size+'px "Cairo",Arial';ctx.direction='rtl';ctx.textAlign='right';};

@@ -1,3 +1,4 @@
+import {appendReportText} from './report-text.js?v=20261021-spacing';
 import {element,client} from './portal-data.js?v=20261017-edit-complete';
 import {RECOGNITION_PROJECT,SCOPED_TYPES,RECOGNITION_KINDS,AWARDS,extraSections,RECOGNITION_TITLE,isRecognition} from './recognition-model.js?v=20261021-recognition';
 const $=id=>document.getElementById(id);let staff=[],allowed=false,wasRecognition=false;
@@ -68,7 +69,7 @@ export function updateExtensions(d){
  for(const id of ['pActivity','pDate','pExecutor','pLocation','pType','pDepartment'])$(id)?.parentElement?.toggleAttribute('hidden',rec);
  for(const id of ['pAreas','pProjects','pCommittees'])$(id)?.closest('.report-section')?.toggleAttribute('hidden',rec);
  if(rec){$('trainingDocumentationFields').hidden=true;}
- const box=$('extensionPreview');box.replaceChildren();for(const [k,v]of extraSections(d)){if(!v?.length)continue;box.append(element('h4',k),element('p',Array.isArray(v)?v.join(' • '):v));}
+ const box=$('extensionPreview');box.replaceChildren();for(const [k,v]of extraSections(d)){if(!v?.length)continue;const p=element('p');appendReportText(p,Array.isArray(v)?v.join(' • '):v);box.append(element('h4',k),p);}
  if(rec&&!allowed)box.append(element('p','تعذر التحقق من صلاحية إنشاء التكريم. أعيدي تحميل الصفحة.'));
  wasRecognition=rec;
 }

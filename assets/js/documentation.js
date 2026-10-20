@@ -1,9 +1,10 @@
+import {appendReportText} from './report-text.js?v=20261021-spacing';
 import {suggestDepartment} from './staff-display.js?v=20261019-staff';
 import {agendaEvent} from './agenda-data.js';
-import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261019-cairo';
+import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261021-spacing';
 import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261021-recognition';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
-import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-recognition';
+import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-spacing';
 import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-recognition';
 import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261017-edit-complete';
 import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261021-recognition';
@@ -51,7 +52,7 @@ function output(id, value) {
     const el = document.getElementById(id);
     if (!el) return;
     const text = Array.isArray(value) ? value.join(' • ') : value;
-    el.textContent = text || '—';
+    appendReportText(el,text||'—');
     el.classList.toggle('empty', !text);
 }
 function preview() {

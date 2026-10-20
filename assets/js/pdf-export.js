@@ -1,5 +1,5 @@
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
-import {drawSignatures} from './report-signatures.js?v=20261019-cairo';
+import {drawSignatures} from './report-signatures.js?v=20261021-spacing';
 import {appendAttachments} from './pdf-attachments.js?v=20261017-edit-complete';
 import {extraSections} from './recognition-model.js?v=20261021-recognition';
 // Rasterized canvas preserves Arabic shaping and embeds every image. No external services.
@@ -75,8 +75,8 @@ export async function renderPDF(record) {await ensureReportFonts();
         lines.push(line);
     } return lines; };
     const section = (label, value) => { if (!value?.length)
-        return; const s = Array.isArray(value) ? value.join(' • ') : String(value); ctx.font = '24px "Cairo", Tahoma, Arial'; const lines = wrap(s, W - 2 * M - 285); ctx.font = 'bold 24px "Cairo", Tahoma, Arial'; const labels = wrap(label, 255); ensure(Math.max(80, labels.length * 35)); const count = Math.max(lines.length, labels.length); for (let i = 0; i < count; i++) {
-        ensure(36);
+        return; const s = Array.isArray(value) ? value.join(' • ') : String(value); ctx.font = '24px "Cairo", Tahoma, Arial'; const lines = wrap(s, W - 2 * M - 285); ctx.font = 'bold 24px "Cairo", Tahoma, Arial'; const labels = wrap(label, 255); ensure(Math.max(80, labels.length * 41)); const count = Math.max(lines.length, labels.length); for (let i = 0; i < count; i++) {
+        ensure(42);
         ctx.fillStyle = '#18574D';
         ctx.font = 'bold 24px "Cairo", Tahoma, Arial';
         if (labels[i])
@@ -85,8 +85,8 @@ export async function renderPDF(record) {await ensureReportFonts();
         ctx.font = '24px "Cairo", Tahoma, Arial';
         if (lines[i])
             ctx.fillText(lines[i], W - M - 285, y + 25);
-        y += 35;
-    } y += 18; };
+        y += 41;
+    } y += 23; };
     start();
     const logoH = (W - 2 * M) * logo.height / logo.width;
     ctx.drawImage(logo, M, y, W - 2 * M, logoH);
@@ -117,7 +117,7 @@ export async function renderPDF(record) {await ensureReportFonts();
                 ctx.font = '24px "Cairo", Tahoma, Arial';
                 ctx.fillStyle = '#000000';
                 ctx.fillText(l, W - M, y);
-                y += 35;
+                y += 41;
             }
         }
     y += 16;
@@ -159,6 +159,7 @@ export async function renderPDF(record) {await ensureReportFonts();
     ensure(signatureHeight+28);y=Math.max(y+22,limit-signatureHeight);
     drawSignatures(ctx,d,W,M,y,24);
     canvases.forEach((canvas, i) => { const g = canvas.getContext('2d'); g.strokeStyle = '#dce5e3'; g.beginPath(); g.moveTo(M, 1640); g.lineTo(W - M, 1640); g.stroke(); g.fillStyle = '#000000'; g.font = '19px "Cairo", Tahoma, Arial'; g.direction = 'rtl'; g.textAlign = 'right'; g.fillText('رقم التوثيق: ' + String(record.id).slice(0, 8), W - M, 1675); g.textAlign = 'left'; g.fillText('صفحة ' + (i + 1) + ' من ' + canvases.length, M, 1675); });
+    if(canvases.length>2)throw new Error('لا يتسع المحتوى في صفحتين بصورة مقروءة. قلّلي النصوص أو الصور؛ لم يُحذف أي محتوى.');
     const pages = canvases.map(c => Uint8Array.from(atob(c.toDataURL('image/jpeg', .94).split(',')[1]), x => x.charCodeAt(0)));
     return packPDF(pages);
 }

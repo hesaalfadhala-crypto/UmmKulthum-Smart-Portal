@@ -1,7 +1,9 @@
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
-import {drawSignatures} from './report-signatures.js?v=20261019-cairo';
+import {drawSignatures} from './report-signatures.js?v=20261021-spacing';
 import {extraSections,isRecognition,reportFields} from './recognition-model.js?v=20261021-recognition';
-import {packPDF} from './pdf-export.js?v=20261019-cairo';
+import {packPDF} from './pdf-export.js?v=20261021-spacing';
+// Canvas pixels scale to A4 at 0.48 pt/px: 14px ≈ 6.7pt; 12px ≈ 5.8pt; 22px ≈ 10.6pt.
+export const REPORT_SPACING=Object.freeze({lineHeight:1.7,paragraph:14,heading:12,section:22});
 export const PAGE_MODES=['auto','one','two'];
 const W=1240,H=1754,M=65,BOTTOM=1600;
 const overflow=()=>new Error('لا يتسع المحتوى في التنسيق المختار بصورة مقروءة. اختاري صفحتين أو قلّلي الصور أو النصوص. لم يُحذف أي محتوى.');
@@ -15,12 +17,23 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
  if(!isRecognition(d)&&d.type==='حصة احتياط')fields.push(...[['الصف / الشعبة',d.reserveClass],['رقم الحصة',d.reservePeriod],['المعلمة الغائبة',d.originalTeacher],['ما تم تنفيذه',d.reserveImplementation]]);
 
  const measure=createCanvas(W,H).getContext('2d');
- const size=24,lh=34,font='"Cairo", Tahoma, Arial';measure.font=size+'px '+font;
+ const size=24,lh=Math.ceil(size*REPORT_SPACING.lineHeight),font='"Cairo", Tahoma, Arial';measure.font=size+'px '+font;
  const blocks=[];
- const addText=(value,bold=false)=>{measure.font=(bold?'bold ':'')+(bold?26:size)+'px '+font;for(const para of String(value).split('\n')){const bullet=!bold&&para.match(/^\s*([•●▪-])\s+(.+)$/);const lines=wrap(measure,bullet?bullet[2]:para,W-2*M-(bullet?30:0));lines.forEach((text,i)=>blocks.push({height:lh,text,bold,indent:bullet?30:0,bullet:!!bullet&&i===0}));}};
- if(!isRecognition(d))addText('يوثّق هذا التقرير النشاط المدرسي وأهدافه وتنفيذه ونتائجه وأثره.');
- for(const [label,value]of fields){const s=Array.isArray(value)?value.filter(Boolean).join(' • '):value;if(!s)continue;addText(label,true);addText(s);blocks.push({height:6});}
- if(photos.length){addText('صور التوثيق',true);for(let i=0;i<photos.length;i+=2)blocks.push({height:254,images:photos.slice(i,i+2),offset:i});}
+ const space=(height,keepWithNext=false)=>blocks.push({height,space:true,keepWithNext});
+ const addText=(value,bold=false)=>{
+  measure.font=(bold?'bold ':'')+(bold?26:size)+'px '+font;
+  const paragraphs=String(value).replace(/\r\n?/g,'\n').split('\n');
+  paragraphs.forEach((para,index)=>{
+   if(index&&!bold)space(REPORT_SPACING.paragraph,true);
+   const bullet=!bold&&para.match(/^\s*([•●▪-])\s+(.+)$/);
+   const lines=wrap(measure,bullet?bullet[2]:para,W-2*M-(bullet?30:0));
+   lines.forEach((text,i)=>blocks.push({height:bold?Math.ceil(26*REPORT_SPACING.lineHeight):lh,text,bold,indent:bullet?30:0,bullet:!!bullet&&i===0,keepWithNext:bold||i===0&&lines.length>1}));
+  });
+ };
+ const heading=value=>{addText(value,true);space(REPORT_SPACING.heading,true);};
+ if(!isRecognition(d)){addText('يوثّق هذا التقرير النشاط المدرسي وأهدافه وتنفيذه ونتائجه وأثره.');space(REPORT_SPACING.section);}
+ for(const [label,value]of fields){const s=Array.isArray(value)?value.filter(Boolean).join(' • '):value;if(!s)continue;heading(label);addText(s);space(REPORT_SPACING.section);}
+ if(photos.length){heading('صور التوثيق');const columns=2;for(let i=0;i<photos.length;i+=columns)blocks.push({height:272,images:photos.slice(i,i+columns),offset:i,columns});}
  measure.font='bold 36px '+font;
  const titleLines=wrap(measure,isRecognition(d)?d.activity:'تقرير '+d.type+' — '+d.activity,W-2*M);
  const top=190+titleLines.length*42+48;
@@ -30,11 +43,11 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
  const cap1=BOTTOM-top,cap2=BOTTOM-top-signatureHeight;
  if(top>600||total>(count===1?oneCap:cap1+cap2))throw overflow();
  let pages=[blocks];
- if(count===2){let best=null,score=Infinity,used=0;for(let i=1;i<blocks.length;i++){used+=blocks[i-1].height;const rest=total-used;if(used>cap1||rest>cap2||blocks[i-1].bold||!rest)continue;const diff=Math.abs(used-rest);if(diff<score){best=i;score=diff;}}if(best===null)throw overflow();pages=[blocks.slice(0,best),blocks.slice(best)];}
+ if(count===2){let best=null,score=Infinity,used=0;for(let i=1;i<blocks.length;i++){used+=blocks[i-1].height;const rest=total-used;if(used>cap1||rest>cap2||blocks[i-1].keepWithNext||!rest)continue;const diff=Math.abs(used-(rest+signatureHeight));if(diff<score){best=i;score=diff;}}if(best===null)throw overflow();pages=[blocks.slice(0,best),blocks.slice(best)];}
  return pages.map((items,page)=>{const c=createCanvas(W,H),g=c.getContext('2d');g.fillStyle='white';g.fillRect(0,0,W,H);g.direction='rtl';g.textAlign='right';
  const scale=Math.min((W-2*M)/logo.width,115/logo.height);g.drawImage(logo,(W-logo.width*scale)/2,30,logo.width*scale,logo.height*scale);
  g.fillStyle='#18574D';g.font='bold 36px '+font;let ty=190;for(const line of titleLines){g.fillText(line,W-M,ty);ty+=42;}g.font='24px '+font;g.fillStyle='#000000';g.fillText('العام الدراسي '+(d.academicYear||'غير مسجل')+' · '+(d.semester||''),W-M,ty+8);
- let y=top;for(const b of items){if(b.text!==undefined){g.fillStyle=b.bold?'#18574D':'#000000';g.font=(b.bold?'bold ':'')+(b.bold?26:size)+'px '+font;if(b.bullet){g.beginPath();g.arc(W-M-7,y+size*.65,3,0,Math.PI*2);g.fill();}g.fillText(b.text,W-M-(b.indent||0),y+size);}if(b.images){const gap=20,bw=(W-2*M-gap)/2,bh=220;b.images.forEach((im,i)=>{const x=W-M-bw-i*(bw+gap);g.fillStyle='#f2f5f3';g.fillRect(x,y,bw,bh);const r=Math.min(bw/im.width,bh/im.height);g.drawImage(im,x+(bw-im.width*r)/2,y+(bh-im.height*r)/2,im.width*r,im.height*r);g.fillStyle='#000000';g.font='20px '+font;g.fillText('الصورة '+(b.offset+i+1),x+bw,y+bh+24);});}y+=b.height;}
+ let y=top;for(const b of items){if(b.text!==undefined){g.fillStyle=b.bold?'#18574D':'#000000';g.font=(b.bold?'bold ':'')+(b.bold?26:size)+'px '+font;if(b.bullet){g.beginPath();g.arc(W-M-7,y+size*.65,3,0,Math.PI*2);g.fill();}g.fillText(b.text,W-M-(b.indent||0),y+size);}if(b.images){const gap=20,columns=b.columns||2,bw=(W-2*M-gap*(columns-1))/columns,bh=220;b.images.forEach((im,i)=>{const x=W-M-bw-i*(bw+gap);g.fillStyle='#f2f5f3';g.fillRect(x,y,bw,bh);const r=Math.min(bw/im.width,bh/im.height);g.drawImage(im,x+(bw-im.width*r)/2,y+(bh-im.height*r)/2,im.width*r,im.height*r);g.fillStyle='#000000';g.font='20px '+font;g.fillText('الصورة '+(b.offset+i+1),x+bw,y+bh+24);});}y+=b.height;}
  if(page===pages.length-1)drawSignatures(g,d,W,M,y+20,size,font,true);
  g.fillStyle='#000000';g.font='20px '+font;g.textAlign='right';g.fillText('بوابة أم كلثوم الذكية · رقم التوثيق '+String(record.id),W-M,1680);g.textAlign='left';g.fillText('صفحة '+(page+1)+' من '+pages.length,M,1680);return c;});
 }

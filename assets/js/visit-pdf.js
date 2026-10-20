@@ -1,5 +1,5 @@
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
-import {packPDF} from './pdf-export.js?v=20261019-cairo';
+import {packPDF} from './pdf-export.js?v=20261021-spacing';
 import {SCHOOL,REPORT_TITLE,PRINCIPAL,LEVELS,JUDGMENTS,SKILLS,WORK,SUPPORT,schoolDate,OBSERVER_ROLES} from './visit-criteria.js';
 import {reportRows,percent,compare} from './visit-analysis.js';
 // Same renderer in the browser and in isolated export tests; Arabic fonts are bundled.

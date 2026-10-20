@@ -35,11 +35,11 @@ export function drawSignatures(ctx,d,width,margin,top,size=24,font='Cairo, Tahom
  const gap=20,total=width-2*margin,unit=(total-2*gap)/4.2,cw=unit*2.2,center=width/2;
  ctx.direction='rtl';ctx.textAlign='center';
  const lines=(value,max,bold=false)=>{ctx.font=(bold?'bold ':'')+(bold?24:22)+'px '+font;const out=[];for(const para of String(value).split('\n')){let line='';for(const word of para.split(/\s+/)){if(line&&ctx.measureText(line+' '+word).width>max){out.push(line);line=word;}else line+=(line?' ':'')+word;}out.push(line);}return out;};
- const text=(value,x,y,max,bold=false)=>{const ls=lines(value,max,bold);if(draw){ctx.fillStyle=bold?'#18574D':'#000000';for(let i=0;i<ls.length;i++)ctx.fillText(ls[i],x,y+24+i*32);}return ls.length*32;};
+ const text=(value,x,y,max,bold=false)=>{const ls=lines(value,max,bold);if(draw){ctx.fillStyle=bold?'#18574D':'#000000';for(let i=0;i<ls.length;i++)ctx.fillText(ls[i],x,y+(bold?24:22)+i*Math.ceil((bold?24:22)*1.7));}return ls.length*Math.ceil((bold?24:22)*1.7);};
  const data=signatures(d),groups=supervisionGroups(d);let height=0;
- for(const [i,x]of [[0,width-margin-unit/2],[2,margin+unit/2]]){let y=top;y+=text(data[i][0],x,y,unit,true)+4;y+=text(data[i][1],x,y,unit);height=Math.max(height,y-top);}
- let y=top;if(data[1][0])y+=text('بإشراف',center,y,cw,true)+4;
- if(groups.assistants.length){y+=text(groups.assistants.length>1?'المديرات المساعدات':'المديرة المساعدة',center,y,cw,true)+4;const sw=cw/groups.assistants.length;let h=0;groups.assistants.forEach((s,i)=>{h=Math.max(h,text(s.name,center+cw/2-sw*(i+.5),y,sw-12));});y+=h+6;}
- if(groups.services){y+=text('رئيسة الخدمات',center,y,cw,true)+4;y+=text(groups.services.name,center,y,cw);}
+ for(const [i,x]of [[0,width-margin-unit/2],[2,margin+unit/2]]){let y=top;y+=text(data[i][0],x,y,unit,true)+12;y+=text(data[i][1],x,y,unit);height=Math.max(height,y-top);}
+ let y=top;if(data[1][0])y+=text('بإشراف',center,y,cw,true)+12;
+ if(groups.assistants.length){y+=text(groups.assistants.length>1?'المديرات المساعدات':'المديرة المساعدة',center,y,cw,true)+12;const sw=cw/groups.assistants.length;let h=0;groups.assistants.forEach((s,i)=>{h=Math.max(h,text(s.name,center+cw/2-sw*(i+.5),y,sw-12));});y+=h+6;}
+ if(groups.services){y+=text('رئيسة الخدمات',center,y,cw,true)+12;y+=text(groups.services.name,center,y,cw);}
  ctx.textAlign='right';return Math.max(height,y-top);
 }
