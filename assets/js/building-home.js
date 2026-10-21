@@ -1,0 +1,3 @@
+import {client,requireUser} from './portal-data.js?v=20261021-unified';
+async function refresh(){const link=document.getElementById('buildingMenu');if(!link)return;try{const u=await requireUser();const c=await client.rpc('building_context');if(c.error)throw c.error;link.hidden=false;const {data,error}=await client.from('building_notifications').select('id').eq('recipient_id',u.id).is('read_at',null);if(error)throw error;const bell=document.getElementById('buildingHomeBell');bell.textContent=data.length?'🔔 '+data.length:'';bell.setAttribute('aria-label',data.length+' إشعارات متابعة المبنى غير مقروءة');}catch{link.hidden=true;}}
+void refresh();window.addEventListener('focus',()=>void refresh());
