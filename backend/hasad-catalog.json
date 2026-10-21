@@ -1,0 +1,333 @@
+{
+  "source": "مشروع حصاد الدانات، الصفحات 2 إلى 7",
+  "manual_review": true,
+  "categories": [
+    {
+      "id": "discipline",
+      "title": "ملكات الانضباط",
+      "sort_order": 1
+    },
+    {
+      "id": "department",
+      "title": "القسم المتميز",
+      "sort_order": 2
+    },
+    {
+      "id": "stars",
+      "title": "نجوم لامعة",
+      "sort_order": 3
+    },
+    {
+      "id": "digital",
+      "title": "بصمات رقمية",
+      "sort_order": 4
+    },
+    {
+      "id": "inspiration",
+      "title": "دانات الإلهام والتحدي",
+      "sort_order": 5
+    }
+  ],
+  "levels": [
+    {
+      "id": "discipline-gold",
+      "category_id": "discipline",
+      "title": "البوبيل الذهبي",
+      "period": "شهر",
+      "review_note": ""
+    },
+    {
+      "id": "discipline-silver",
+      "category_id": "discipline",
+      "title": "البوبيل الفضي",
+      "period": "شهر",
+      "review_note": "شرط «غياب 1 أو استئذان 1 أو تأخير 1» يحتاج تفسيرًا معتمدًا. لا يتحقق النظام من الاستحقاق تلقائيًا؛ يلزم تحقق المديرة."
+    },
+    {
+      "id": "discipline-vip",
+      "category_id": "discipline",
+      "title": "VIP",
+      "period": "فصل",
+      "review_note": ""
+    },
+    {
+      "id": "department-distinguished",
+      "category_id": "department",
+      "title": "القسم المتميز",
+      "period": "شهر",
+      "review_note": ""
+    },
+    {
+      "id": "stars-gold",
+      "category_id": "stars",
+      "title": "نجوم لامعة ذهبية",
+      "period": "فصل",
+      "review_note": ""
+    },
+    {
+      "id": "stars-silver",
+      "category_id": "stars",
+      "title": "نجوم لامعة فضية",
+      "period": "",
+      "review_note": ""
+    },
+    {
+      "id": "digital-distinguished",
+      "category_id": "digital",
+      "title": "بصمات رقمية",
+      "period": "",
+      "review_note": ""
+    },
+    {
+      "id": "inspiration-distinguished",
+      "category_id": "inspiration",
+      "title": "دانات الإلهام والتحدي",
+      "period": "فصل",
+      "review_note": ""
+    }
+  ],
+  "criteria": [
+    {
+      "id": "discipline-gold-1",
+      "level_id": "discipline-gold",
+      "title": "طوال الشهر: غياب 0، استئذان 0، تأخير 0.",
+      "sort_order": 1
+    },
+    {
+      "id": "discipline-silver-1",
+      "level_id": "discipline-silver",
+      "title": "طوال الشهر: غياب 1 أو استئذان 1 أو تأخير 1.",
+      "sort_order": 1
+    },
+    {
+      "id": "discipline-vip-1",
+      "level_id": "discipline-vip",
+      "title": "طوال الفصل: غياب 0، استئذان 0، تأخير 0.",
+      "sort_order": 1
+    },
+    {
+      "id": "department-distinguished-1",
+      "level_id": "department-distinguished",
+      "title": "الانضباط الوظيفي لجميع منتسبات القسم لمدة شهر كامل.",
+      "sort_order": 1
+    },
+    {
+      "id": "department-distinguished-2",
+      "level_id": "department-distinguished",
+      "title": "المهنية في العمل وأداء ما يوكل إليهن من مهام على أكمل وجه.",
+      "sort_order": 2
+    },
+    {
+      "id": "department-distinguished-3",
+      "level_id": "department-distinguished",
+      "title": "المبادرة والتعاون مع جميع أقسام المدرسة.",
+      "sort_order": 3
+    },
+    {
+      "id": "department-distinguished-4",
+      "level_id": "department-distinguished",
+      "title": "التميز في تفعيل الأسابيع الثقافية.",
+      "sort_order": 4
+    },
+    {
+      "id": "department-distinguished-5",
+      "level_id": "department-distinguished",
+      "title": "إعداد فعاليات وبرامج تعزز من الشراكة المجتمعية.",
+      "sort_order": 5
+    },
+    {
+      "id": "stars-gold-1",
+      "level_id": "stars-gold",
+      "title": "الحصول على تقدير يتجاوز التوقعات بكثير في المواقف التعليمية.",
+      "sort_order": 1
+    },
+    {
+      "id": "stars-gold-2",
+      "level_id": "stars-gold",
+      "title": "التميز في الأعمال الكتابية وتميز الاحتفاء بها في الصفوف.",
+      "sort_order": 2
+    },
+    {
+      "id": "stars-gold-3",
+      "level_id": "stars-gold",
+      "title": "حصول صفوف المعلمة على أعلى نسبة إتقان.",
+      "sort_order": 3
+    },
+    {
+      "id": "stars-gold-4",
+      "level_id": "stars-gold",
+      "title": "المبادرة في تقديم أكثر من ورشتين ضمن مركز الدعم والتطوير المهني خلال الفصل.",
+      "sort_order": 4
+    },
+    {
+      "id": "stars-gold-5",
+      "level_id": "stars-gold",
+      "title": "الحصول على لقب التوأم الذهبي ضمن مركز الدعم والتطوير المهني.",
+      "sort_order": 5
+    },
+    {
+      "id": "stars-silver-1",
+      "level_id": "stars-silver",
+      "title": "الحصول على تقدير يتجاوز التوقعات في المواقف التعليمية.",
+      "sort_order": 1
+    },
+    {
+      "id": "stars-silver-2",
+      "level_id": "stars-silver",
+      "title": "المبادرة في تقديم ورشة على الأقل ضمن مركز الدعم والتطوير المهني.",
+      "sort_order": 2
+    },
+    {
+      "id": "digital-distinguished-1",
+      "level_id": "digital-distinguished",
+      "title": "تقديم ممارسة متميزة في التمكين الرقمي.",
+      "sort_order": 1
+    },
+    {
+      "id": "digital-distinguished-2",
+      "level_id": "digital-distinguished",
+      "title": "المبادرة في تقديم ورش ضمن فريق التمكين الرقمي.",
+      "sort_order": 2
+    },
+    {
+      "id": "digital-distinguished-3",
+      "level_id": "digital-distinguished",
+      "title": "حصول المعلمة على شهادة المعلم الخبير.",
+      "sort_order": 3
+    },
+    {
+      "id": "digital-distinguished-4",
+      "level_id": "digital-distinguished",
+      "title": "المساهمة في حصول المدرسة على لقب المدرسة الحاضنة للتكنولوجيا.",
+      "sort_order": 4
+    },
+    {
+      "id": "digital-distinguished-5",
+      "level_id": "digital-distinguished",
+      "title": "الترشح لتحقيق أعلى نسبة مشاركة شهريًا في تفعيل بوابة أم كلثوم الذكية.",
+      "sort_order": 5
+    },
+    {
+      "id": "digital-distinguished-6",
+      "level_id": "digital-distinguished",
+      "title": "تقديم دروس نموذجية عند زيارات الوفود وإدارة سياسات التعليم.",
+      "sort_order": 6
+    },
+    {
+      "id": "inspiration-distinguished-1",
+      "level_id": "inspiration-distinguished",
+      "title": "المشاركة في عمل تطوعي متميز.",
+      "sort_order": 1
+    },
+    {
+      "id": "inspiration-distinguished-2",
+      "level_id": "inspiration-distinguished",
+      "title": "أداء عمل متميز أو حصاد مركز على مستوى وزاري.",
+      "sort_order": 2
+    },
+    {
+      "id": "inspiration-distinguished-3",
+      "level_id": "inspiration-distinguished",
+      "title": "تحقيق قصة نجاح خلال الفصل الدراسي.",
+      "sort_order": 3
+    },
+    {
+      "id": "inspiration-distinguished-4",
+      "level_id": "inspiration-distinguished",
+      "title": "تقديم بحث إجرائي متميز.",
+      "sort_order": 4
+    },
+    {
+      "id": "inspiration-distinguished-5",
+      "level_id": "inspiration-distinguished",
+      "title": "تقديم مقترح لتحسين وتبسيط إجراءات العمل بما يوفر الوقت والجهد والميزانية.",
+      "sort_order": 5
+    }
+  ],
+  "reward_rules": [
+    {
+      "id": "discipline-gold-hours",
+      "level_id": "discipline-gold",
+      "kind": "hours",
+      "quantity": 3,
+      "title": "3 ساعات سعادة"
+    },
+    {
+      "id": "discipline-silver-hours",
+      "level_id": "discipline-silver",
+      "kind": "hours",
+      "quantity": 2,
+      "title": "ساعتان سعادة"
+    },
+    {
+      "id": "discipline-vip-day",
+      "level_id": "discipline-vip",
+      "kind": "day",
+      "quantity": 1,
+      "title": "يوم تعويضي"
+    },
+    {
+      "id": "department-distinguished-certificate",
+      "level_id": "department-distinguished",
+      "kind": "certificate",
+      "quantity": 1,
+      "title": "شهادة القسم المتميز"
+    },
+    {
+      "id": "department-distinguished-breakfast",
+      "level_id": "department-distinguished",
+      "kind": "breakfast",
+      "quantity": 1,
+      "title": "فطور جماعي للقسم"
+    },
+    {
+      "id": "stars-gold-certificate",
+      "level_id": "stars-gold",
+      "kind": "certificate",
+      "quantity": 1,
+      "title": "شهادات شكر"
+    },
+    {
+      "id": "stars-gold-hours",
+      "level_id": "stars-gold",
+      "kind": "hours",
+      "quantity": 3,
+      "title": "3 ساعات سعادة"
+    },
+    {
+      "id": "stars-silver-certificate",
+      "level_id": "stars-silver",
+      "kind": "certificate",
+      "quantity": 1,
+      "title": "شهادات شكر"
+    },
+    {
+      "id": "stars-silver-hours",
+      "level_id": "stars-silver",
+      "kind": "hours",
+      "quantity": 2,
+      "title": "ساعتان سعادة"
+    },
+    {
+      "id": "digital-distinguished-hours",
+      "level_id": "digital-distinguished",
+      "kind": "hours",
+      "quantity": 3,
+      "title": "3 ساعات سعادة"
+    },
+    {
+      "id": "inspiration-distinguished-certificate",
+      "level_id": "inspiration-distinguished",
+      "kind": "certificate",
+      "quantity": 1,
+      "title": "شهادات شكر"
+    },
+    {
+      "id": "inspiration-distinguished-day",
+      "level_id": "inspiration-distinguished",
+      "kind": "day",
+      "quantity": 1,
+      "title": "يوم تعويضي"
+    }
+  ]
+}
