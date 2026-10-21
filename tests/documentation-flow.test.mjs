@@ -8,6 +8,7 @@ const require = createRequire(import.meta.url);
 const { createCanvas, Image: NativeImage, GlobalFonts } = require('@napi-rs/canvas');
 GlobalFonts.registerFromPath('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 'Tahoma');
 const root = path.resolve(import.meta.dirname, '..');
+globalThis.FontFace=class {constructor(family,source){this.family=family;this.source=source;}async load(){const url=this.source.match(/url\("(.*?)"\)/)[1];assert.ok(GlobalFonts.registerFromPath(new URL(url).pathname,this.family));return this;}};
 const objects = new Map();
 let objectId = 0, downloadedName;
 URL.createObjectURL = blob => { const url = 'blob:test-' + objectId++; objects.set(url, blob); return url; };
@@ -23,7 +24,7 @@ globalThis.Image = function BrowserImage() {
     return image;
 };
 globalThis.document = {
-    fonts: { ready: Promise.resolve() },
+    fonts: { ready: Promise.resolve(), add(){} },
     createElement(tag) {
         if (tag === 'a') return { click() { downloadedName = this.download; } };
         assert.equal(tag, 'canvas');
@@ -135,9 +136,7 @@ test('upload → archive → retrieve → static PDF preserves fields and all im
     await exportPDF(record); // catches the original numeric-id filename regression
     assert.match(downloadedName, /-1\.pdf$/);
     const large = { ...record, data: { ...record.data, implementation: 'شرح طويل لتجربة التوثيق والاسترجاع.\n'.repeat(90) }, photos: Array.from({ length: 10 }, (_, i) => record.photos[i % 2]) };
-    const longPDF = await renderPDF(large);
-    assert.ok(/\/Count ([4-9]|[1-9][0-9]+)/.test(new TextDecoder().decode(longPDF)));
-    if (destination) await fs.writeFile(path.join(destination, 'original-portal-long.pdf'), longPDF);
+    await assert.rejects(renderPDF(large),/لا يتسع المحتوى في صفحتين/); // Current approved print rule warns instead of clipping.
 });
 
 test('lost insert response and repeated save recover one record without re-upload', async () => {

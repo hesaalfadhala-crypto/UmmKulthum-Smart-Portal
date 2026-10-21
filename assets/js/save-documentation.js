@@ -111,7 +111,7 @@ export async function saveSubmission(client, userId, submission, checkpoint, pro
     await checkpoint(submission);
     try {
         const { data, error } = await client.from('documentations')
-            .insert({...databaseRecord(userId, submission),...(submission.data.agendaEventId?{agenda_event_id:submission.data.agendaEventId}:{})}).select('id').single();
+            .insert({...databaseRecord(userId, submission),status:'published',...(submission.data.agendaEventId?{agenda_event_id:submission.data.agendaEventId}:{})}).select('id').single();
         if (error || data?.id == null) throw new Error('تعذر تأكيد الحفظ.');
         return data;
     } catch {

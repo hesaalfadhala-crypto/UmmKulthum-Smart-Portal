@@ -1,5 +1,5 @@
 import {appendReportText} from './report-text.js?v=20261021-spacing';
-import {installAchievementReview} from './achievement-review.js?v=20261020-auto';
+import {installAchievementReview} from './achievement-review.js?v=20261021-minimum';
 import {renderSignatures} from './report-signatures.js?v=20261021-spacing';
 import {editContext} from './edit-documentation.js?v=20261021-recognition';
 import {reportFields,isRecognition} from './recognition-model.js?v=20261021-unified';

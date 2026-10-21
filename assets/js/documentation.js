@@ -7,7 +7,7 @@ import {installOtherChoices,displayChoices,validateOtherChoices} from './documen
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-spacing';
 import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-unified';
 import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261021-unified';
-import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261021-recognition';
+import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261021-minimum';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
