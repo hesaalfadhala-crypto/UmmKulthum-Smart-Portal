@@ -1,5 +1,5 @@
 import {listBuildingDocumentations} from './building-documentation-data.js?v=20261023';
-import {BD_PROJECT_FILTER,buildingDocumentationEntries,buildingArchiveVisible,healthCommitteeId,buildingDocHref} from './building-documentation-model.js?v=20261024-photos';
+import {BD_PROJECT_FILTER,buildingDocumentationEntries,buildingArchiveVisible,healthCommitteeId,buildingDocHref} from './building-documentation-model.js?v=20261024-date';
 import {listCompetitions,deleteCompetition} from './competition-data.js?v=20261021-unified';
 import {motivationStats} from './motivation-model.js';
 import {SUPERVISORS,selectedSupervisors} from './report-signatures.js?v=20261021-spacing';

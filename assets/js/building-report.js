@@ -1,4 +1,4 @@
-import {drawDocumentationFooter} from './building-documentation-model.js?v=20261024-photos';
+import {drawDocumentationFooter} from './building-documentation-model.js?v=20261024-date';
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';import {packPDF} from './pdf-export.js?v=20261021-spacing';import {drawSignatures,renderSignatures} from './report-signatures.js?v=20261021-spacing';import {reportSections,KINDS} from './building-model.js?v=20261021-building';
 const W=1240,H=1754,M=70,FONT='"Cairo",Tahoma,Arial';
 function lines(g,value,max){const out=[];for(const para of String(value||'').replace(/\r/g,'').split('\n')){let current='';for(const word of para.split(/\s+/)){let part='';for(const ch of word){if(g.measureText(part+ch).width>max){if(current){out.push(current);current='';}out.push(part);part=ch;}else part+=ch;}if(current&&g.measureText(current+' '+part).width>max){out.push(current);current=part;}else current+=(current?' ':'')+part;}out.push(current);}return out;}

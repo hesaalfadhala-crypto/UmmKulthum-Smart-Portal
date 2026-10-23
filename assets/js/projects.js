@@ -1,6 +1,6 @@
 import {fetchRecords,normalize,element} from './portal-data.js?v=20261021-unified';
 import {listBuildingDocumentations} from './building-documentation-data.js?v=20261023';
-import {buildingDocHref} from './building-documentation-model.js?v=20261024-photos';
+import {buildingDocHref} from './building-documentation-model.js?v=20261024-date';
 const cards=[...document.querySelectorAll('.project')],search=document.querySelector('.search');let loading=false;
 search.addEventListener('input',()=>cards.forEach(card=>card.hidden=!card.querySelector('h3').textContent.toLowerCase().includes(search.value.trim().toLowerCase())));
 async function load(){if(loading)return;loading=true;try{
