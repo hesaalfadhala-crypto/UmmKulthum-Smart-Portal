@@ -1,16 +1,16 @@
 import {fetchRecords,normalize,element} from './portal-data.js?v=20261021-unified';
-const cards=[...document.querySelectorAll('.project')],search=document.querySelector('.search');
+import {listBuildingDocumentations} from './building-documentation-data.js?v=20261023';
+import {buildingDocHref} from './building-documentation-model.js?v=20261023';
+const cards=[...document.querySelectorAll('.project')],search=document.querySelector('.search');let loading=false;
 search.addEventListener('input',()=>cards.forEach(card=>card.hidden=!card.querySelector('h3').textContent.toLowerCase().includes(search.value.trim().toLowerCase())));
-async function load(){try{
- const rows=await fetchRecords();let linked=0;
+async function load(){if(loading)return;loading=true;try{
+ const [general,building]=await Promise.allSettled([fetchRecords(),listBuildingDocumentations()]);const rows=general.status==='fulfilled'?general.value:[],buildingRows=building.status==='fulfilled'?building.value:[];let linked=0;
  document.querySelector('.summary .stat:first-child strong').textContent=cards.length;
- for(const card of cards){
-  const name=card.querySelector('h3').textContent.trim(),matching=rows.filter(row=>normalize(row).data.projects.includes(name));
-  card.querySelector('.project-footer span:last-child').textContent=matching.length;
-  card.querySelector('.status').textContent=matching.length?'توثيقات محفوظة':'لا توجد توثيقات';
-  if(matching.length){const list=element('div');for(const row of matching){const link=element('a',normalize(row).data.activity);link.href='report.html?id='+encodeURIComponent(String(row.id));link.style.display='block';list.append(link);}card.append(list);}
+ for(const card of cards){card.querySelector('.project-report-list')?.remove();const name=card.querySelector('h3').textContent.trim(),isBuilding=card.id==='building-followup-project',matching=isBuilding?buildingRows:rows.filter(row=>normalize(row).data.projects.includes(name));
+  card.querySelector('.project-footer span:last-child').textContent=matching.length;card.querySelector('.status').textContent=(isBuilding?building:general).status==='rejected'?'تعذر التحميل؛ أعيدي تحديث الصفحة':matching.length?'توثيقات محفوظة':'لا توجد توثيقات ضمن صلاحياتكِ';
+  if(matching.length){const list=element('div');list.className='project-report-list';for(const row of matching){const link=element('a',isBuilding?row.title:normalize(row).data.activity);link.href=isBuilding?buildingDocHref(row.id):'report.html?id='+encodeURIComponent(String(row.id));link.style.display='block';list.append(link);if(isBuilding){list.append(element('p','اسم المعلمة: '+row.teacher_name+' — معدّة التقرير: '+row.author_name));for(const [label,action]of [['طباعة التقرير','print'],['تنزيل PDF','pdf']]){const a=element('a',label);a.href=buildingDocHref(row.id,action);a.style.marginInlineEnd='12px';list.append(a);}}}card.append(list);}
  }
- linked=rows.filter(row=>normalize(row).data.projects.some(name=>cards.some(c=>c.querySelector('h3').textContent.trim()===name))).length;
+ linked=rows.filter(row=>normalize(row).data.projects.some(name=>cards.some(c=>c.querySelector('h3').textContent.trim()===name))).length+buildingRows.length;
  document.querySelector('.summary .stat:nth-child(2) strong').textContent=linked;
-}catch(error){document.querySelector('.heading').append(element('p',error.message));}}
-void load();
+}catch(error){document.querySelector('.heading').append(element('p',error.message));}finally{loading=false;}}
+window.addEventListener('pageshow',event=>{if(event.persisted)void load();});window.addEventListener('focus',()=>void load());void load();
