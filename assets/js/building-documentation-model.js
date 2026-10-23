@@ -3,7 +3,7 @@ export const buildingDocHref=(id,action='')=>'building-documentations.html?id='+
 export const healthCommitteeId=(id,tags)=>tags.some(t=>String(t.id)===String(id)&&t.kind==='committee'&&[BD_COMMITTEE,BD_COMMITTEE_TAG].includes(t.name));
 export const buildingArchiveVisible=(entry,filters,tags)=>entry.kind!=='building_documentation'||entry.areaSelected||filters.project===BD_PROJECT_FILTER||entry.committeeSelected&&healthCommitteeId(filters.committee,tags);
 export function buildingDocumentationSections(r){return [['اسم المعلمة',r.teacher_name],...(r.area_selected?[['المجال',BD_AREA]]:[]),...(r.committee_selected?[['اللجنة',BD_COMMITTEE]]:[]),['الوصف',r.description],['النتائج',r.results]].filter(([,v])=>v);}
-export function buildingDocumentationModel(r,files=[]){return {documentation:true,compact:true,followup:!!r.services_followup,title:r.title,reference:r.reference,author_name:r.author_name,sections:buildingDocumentationSections(r),photos:files.filter(f=>f.kind==='photo')};}
+export function buildingDocumentationModel(r,files=[]){return {documentation:true,compact:true,followup:!!r.services_followup,title:r.title,reference:r.reference,author_name:r.author_name,sections:buildingDocumentationSections(r),photos:files.filter(f=>f.kind==='photo'),pdfFiles:files.filter(f=>f.kind==='pdf')};}
 export function drawDocumentationFooter(ctx,d,width,margin,top,size=24,font='Cairo,Tahoma,Arial',draw=true){
  const unit=(width-2*margin)/3,entries=[['معدّة التقرير',d.reportPreparedBy||d.author_name||'—',width-margin-unit/2],['مديرة المدرسة','أ. هيا محمد النعيمي',margin+unit/2]];if(d.services_followup||d.followup)entries.push(['المتابعة','رئيسة الخدمات\nأ. حصه خليفة الظهراني',width/2]);
  let height=0;ctx.direction='rtl';ctx.textAlign='center';
