@@ -1,6 +1,6 @@
 import {listCompetitions} from './competition-data.js?v=20261021-unified';
 import {unifiedDocumentations} from './competition-analytics.js?v=20261021-unified';
-import {fetchRecords,normalize,element} from './portal-data.js?v=20261021-unified';
+import {fetchRecords,normalize,element} from './portal-data.js?v=20261024-meetings';
 const grid=document.getElementById('archiveGrid');const search=document.querySelector('.search');const selects=[...document.querySelectorAll('.filters select')];let records=[],loading=true;
 const stat=(id,value)=>{document.getElementById(id).textContent=value;};
 function showState(title,description,retry=false){grid.replaceChildren();const box=element('div',undefined,'empty-state');box.append(element('h3',title),element('p',description));if(retry){const b=element('button','إعادة المحاولة','report-btn');b.addEventListener('click',()=>void load());box.append(b);}grid.append(box);}

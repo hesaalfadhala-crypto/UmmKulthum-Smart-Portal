@@ -8,7 +8,8 @@
     "test:plans": "node --test --test-concurrency=1 tests/plans/*.test.mjs",
     "test:complete": "node --test --test-concurrency=1 tests/complete/*.test.mjs",
     "test:report-pages": "node --test tests/report-pages/*.test.mjs",
-    "test:agenda": "node --test --test-concurrency=1 tests/agenda/*.test.mjs"
+    "test:agenda": "node --test --test-concurrency=1 tests/agenda/*.test.mjs",
+    "test:meetings": "node --test --test-concurrency=1 tests/meetings/*.test.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

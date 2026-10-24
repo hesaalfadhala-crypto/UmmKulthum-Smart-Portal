@@ -1,3 +1,4 @@
+if(new URLSearchParams(location.search).get('meeting')==='1')location.replace('meeting.html');
 import {appendReportText} from './report-text.js?v=20261021-spacing';
 import {suggestDepartment} from './staff-display.js?v=20261019-staff';
 import {agendaEvent} from './agenda-data.js';
@@ -6,7 +7,7 @@ import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-spacing';
 import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-unified';
-import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261021-unified';
+import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261024-meetings';
 import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261021-minimum';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
@@ -124,6 +125,7 @@ async function autosave() {
 }
 document.getElementById('type').addEventListener('change',async()=>{
  const choice=document.getElementById('type').value;
+ if(choice==='اجتماع'&&ready&&!saving&&!pending){location.assign('meeting.html');return;}
  if(!ready||saving||pending||!['مسابقة','إنجاز','مسابقة وإنجاز طلابي'].includes(choice))return;
  try{await writeDraft(user.id+':competition-entry',{data:collect(),files,attachments,sourceRequestId:requestId});location.assign('competitions.html?entry=documentation&kind='+(choice==='إنجاز'?'achievement':'competition'));}catch(e){message('تعذر نقل المسودة إلى النموذج الموحد: '+e.message,true);}
 });
@@ -213,7 +215,7 @@ try {
     if(!programError){centerPrograms=(programs||[]).filter(p=>p.status!=='cancelled');for(const p of centerPrograms){const option=element('option',p.title);option.value=p.id;document.getElementById('centerProgramId').append(option);}}
     if(editId){
         const link=await client.rpc('competition_document_link',{document_id:editId});if(link.error)throw Error('تعذر التحقق من رابط التقرير الموحد.');if(link.data?.id){location.replace('competitions.html?edit='+encodeURIComponent(link.data.id));throw {redirect:true};}
-        originalReport=await fetchRecord(editId);
+        originalReport=await fetchRecord(editId);if(originalReport.activity_type==='اجتماع'){location.replace('meeting.html?id='+encodeURIComponent(editId)+'&edit=1');throw {redirect:true};}
         if(!(await editContext(client,editId)).can_edit)throw new Error('ليست لديكِ صلاحية تعديل هذا التقرير.');
         retainedPhotos=structuredClone(originalReport.photo_files||[]);retainedAttachments=structuredClone(originalReport.attachment_files||[]);
         existingPhotos=await loadPhotos(originalReport);
