@@ -1,0 +1,2 @@
+import {client,requireUser} from './portal-data.js?v=20261021-unified';
+async function refresh(){const badge=document.getElementById('meetingHomeBell');if(!badge)return;try{const user=await requireUser();const {data,error}=await client.from('meeting_notifications').select('id').eq('recipient_id',user.id).is('read_at',null);if(error)throw error;badge.textContent=data.length?'🔔 '+data.length:'';}catch{badge.textContent='';}}window.addEventListener('focus',()=>void refresh());void refresh();
