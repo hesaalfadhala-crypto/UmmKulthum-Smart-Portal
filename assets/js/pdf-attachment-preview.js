@@ -20,7 +20,7 @@ export async function attachmentCanvases(files=[],{getRenderer=renderer,download
    for(let number=1;number<=pdf.numPages;number++){
     if(!isCurrent())return [];
     const page=await pdf.getPage(number),base=page.getViewport({scale:1});
-    const scale=Math.min(2.5,1754/Math.max(base.width,base.height));
+    const scale=Math.min(4.2,3508/Math.max(base.width,base.height));
     const viewport=page.getViewport({scale}),canvas=createCanvas();
     canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
     canvas.setAttribute?.('aria-label',file.name+' — الصفحة '+number+' من '+pdf.numPages);

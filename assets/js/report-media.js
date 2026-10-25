@@ -1,0 +1,5 @@
+export const localFileKey=f=>[f.name,f.size,f.lastModified||0].join(':');
+export function uniqueFiles(existing,incoming){const keys=new Set(existing.map(localFileKey));return [...existing,...incoming.filter(f=>{const key=localFileKey(f);if(keys.has(key))return false;keys.add(key);return true;})];}
+export function attachmentKeys(retained,files){return [...retained.map(f=>f.path),...files.map(f=>'new:'+localFileKey(f))];}
+export function syncAttachmentOrder(order,retained,files){const keys=attachmentKeys(retained,files);return [...order.filter(k=>keys.includes(k)),...keys.filter(k=>!order.includes(k))];}
+export function orderedAttachmentRefs(s){if(!s.attachments&&!s.retainedAttachments)return s.uploadedAttachments||[];const retained=s.retainedAttachments||[],files=s.attachments||[],uploaded=s.uploadedAttachments||[],refs=new Map(retained.map(f=>[f.path,f]));files.forEach((f,i)=>refs.set('new:'+localFileKey(f),uploaded[i]));return syncAttachmentOrder(s.attachmentOrder||[],retained,files).map(k=>refs.get(k)).filter(Boolean);}

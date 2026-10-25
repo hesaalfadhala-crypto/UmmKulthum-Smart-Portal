@@ -120,7 +120,7 @@ test('upload → archive → retrieve → static PDF preserves fields and all im
     assert.deepEqual(record.data.projects, input.data.projects);
     record.photos = await loadPhotos(record);
     assert.equal(record.photos.length, 2);
-    assert.equal(record.photos[0].width, 1800);
+    assert.equal(record.photos[0].width, 2400);
     assert.equal(record.photos[1].height, 1500);
     globalThis.fetch = async url => {
         if (url === 'school-logo.png') return new Response(await fs.readFile(path.join(root, 'school-logo.png')));
@@ -180,3 +180,5 @@ test('archive pagination retrieves more than the first page', async () => {
     assert.deepEqual(legacyGroups.data.projects, ['الخوارزمي','غرس']);
     assert.deepEqual(legacyGroups.data.targets, ['جميع الطالبات']);
 });
+
+test('ten real synthetic files persist, reload via signed originals, and repeated save never duplicates report/photos',async()=>{const m=model(),input=submission();input.files=Array.from({length:10},(_,i)=>imageFile(i%2?800:1200,i%2?1300:700,i%2?'#dbba74':'#216d61','ten-'+i+'.jpg'));const saved=await saveSubmission(m.client,'synthetic-user',input,async()=>{});assert.equal(m.rows[0].photo_files.length,10);assert.equal(m.stored.size,10);const photos=await loadPhotos(normalize(m.rows[0]));assert.equal(photos.length,10);assert.equal(new Set(photos.map(p=>p.path)).size,10);for(const f of photos){const original=m.stored.get(f.path);assert.ok(original.size>0);assert.ok(f.width>=800&&f.height>=700);}assert.equal((await saveSubmission(m.client,'synthetic-user',input,async()=>{})).id,saved.id);assert.equal(m.rows.length,1);assert.equal(m.uploads,10);await assert.rejects(()=>saveSubmission(m.client,'synthetic-user',{...submission(),files:[...input.files,input.files[0]]},async()=>{}),/10 صور/);});

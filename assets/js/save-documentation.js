@@ -1,3 +1,4 @@
+import {orderedAttachmentRefs} from './report-media.js?v=20261025-flow';
 import {displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
 import {validateNewDetails} from './recognition-model.js?v=20261021-unified';
 // Immutable submission + request_id make retries safe after a lost response.
@@ -40,7 +41,7 @@ export function databaseRecord(userId, submission) {
         workshop_type:d.type==='ورشة تدريبية'?(d.workshopType||null):null,executing_agency:d.type==='ورشة تدريبية'&&d.workshopType==='external'?(d.executingAgency||null):null,
         support_program_id: d.type==='ورشة تدريبية'?(d.centerProgramId||null):null,
         training_beneficiaries: d.type==='ورشة تدريبية'&&d.trainingBeneficiaries!=null&&d.trainingBeneficiaries!==''?Number(d.trainingBeneficiaries):null,
-        attachment_files:submission.uploadedAttachments||[],details: submission.data, photo_files: submission.uploaded || []
+        attachment_files:orderedAttachmentRefs(submission),details: submission.data, photo_files: submission.uploaded || []
     };
 }
 
@@ -57,7 +58,7 @@ export async function preparePhoto(file) {
             img.onerror = () => reject(new Error('تعذر قراءة إحدى الصور. أعيدي اختيارها.'));
             img.src = url;
         });
-        const ratio = Math.min(1, 1800 / Math.max(img.naturalWidth, img.naturalHeight));
+        const ratio = Math.min(1, 2560 / Math.max(img.naturalWidth, img.naturalHeight));
         const canvas = document.createElement('canvas');
         canvas.width = Math.max(1, Math.round(img.naturalWidth * ratio));
         canvas.height = Math.max(1, Math.round(img.naturalHeight * ratio));
@@ -66,7 +67,7 @@ export async function preparePhoto(file) {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         let blob;
-        for (const quality of [.86, .72, .55]) {
+        for (const quality of [.94, .9, .86, .8, .72]) {
             blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
             if (blob && blob.size <= 3 * 1024 * 1024) break;
         }

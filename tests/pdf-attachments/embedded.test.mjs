@@ -25,11 +25,11 @@ const makeDoc=()=>{const body=node('body');return {body,open(){},write(text){thi
 globalThis.document={body:node('body'),createElement(tag){if(tag!=='iframe')return node(tag);printFrame=node(tag);printFrame.contentDocument=makeDoc();printFrame.contentWindow={addEventListener(){},focus(){},print(){printFrame.printed=true;}};return printFrame;}};
 const originalURL=URL.createObjectURL;const blobs=new Map();URL.createObjectURL=blob=>{const key='blob:test-'+blobs.size;blobs.set(key,blob);return key;};URL.revokeObjectURL=()=>{};
 // Timer cleanup is not part of these tests and must not keep Node alive for 30 seconds.
-globalThis.setTimeout=(fn,ms)=>({unref(){}});
+const nativeSetTimeout=globalThis.setTimeout;globalThis.setTimeout=(fn,ms,...args)=>ms>=20000?{unref(){}}:nativeSetTimeout(fn,ms,...args);
 const logo=createCanvas(1000,110);logo.getContext('2d').fillRect(0,0,1000,110);
 const photo=createCanvas(800,500);photo.getContext('2d').fillStyle='#ee3344';photo.getContext('2d').fillRect(0,0,800,500);
 const record={id:'SYNTHETIC-PDF-TEST',photos:[{url:'photo-private'}],data:{activity:'اختبار المرفقات',type:'فعالية',goal:'تقرير تجريبي فقط',academicYear:'2026–2027',reportPreparedBy:'معدّة تجريبية',reportSupervisors:['assistant']}};
-globalThis.__prepare=async(r,mode)=>{assert.equal(r.photos.length,1,'report photo retained');outputPages=reports.reportCanvases(r,mode,{logo,photos:[photo],createCanvas});return outputPages;};
+globalThis.__prepare=async(r,mode)=>{assert.ok(r.photos.length>=1,'report photos retained');outputPages=reports.reportCanvases(r,mode,{logo,photos:Array(r.photos.length).fill(photo),createCanvas});return outputPages;};
 async function sourcePDF(count){const pdf=await PDFDocument.create();const embedded=await pdf.embedPng(photo.toBuffer('image/png'));for(let i=0;i<count;i++){const p=pdf.addPage(i%2?[842,595]:[595,842]);p.drawRectangle({x:0,y:0,width:p.getWidth(),height:p.getHeight(),color:rgb(1,1,1)});p.drawText('SYNTHETIC ATTACHMENT PAGE '+(i+1),{x:30,y:40,size:18});p.drawImage(embedded,{x:70,y:100,width:400,height:250});}return new Blob([await pdf.save()],{type:'application/pdf'});}
 test('real report image + all PDF attachment pages: download, print, preview, private buckets, failures and privacy cancellation',async()=>{
  await fs.mkdir(new URL('.test-output/',root),{recursive:true});
@@ -54,5 +54,12 @@ test('real report image + all PDF attachment pages: download, print, preview, pr
  await assert.rejects(()=>preview.attachmentCanvases([{path:'bad.pdf',name:'bad'}],opts),/تعذر عرض/);
  await reports.outputReport(record,'one',false);assert.equal((await PDFDocument.load(await blobs.get(downloadedPDF).arrayBuffer())).getPageCount(),1,'no attachments still exports exactly the report');const priorFrame=printFrame;await assert.rejects(()=>reports.outputReport({...r,attachment_files:[{path:'bad.pdf',name:'bad'}]},'auto',true),/تعذر عرض/);assert.equal(printFrame,priorFrame,'never prints a partial report');const previous=downloadedPDF;await assert.rejects(()=>reports.outputReport({...r,attachment_files:[{path:'bad.pdf',name:'bad'}]},'auto'),/تعذر دمج/);assert.equal(downloadedPDF,previous,'never downloads a partial report');
  let checks=0;assert.deepEqual(await preview.attachmentCanvases(files,{...opts,isCurrent:()=>++checks<2}),[],'privacy toggle cancels stale preview');
- URL.createObjectURL=originalURL;
+ // Expanded merge cases: exact original page counts and ordering, including ten photos.
+ assets.set('three.pdf',await sourcePDF(3));assets.set('five.pdf',await sourcePDF(5));
+ const refs=n=>({path:n+'.pdf',name:n+'.pdf'});
+ for(const [baseGoal,photos,files]of [['قصير',record.photos,[refs('three')]],['شرح طويل '.repeat(200),record.photos,[refs('five')]],['عشر صور',Array(10).fill({url:'photo-private'}),[refs('three')]],['ملفان',record.photos,[refs('five'),refs('three')]]]){
+ await reports.outputReport({...record,data:{...record.data,goal:baseGoal},photos,attachment_files:files},'auto',false);const merged=await PDFDocument.load(await blobs.get(downloadedPDF).arrayBuffer());if(baseGoal==='قصير')assert.equal(outputPages.length,1);if(baseGoal.startsWith('شرح طويل'))assert.equal(outputPages.length,2);assert.equal(merged.getPageCount(),outputPages.length+files.reduce((n,f)=>n+(f.path==='five.pdf'?5:3),0));assert.equal(merged.getPage(outputPages.length).getWidth(),595);assert.equal(merged.getPage(outputPages.length+1).getWidth(),842);if(photos.length===10){assert.ok(outputPages.length>=3);await fs.writeFile(new URL('.test-output/ten-photos-merged.pdf',root),new Uint8Array(await blobs.get(downloadedPDF).arrayBuffer()));}
+ }
+ await reports.outputReport(r,'auto',true,{includeAttachments:false});assert.equal(printFrame.contentDocument.images.length,outputPages.length,'base-only printing excludes all attachments');
+ globalThis.setTimeout=nativeSetTimeout;URL.createObjectURL=originalURL;
 });

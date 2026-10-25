@@ -1,0 +1,20 @@
+/* Documentation-only compact readable layout, shared by draft, saved report and archive. */
+article.report,article#report{line-height:1.45!important;font-family:Cairo,Tahoma,Arial,sans-serif!important;color:#000;background:#fff}
+article.report :is(p,li,td,.report-paragraph),article#report :is(p,li,td,.report-paragraph){line-height:1.45!important;color:#000;overflow-wrap:anywhere}
+article.report :is(h2,h3,h4),article#report :is(h2,h3,h4){margin-bottom:4px!important;line-height:1.45!important;color:#18574D;font-weight:700;break-after:avoid}
+article.report .report-section,article#report #sections>section{margin:0 0 9px!important;padding:0!important}
+article.report p,article#report p{margin-bottom:4px!important}
+article.report .report-paragraph+.report-paragraph,article#report .report-paragraph+.report-paragraph{margin-top:4px!important}
+article.report .info,article#report .meta{gap:9px!important;margin-bottom:9px!important;padding:8px 0!important;background:#fff!important}
+article#report .meta b{margin-bottom:4px!important}
+article.report .report-title,article#report h1{margin-bottom:9px!important;padding-bottom:6px!important}
+article.report :is(td,th),article#report :is(td,th){padding:5px 7px!important}
+#reportImages,.photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#reportImages figure,.photos figure{margin:0!important;break-inside:avoid;min-width:0}
+#reportImages img,.photos img{width:100%;height:300px!important;object-fit:contain!important;background:#f3f7f5}
+#reportImages:has(figure:only-child),.photos:has(figure:only-child){grid-template-columns:1fr}
+#reportImages:has(figure:only-child) img,.photos:has(figure:only-child) img{height:400px!important}
+.photos[data-layout=large]{grid-template-columns:1fr}.photos[data-layout=large] img{height:430px!important}
+.photo-actions{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0}.photo-actions button{font:inherit}
+@media(max-width:600px){#reportImages,.photos{grid-template-columns:1fr}}
+@media print{article.report,article#report,article.report p,article#report p{line-height:1.45!important}#reportImages,.photos{grid-template-columns:1fr 1fr}.photos[data-layout=large]{grid-template-columns:1fr}}

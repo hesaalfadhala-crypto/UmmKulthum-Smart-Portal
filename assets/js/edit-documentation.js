@@ -1,4 +1,5 @@
-import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js?v=20261021-recognition';
+import {orderedAttachmentRefs} from './report-media.js?v=20261025-flow';
+import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js?v=20261025-flow';
 import {validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
 import {validateNewDetails} from './recognition-model.js?v=20261021-unified';
 
@@ -35,7 +36,7 @@ export async function saveReportEdit(client,userId,edit,checkpoint,progress=()=>
   if(error)throw new Error('تعذر حفظ المرفق الجديد. أعيدي محاولة الحفظ.');
   edit.uploadedAttachments.push({bucket:'school-report-files',path,name:f.name,size:f.size});await checkpoint();
  }
- const payload=databaseRecord(userId,{requestId:edit.requestId,data:edit.data,uploaded:[...edit.retainedPhotos,...edit.uploaded],uploadedAttachments:[...edit.retainedAttachments,...edit.uploadedAttachments]});
+ const payload=databaseRecord(userId,{requestId:edit.requestId,data:edit.data,uploaded:[...edit.retainedPhotos,...edit.uploaded],uploadedAttachments:orderedAttachmentRefs(edit)});
  delete payload.created_by;delete payload.request_id;payload.last_edit_request=edit.requestId;
  edit.sent=true;await checkpoint();progress('جار تحديث التقرير الأصلي…');
  try{
