@@ -5,7 +5,7 @@ import {drawSignatures} from './report-signatures.js?v=20261021-spacing';
 import {extraSections,isRecognition,reportFields} from './recognition-model.js?v=20261021-unified';
 import {packPDF} from './pdf-export.js?v=20261021-spacing';
 // Canvas pixels scale to A4 at 0.48 pt/px: 14px ≈ 6.7pt; 12px ≈ 5.8pt; 22px ≈ 10.6pt.
-export const REPORT_SPACING=Object.freeze({lineHeight:1.45,paragraph:8,heading:8,section:18});
+export const REPORT_SPACING=Object.freeze({lineHeight:1.4,paragraph:6,heading:6,section:12});
 export const PAGE_MODES=['auto','one','two'];
 const W=1240,H=1754,M=65,BOTTOM=1600;
 const overflow=()=>new Error('تعذر توزيع أحد عناصر التقرير دون قص. لم يُحذف أي محتوى.');
@@ -38,7 +38,7 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
  if(photos.length){heading('صور التوثيق');const layout=record.photoLayout||'auto';for(let i=0;i<photos.length;){const im=photos[i],wide=im.width/im.height>=1.9,single=layout==='large'||photos.length-i===1||wide||(photos[i+1]&&photos[i+1].width/photos[i+1].height>=1.9);const columns=single?1:2,images=photos.slice(i,i+columns),bh=single?520:410;blocks.push({height:bh+48,images,offset:i,columns,imageHeight:bh});i+=columns;}}
  measure.font='bold 36px '+font;
  const titleLines=wrap(measure,isRecognition(d)?d.activity:'تقرير '+(d.reportTypeLabel||d.type)+' — '+d.activity,W-2*M);
- const top=190+titleLines.length*42+48;
+ const top=190+titleLines.length*42+24;
  const signatureHeight=drawSignatures(measure,d,W,M,0,size,font,false)+30;
  // Flow at readable sizes, with no page-count ceiling. Keep headings with the first content lines.
  while(blocks.at(-1)?.space)blocks.pop();if(blocks.length)blocks.at(-1).keepWithNext=true;
