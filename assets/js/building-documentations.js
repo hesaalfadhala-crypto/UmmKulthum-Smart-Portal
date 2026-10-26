@@ -2,7 +2,7 @@ import {previewBuildingPDF} from './building-documentation-pdf.js?v=20261024-pdf
 import {prepareEvidence,uploadFiles,signedFiles} from './building-data.js?v=20261021-building';
 import {requireUser,listBuildingDocumentations,getBuildingDocumentation,documentationRPC} from './building-documentation-data.js?v=20261023';
 import {documentationDay,buildingDocumentationDate,buildingDocHref,buildingDocumentationModel,buildingDocumentationSections,renderDocumentationFooter} from './building-documentation-model.js?v=20261024-date';
-import {exportBuilding} from './building-report.js?v=20261024-pdf';
+import {exportBuilding} from './building-report.js?v=20261026-compact';
 import {displayDate} from './building-model.js?v=20261023-location';
 const $=id=>document.getElementById(id),el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 let user,context,rows=[],detail=null,editing=null,recordId,requestId,frozen=null,busy=false,pending=[],retained=[],detailFiles=[],previewURLs=[];

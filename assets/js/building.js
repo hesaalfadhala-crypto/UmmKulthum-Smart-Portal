@@ -1,6 +1,6 @@
 import {loadBuilding,rpc,prepareEvidence,uploadFiles,signedFiles} from './building-data.js?v=20261021-building';
 import {KINDS,TYPES,ROLES,STATES,CLEAN,SUPPLIES,RATINGS,ISSUES,POSITIONS,METRICS,maintenance,localNow,displayDate,day,issueText,repeated,statistics,filterRecords,metricRows,recordLocationKey} from './building-model.js?v=20261023-location';
-import {SUPERVISORS} from './report-signatures.js?v=20261021-spacing';import {renderBuildingReport,recordModel,exportBuilding} from './building-report.js?v=20261021-building';
+import {SUPERVISORS} from './report-signatures.js?v=20261021-spacing';import {renderBuildingReport,recordModel,exportBuilding} from './building-report.js?v=20261026-compact';
 import {readDraft,writeDraft,removeDraft} from './draft-store.js';
 const $=id=>document.getElementById(id),el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;},empty=(n,text='لا توجد سجلات ضمن هذا النطاق.')=>n.append(el('p',text,'empty'));
 let data,editing=null,entryKind='cleanliness',recordId,requestId,pending=[],retained=[],frozen=null,detail=null,detailFiles=[],followRow,followRequest,repairPending=[],repairRetained=[],followFrozen=null,selectedMetric='',maintenanceOnly=false,loading=false,saving=false,draftTimer,followTimer;const previewUrls=new Map();
