@@ -1,5 +1,6 @@
+import {validateExchange} from './exchange-visit-model.js';
 import {orderedAttachmentRefs} from './report-media.js?v=20261025-flow';
-import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js?v=20261025-flow';
+import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js?v=20261101-exchange';
 import {validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
 import {validateNewDetails} from './recognition-model.js?v=20261021-unified';
 
@@ -15,7 +16,7 @@ export function editableData(row,normalized){
  return data;
 }
 export async function saveReportEdit(client,userId,edit,checkpoint,progress=()=>{}){
- validateOtherChoices(edit.data);validateNewDetails(edit.data);
+ validateExchange(edit.data);validateOtherChoices(edit.data);validateNewDetails(edit.data);
  if(!edit.data.activity?.trim())throw new Error('اكتبي اسم الفعالية أو النشاط.');
  const lookup=async()=>{const {data,error}=await client.from('documentations').select('id,edit_version,last_edit_request').eq('id',edit.id).single();if(error||!data)throw new Error('تعذر التحقق من حفظ التعديل. بياناتك باقية في المسودة.');return data;};
  let current=await lookup();if(current.last_edit_request===edit.requestId)return current;
