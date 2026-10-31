@@ -1,0 +1,22 @@
+import {client,requireUser,fetchRecords,element,academicYear} from './portal-data.js?v=20261024-meetings';
+import {departmentReports,teacherGroups} from './department-reports-model.js?v=20261031';
+const $=id=>document.getElementById(id);let context,records=[],busy=false;
+const link=(text,href)=>{const a=element('a',text,'button');a.href=href;return a;};
+function render(){
+ const dep=$('department').value,names=new Map(context.staff.map(p=>[p.id,p.name]));
+ const list=departmentReports(records,dep,{query:$('query').value,kind:$('kind').value,year:$('year').value,from:$('from').value,to:$('to').value,names});
+ $('total').textContent=list.length;$('authors').textContent=new Set(list.map(r=>r.created_by)).size;$('month').textContent=list.filter(r=>(r.activity_date||r.created_at||'').slice(0,7)===new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit'}).format(new Date())).length;
+ const box=$('teachers');box.replaceChildren();
+ for(const p of teacherGroups(context.staff,list,dep)){
+  const details=element('details',undefined,'teacher-reports'),summary=element('summary');summary.append(element('strong',p.name),element('span',String(p.reports.length)+' تقرير'));details.append(summary);
+  if(p.job_title)details.append(element('p',p.job_title));
+  if(!p.reports.length)details.append(element('p','لا توجد تقارير منشورة مطابقة للفلاتر.'));
+  for(const r of p.reports){const card=element('article',undefined,'report-item');card.append(element('h3',r.activity||r.details?.activity||'تقرير'),element('p',[r.activity_type,r.activity_date||String(r.created_at).slice(0,10),academicYear(r)].filter(Boolean).join(' · ')));const meeting=r.activity_type==='اجتماع',href=(meeting?'meeting.html':'report.html')+'?id='+encodeURIComponent(r.id),actions=element('div',undefined,'actions');actions.append(link('عرض التقرير',href),link('طباعة',href+'&action=print'),link('تنزيل PDF',href+'&action=pdf'));card.append(actions);details.append(card);}box.append(details);
+ }
+ if(!box.children.length)box.append(element('p','لا توجد مستخدمات أو تقارير للقسم المحدد.'));
+}
+function options(id,values){const old=$(id).value;$(id).replaceChildren(new Option('الكل',''));for(const v of [...new Set(values.filter(Boolean))].sort())$(id).add(new Option(v,v));$(id).value=old;}
+async function load(){if(busy)return;busy=true;$('refresh').disabled=true;$('status').textContent='جار تحميل تقارير الأقسام المصرح بها…';try{await requireUser();const {data,error}=await client.rpc('department_report_context');if(error)throw Error(error.message);context=data;if(!context.departments.length){$('content').hidden=true;throw Error('لا يوجد تكليف معتمد لحسابكِ بمتابعة تقارير قسم.');}records=(await fetchRecords()).map(r=>({...r,academic_year:academicYear(r)}));const prev=$('department').value;$('department').replaceChildren(...context.departments.map(d=>new Option(d,d)));if(context.departments.includes(prev))$('department').value=prev;options('kind',records.filter(r=>context.departments.includes(r.department)).map(r=>r.activity_type));options('year',records.map(r=>r.academic_year||r.details?.academicYear||''));$('content').hidden=false;render();$('status').textContent='تم تحميل التقارير المنشورة المتاحة وفق الصلاحيات. آخر تحديث: '+new Date().toLocaleString('ar-BH',{timeZone:'Asia/Bahrain'});if(context.can_manage)setupAdmin();}catch(e){$('status').textContent=e.message;$('status').classList.add('error');}finally{busy=false;$('refresh').disabled=false;}}
+function setupAdmin(){const box=$('manage');box.hidden=false;const prev=$('reader').value;$('reader').replaceChildren(...context.staff.map(p=>new Option(p.name,p.id)));$('reader').value=prev||context.staff[0]?.id||'';$('grantDepartment').replaceChildren(...context.departments.map(d=>new Option(d,d)));}
+$('manageForm').onsubmit=async e=>{e.preventDefault();const b=$('grantSave');b.disabled=true;try{const {error}=await client.rpc('set_department_report_reader',{subject_id:$('reader').value,dept:$('grantDepartment').value,enabled:$('grantEnabled').checked});if(error)throw error;$('adminStatus').textContent='تم حفظ تكليف القراءة فقط.';}catch(error){$('adminStatus').textContent=error.message;}finally{b.disabled=false;}};
+for(const id of ['department','query','kind','year','from','to'])$(id).addEventListener('input',render);$('refresh').onclick=()=>void load();void load();

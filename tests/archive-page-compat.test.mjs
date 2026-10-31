@@ -3,6 +3,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {JSDOM} from 'jsdom';
+import {buildingArchiveVisible,healthCommitteeId,BD_PROJECT_FILTER} from '../assets/js/building-documentation-model.js';
 const source=readFileSync(new URL('../assets/js/smart-archive.js',import.meta.url),'utf8');
 for(const page of ['archive.html','smart-archive.html'])for(const legacy of [false,true])test(`${page}: load and filter reports${legacy?' without statistics container':''}`,()=>{
  const dom=new JSDOM(readFileSync(new URL('../'+page,import.meta.url),'utf8'));
@@ -10,7 +11,7 @@ for(const page of ['archive.html','smart-archive.html'])for(const legacy of [fal
  if(legacy)document.getElementById('motivationStats').remove();
  const script=source.replace(/^import .*;\n/gm,'').replace(/export /g,'').split("if(typeof document!==")[0];
  const element=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
- const context=vm.createContext({document,element,motivationStats:()=>({reports:1,beneficiaries:3,missing:0,departments:[],dates:[],years:[]}),normalize:r=>({data:r.details}),console});
+ const context=vm.createContext({document,element,buildingArchiveVisible,healthCommitteeId,BD_PROJECT_FILTER,motivationStats:()=>({reports:1,beneficiaries:3,missing:0,departments:[],dates:[],years:[]}),normalize:r=>({data:r.details}),console});
  vm.runInContext(script+`;entries=[{kind:'documentation',title:'تقرير تجريبي',department:'العلوم',date:'2026-10-17',row:{id:99,details:{}},href:'report.html?id=99'}];render();`,context);
  assert.equal(document.querySelectorAll('#results article').length,1);
  assert.match(document.getElementById('motivationStats').textContent,/عدد التقارير: 1/);

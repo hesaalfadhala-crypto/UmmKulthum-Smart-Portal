@@ -1,0 +1,3 @@
+import {client} from './portal-data.js?v=20261024-meetings';
+async function install(){try{const {data,error}=await client.rpc('department_report_context');if(error||!data?.departments?.length)return;const target=document.querySelector('.sidebar nav')||document.querySelector('.sidebar')||document.querySelector('main nav')||document.querySelector('nav');if(!target||target.querySelector('[data-department-reports]'))return;const a=document.createElement('a');a.href='department-reports.html';a.textContent='تقارير قسمي';a.className='menu-item';a.dataset.departmentReports='1';target.append(a);}catch{}}
+void install();
