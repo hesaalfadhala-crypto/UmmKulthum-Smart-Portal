@@ -1,3 +1,4 @@
+import {recoverDocumentationDraft,recoveredSubmissionMatches} from './documentation-recovery.js?v=20261101-unlock';
 import {installExchange,loadExchange,collectExchange,restoreExchange,updateExchange,lockExchange} from './exchange-visit-form.js?v=20261101';
 import {validateExchange,isExchange,EXCHANGE_TYPE} from './exchange-visit-model.js';
 import {localFileKey,uniqueFiles,attachmentKeys,syncAttachmentOrder} from './report-media.js?v=20261025-flow';
@@ -11,7 +12,7 @@ import {installOtherChoices,displayChoices,validateOtherChoices} from './documen
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-spacing';
 import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-unified';
 import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261024-meetings';
-import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261101-exchange';
+import { checkSaveSchema, saveSubmission, databaseRecord } from './save-documentation.js?v=20261101-exchange';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
@@ -30,6 +31,7 @@ const editId=new URLSearchParams(location.search).get('edit');
 if(editId){saveButton.classList.add('save-edits');document.body.classList.add('editing-report');}
 let originalReport=null, retainedPhotos=[], retainedAttachments=[], existingPhotos=[], attachmentOrder=[], draftKey;
 let profile, user, attachments = [], files = [], pending = null, saving = false, ready = false, previewUrls = [], attachmentPreviewUrls=[];
+let verifyOriginalOnSave=false;
 let requestId = crypto.randomUUID(), writeQueue = Promise.resolve();
 let centerPrograms=[];let agendaSource=null;const agendaId=new URLSearchParams(location.search).get('agenda_event');
 
@@ -45,7 +47,11 @@ function freeze() {
     saveButton.disabled = !ready || saving;
     clearButton.disabled = !ready || saving || !!pending?.sent;
     document.querySelectorAll('#retainedFiles button').forEach(b=>b.disabled=!ready||saving||!!pending);
-    editButton.hidden = !pending || !!pending.sent || saving;
+    editButton.hidden = !pending;
+    editButton.disabled=!ready||saving;
+    editButton.textContent=pending?.sent?'التحقق من الحفظ واستكمال التعديل':'استكمال تعديل المسودة';
+    document.getElementById('pendingRecovery').hidden=!ready||!pending;
+    document.getElementById('retryPendingSave').disabled=!ready||saving;
     saveButton.textContent = saving ? 'جار الحفظ…' : pending ? 'إعادة محاولة الحفظ' : editId ? 'حفظ التعديلات' : 'حفظ في الأرشيف وعرض التقرير';
 }
 function collect() {
@@ -123,7 +129,7 @@ function persist(snapshot) {
     writeQueue = job;
     return job;
 }
-function draft() { return { requestId, data: collect(), files, attachments, attachmentOrder, pending, retainedPhotos, retainedAttachments, version:originalReport?.edit_version }; }
+function draft() { return { requestId, data: collect(), files, attachments, attachmentOrder, pending, verifyOriginalOnSave, retainedPhotos, retainedAttachments, version:originalReport?.edit_version }; }
 async function autosave() {
     if (!ready || saving || pending) return;
     try {
@@ -169,21 +175,37 @@ saveButton.addEventListener('click', async () => {
         pending ||= { requestId, data: collect(), files, attachments, attachmentOrder, uploaded: [], uploadedAttachments:[], sent: false, ...(editId?{id:originalReport.id,version:originalReport.edit_version,retainedPhotos,retainedAttachments}:{} ) };
         await persist(draft());
         const row = await (editId?saveReportEdit:saveSubmission)(client, user.id, pending, () => persist(draft()), message);
+        if(!editId&&verifyOriginalOnSave){const actual=await fetchRecord(row.id);if(!recoveredSubmissionMatches(databaseRecord(user.id,pending),actual))throw Object.assign(new Error('تأكد وجود تقرير لهذه المحاولة، لكن بيانات المسودة تختلف. لم تُحذف المسودة أو تُنشأ نسخة أخرى؛ افتحي التقرير الأصلي لاستكمال التعديل.'),{recoveredReportId:row.id});}
         message(editId?'تم حفظ التعديلات بنجاح':'تم تأكيد الحفظ في الأرشيف. جار فتح التقرير النهائي…');
         // If local cleanup fails, request_id still recovers the saved server record on retry.
         try { await removeDraft(draftKey); } catch { /* server record is already confirmed */ }
         location.assign('report.html?id=' + encodeURIComponent(String(row.id))+(editId?'&saved_edit='+encodeURIComponent(pending.requestId):''));
-    } catch (e) { if(agendaSource){try{const latest=await agendaEvent(agendaSource.id);if(latest.report_id){location.assign('report.html?id='+encodeURIComponent(latest.report_id));return;}}catch{}}message(e.message, true); }
+    } catch (e) { if(agendaSource){try{const latest=await agendaEvent(agendaSource.id);if(latest.report_id){location.assign('report.html?id='+encodeURIComponent(latest.report_id));return;}}catch{}}message(e.message, true);if(e.recoveredReportId)recoveredReportLinks(e.recoveredReportId); }
     finally { saving = false; freeze(); }
 });
-editButton.addEventListener('click', async () => {
-    if (!pending || pending.sent || saving) return;
-    // No insert was sent yet. A new request keeps previously staged images separate.
-    pending = null;
-    requestId = crypto.randomUUID();
-    freeze();
-    await autosave();
-});
+function recoveredReportLinks(id){
+ for(const [label,url]of [['عرض التقرير الأصلي','report.html?id='],['تعديل التقرير الأصلي','documentation.html?edit=']]){const a=element('a',label);a.href=url+encodeURIComponent(id);a.style.marginInlineStart='12px';status.append(a);}
+}
+async function resumePendingDraft(){
+ if(!pending||saving||!ready)return;
+ saving=true;freeze();message('جار التحقق من محاولة الحفظ السابقة…');
+ try{
+  const signedIn=await requireUser();if(signedIn.id!==user.id)throw Error('تغير حساب الدخول. أعيدي تحميل الصفحة.');
+  const result=await recoverDocumentationDraft(client,user.id,pending,{editId});
+  if(result.kind==='saved'){
+   // A confirmed original is edited by its original ID. Keep any differing local data.
+   const expected=databaseRecord(user.id,{...pending,uploaded:[...(pending.retainedPhotos||[]),...(pending.uploaded||[])]});
+   if(!recoveredSubmissionMatches(expected,result.row)){message('يوجد تقرير محفوظ لهذه المحاولة وتختلف عنه بيانات المسودة. احتُفظ بالمسودة وصورها؛ افتحي التقرير الأصلي لاستكمال التعديل.',true);recoveredReportLinks(result.row.id);return;}
+   await writeQueue.catch(()=>{});await removeDraft(draftKey);
+   location.assign('documentation.html?edit='+encodeURIComponent(result.row.id));return;
+  }
+  requestId=result.requestId||requestId;verifyOriginalOnSave=!!result.verifyOriginalOnSave;pending=null;
+  freeze();await persist(draft());message('تم استرجاع المسودة للتعديل. يمكنكِ تغيير البيانات وإضافة الصور، ثم الحفظ.');
+ }catch(e){message(e.message,true);if(e.recoveredReportId)recoveredReportLinks(e.recoveredReportId);}
+ finally{saving=false;freeze();}
+}
+editButton.addEventListener('click',()=>void resumePendingDraft());
+document.getElementById('retryPendingSave').addEventListener('click',()=>saveButton.click());
 clearButton.addEventListener('click', async () => {
     if (saving || pending?.sent || !confirm(editId?'إلغاء مسودة التعديل والعودة للتقرير دون تغيير النسخة المحفوظة؟':'مسح هذه المسودة وبدء توثيق جديد؟')) return;
     saving = true;
@@ -198,7 +220,7 @@ clearButton.addEventListener('click', async () => {
             else el.value = '';
         });
         document.querySelectorAll('#recognitionStaff input,#recipientDetails input,#recipientDetails textarea').forEach(i=>i.checked=false);
-        files = [];attachments=[];document.getElementById('attachments').value=''; pending = null; requestId = crypto.randomUUID(); images.value = '';
+        files = [];attachments=[];document.getElementById('attachments').value=''; pending = null; verifyOriginalOnSave=false; requestId = crypto.randomUUID(); images.value = '';
         document.getElementById('reportPreparedBy').value=profile?.full_name||user.user_metadata?.full_name||'';
         suggestDepartment(document.getElementById('department'),profile);preview(); previewPhotos(); message('ابدئي توثيقًا جديدًا.');
     } catch (e) { message(e.message, true); }
@@ -238,7 +260,7 @@ try {
     if(saved&&editId&&saved.version!==originalReport.edit_version&&!saved.pending?.sent)throw new Error('توجد مسودة لتعديل نسخة سابقة. افتحي التقرير الأحدث؛ المسودة محفوظة.');
     if (saved) {
         attachmentOrder=saved.attachmentOrder||[];if(editId){retainedPhotos=saved.retainedPhotos||[];retainedAttachments=saved.retainedAttachments||[];}
-        requestId = saved.requestId; files = saved.files || [];attachments=saved.attachments||[];document.getElementById('attachmentCount').textContent=attachments.length+' ملفات PDF مرفقة'; pending = saved.pending || null;
+        requestId = saved.requestId; files = saved.files || [];attachments=saved.attachments||[];document.getElementById('attachmentCount').textContent=attachments.length+' ملفات PDF مرفقة'; pending = saved.pending || null;verifyOriginalOnSave=!!saved.verifyOriginalOnSave;
         restore(saved.data || {});
         message(pending ? 'استُعيدت محاولة الحفظ السابقة. أعيدي الحفظ للتحقق من الأرشيف دون إنشاء نسخة مكررة.' : 'استُعيدت المسودة وصورها من هذا الجهاز.');
     } else if(!editId){const params=new URLSearchParams(location.search),program=centerPrograms.find(p=>p.id===params.get('center_program'));if(program||params.get('type')==='workshop'){document.getElementById('type').value='ورشة تدريبية';if(program){document.getElementById('centerProgramId').value=program.id;document.getElementById('activity').value=program.title;document.getElementById('executionScope').value=program.workshop_type||'';document.getElementById('organizingEntity').value=program.executing_agency||'';document.getElementById('hostingEntity').value=program.hosting_entity||'';const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bahrain',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(program.starts_at));const d=Object.fromEntries(parts.map(p=>[p.type,p.value]));document.getElementById('date').value=d.year+'-'+d.month+'-'+d.day;}}preview();}
@@ -246,6 +268,7 @@ try {
     if(!saved&&new URLSearchParams(location.search).get('project')==='recognition'){document.querySelector('#recognitionProjectOption input').checked=true;document.getElementById('type').value='فعالية';preview();}
     if(!saved&&!editId&&!agendaSource){suggestDepartment(document.getElementById('department'),profile);preview();}
     previewPhotos(); ready = true; freeze();
+    if(pending)await resumePendingDraft();
 } catch (e) {
     if(e.redirect){}else{message(e.message, true);
     const login = element('a', 'تسجيل الدخول');
