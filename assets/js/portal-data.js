@@ -1,4 +1,4 @@
-import {displayChoices} from './documentation-choices.js?v=20261021-recognition';
+import {displayChoices} from './documentation-choices.js?v=20261101-values';
 // Existing school project and session. Public browser key; never add a service key here.
 export const client = window.supabase.createClient('https://ulqwkxzjwdmkspsjzvup.supabase.co','sb_publishable_6R4Sk7sWLAnMbbQjL0BXXQ_0nL2CWoV');
 export async function requireUser(){const {data,error}=await client.auth.getUser();if(error||!data?.user)throw new Error('يرجى تسجيل الدخول إلى البوابة أولًا.');return data.user;}
@@ -12,3 +12,4 @@ export async function reportContext(){await requireUser();const {data,error}=awa
 export async function setDeleted(row,deleted){if(!confirm((deleted?'حذف التقرير منطقيًا: ':'استعادة التقرير: ')+(row.activity||row.details?.activity||row.id)+'؟'))return false;const link=await client.rpc('competition_document_link',{document_id:row.id});if(link.error)throw new Error(link.error.message);if(link.data?.id){const r=await client.rpc(deleted?'delete_competition':'restore_competition',{record_id:link.data.id});if(r.error)throw new Error(r.error.message);return true;}const {error}=await client.rpc('set_report_deleted',{report_id:row.id,deleted,expected_version:row.deletion_version||0});if(error)throw new Error(error.message);return true;}
 export async function fetchDeletedRecords(){await requireUser();let out=[];for(let start=0;;start+=200){const {data,error}=await client.from('documentations').select('*').not('deleted_at','is',null).order('deleted_at',{ascending:false}).order('id').range(start,start+199);if(error)throw new Error(error.message);out.push(...data);if(data.length<200)return out;}}
 export function academicYear(row){if(row.academic_year)return row.academic_year;const d=row.activity_date||row.date||String(row.created_at||'').slice(0,10);if(!d)return '';const y=Number(d.slice(0,4)),m=Number(d.slice(5,7));return (m>=9?y:y-1)+'-'+(m>=9?y+1:y);}
+

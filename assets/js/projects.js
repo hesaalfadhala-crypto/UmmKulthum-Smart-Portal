@@ -1,5 +1,5 @@
 import {meetingRPC} from './meeting-data.js?v=20261024-meetings';
-import {fetchRecords,normalize,element} from './portal-data.js?v=20261024-meetings';
+import {fetchRecords,normalize,element} from './portal-data.js?v=20261101-values';
 import {listBuildingDocumentations} from './building-documentation-data.js?v=20261023';
 import {buildingDocHref} from './building-documentation-model.js?v=20261024-date';
 const cards=[...document.querySelectorAll('.project')],search=document.querySelector('.search');let loading=false;
@@ -15,3 +15,4 @@ async function load(){if(loading)return;loading=true;try{
  document.querySelector('.summary .stat:nth-child(2) strong').textContent=linked;
 }catch(error){document.querySelector('.heading').append(element('p',error.message));}finally{loading=false;}}
 window.addEventListener('pageshow',event=>{if(event.persisted)void load();});window.addEventListener('focus',()=>void load());void load();
+

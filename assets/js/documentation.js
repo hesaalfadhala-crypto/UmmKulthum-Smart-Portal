@@ -1,3 +1,5 @@
+import {canonicalProject} from './values-project-model.js?v=20261101-values';
+import {installValuesProject,collectValuesProject,restoreValuesProject,updateValuesProject,renderValuesPhotos,lockValuesProject,validateValuesForm} from './values-project-form.js?v=20261101-values';
 import {recoverDocumentationDraft,recoveredSubmissionMatches} from './documentation-recovery.js?v=20261101-unlock';
 import {installExchange,loadExchange,collectExchange,restoreExchange,updateExchange,lockExchange} from './exchange-visit-form.js?v=20261101';
 import {validateExchange,isExchange,EXCHANGE_TYPE} from './exchange-visit-model.js';
@@ -8,15 +10,16 @@ import {suggestDepartment} from './staff-display.js?v=20261019-staff';
 import {agendaEvent} from './agenda-data.js';
 import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261021-spacing';
 import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261101-exchange';
-import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
+import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261101-values';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-spacing';
 import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-unified';
-import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261024-meetings';
+import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261101-values';
 import { checkSaveSchema, saveSubmission, databaseRecord } from './save-documentation.js?v=20261101-exchange';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
 installExchange();
+installValuesProject({state:()=>({files,retainedPhotos,existingPhotos,author:originalReport?normalize(originalReport).data.reportPreparedBy:profile?.full_name,department:profile?.department,locked:!ready||saving||!!pending}),add:picked=>{files=uniqueFiles(files,picked);},remove:f=>{if(f.path)retainedPhotos=retainedPhotos.filter(p=>p.path!==f.path);else files=files.filter(p=>localFileKey(p)!==localFileKey(f));},changed:()=>{previewPhotos();preview();void autosave();},message:(...args)=>message(...args)});
 for(const label of ['مسابقة','إنجاز'])document.getElementById('type').add(new Option(label,label));
 const form = document.querySelector('.form');
 const otherChoices=installOtherChoices(form);
@@ -40,6 +43,7 @@ function message(text, error = false) {
     status.classList.toggle('error', error);status.classList.toggle('success',!error&&text==='تم حفظ التعديلات بنجاح');
 }
 function freeze() {
+    lockValuesProject(!ready||saving||!!pending);
     fields.forEach(el => { el.disabled = !ready || saving || !!pending; });
     document.querySelectorAll('#recognitionStaff input,#recipientDetails input,#recipientDetails textarea').forEach(el=>el.disabled=!ready||saving||!!pending);
     lockExchange();
@@ -59,7 +63,7 @@ function collect() {
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => { data[el.id] = el.value.trim(); });
     for (const [key, cls] of Object.entries(groups))
         data[key] = [...form.querySelectorAll('.' + cls + '-checks input:checked')].map(el => el.value);
-    const result=otherChoices.collect(collectExchange(collectExtensions(data)));if(agendaSource)result.agendaEventId=agendaSource.id;return result;
+    const result=otherChoices.collect(collectExchange(collectExtensions(data)));if(agendaSource)result.agendaEventId=agendaSource.id;return collectValuesProject(result);
 }
 function output(id, value) {
     const el = document.getElementById(id);
@@ -91,6 +95,7 @@ function preview() {
     for(const el of document.querySelectorAll('article.report .report-section>p[id]'))if(['pAreas','pProjects','pCommittees','pGoal','pImplementation','pImpact','pRecommendations','pTarget'].includes(el.id))el.closest('.report-section').hidden=el.classList.contains('empty')||(isRecognition(d)&&['pAreas','pProjects','pCommittees','pGoal','pImplementation','pImpact','pRecommendations','pTarget'].includes(el.id));
     updateExchange(raw);
     document.querySelector('.report-title').textContent = isRecognition(d)?d.recognition?.title||d.activity:'معاينة تقرير ' + d.type;
+    updateValuesProject(raw);
 }
 function previewPhotos() {
     previewUrls.forEach(url => URL.revokeObjectURL(url));
@@ -110,8 +115,10 @@ function previewPhotos() {
     });
     document.getElementById('imageCount').textContent = (retainedPhotos.length+files.length) ? (retainedPhotos.length+files.length) + ' / 10 صور مرفقة' : '0 / 10 صور مرفقة';
     previewExisting();
+    renderValuesPhotos(collect());
 }
 function restore(data) {
+    data={...data,type:canonicalProject(data.type),projects:(data.projects||[]).map(canonicalProject)};
     if(isExchange(data))data={...data,type:EXCHANGE_TYPE};
     data={...data,executingEntity:data.executingEntity??data.executingAgency??'',reportSupervisors:selectedSupervisors(data)};
     if(editId){for(const el of fields.filter(el=>el.tagName==='SELECT'))if(data[el.id]&&!Array.from(el.options).some(o=>o.value===String(data[el.id]))){const o=element('option',String(data[el.id]));o.value=String(data[el.id]);el.append(o);}
@@ -121,7 +128,7 @@ function restore(data) {
     });
     for (const [key, cls] of Object.entries(groups))
         form.querySelectorAll('.' + cls + '-checks input').forEach(el => { el.checked = data[key]?.includes(el.value) || false; });
-    restoreExtensions(data);restoreExchange(data);otherChoices.restore(data);preview();
+    restoreExtensions(data);restoreExchange(data);restoreValuesProject(data);otherChoices.restore(data);preview();
 }
 function persist(snapshot) {
     const copy = structuredClone(snapshot);
@@ -159,7 +166,7 @@ images.addEventListener('change', () => {
 });
 saveButton.addEventListener('click', async () => {
     if (!ready || saving) return;
-    const details=collect();try{validateExchange(details);validateOtherChoices(details);validateNewDetails(details);}catch(e){message(e.message,true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات غير صالح.',true);return;}
+    const details=collect();try{validateValuesForm(details);validateExchange(details);validateOtherChoices(details);validateNewDetails(details);}catch(e){message(e.message,true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات غير صالح.',true);return;}
     if (!collect().activity) {
         message('اكتبي اسم الفعالية أو النشاط.', true);
         document.getElementById('activity').focus();
