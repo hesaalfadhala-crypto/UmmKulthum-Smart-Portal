@@ -1,18 +1,21 @@
+import {installExchange,loadExchange,collectExchange,restoreExchange,updateExchange,lockExchange} from './exchange-visit-form.js?v=20261101';
+import {validateExchange,isExchange,EXCHANGE_TYPE} from './exchange-visit-model.js';
 import {localFileKey,uniqueFiles,attachmentKeys,syncAttachmentOrder} from './report-media.js?v=20261025-flow';
 if(new URLSearchParams(location.search).get('meeting')==='1')location.replace('meeting.html');
 import {appendReportText} from './report-text.js?v=20261021-spacing';
 import {suggestDepartment} from './staff-display.js?v=20261019-staff';
 import {agendaEvent} from './agenda-data.js';
 import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261021-spacing';
-import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261025-flow';
+import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261101-exchange';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-spacing';
 import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-unified';
 import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261024-meetings';
-import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261025-flow';
+import { checkSaveSchema, saveSubmission } from './save-documentation.js?v=20261101-exchange';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
+installExchange();
 for(const label of ['مسابقة','إنجاز'])document.getElementById('type').add(new Option(label,label));
 const form = document.querySelector('.form');
 const otherChoices=installOtherChoices(form);
@@ -37,6 +40,7 @@ function message(text, error = false) {
 function freeze() {
     fields.forEach(el => { el.disabled = !ready || saving || !!pending; });
     document.querySelectorAll('#recognitionStaff input,#recipientDetails input,#recipientDetails textarea').forEach(el=>el.disabled=!ready||saving||!!pending);
+    lockExchange();
     images.disabled = !ready || saving || !!pending;document.getElementById('attachments').disabled=images.disabled;
     saveButton.disabled = !ready || saving;
     clearButton.disabled = !ready || saving || !!pending?.sent;
@@ -49,7 +53,7 @@ function collect() {
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => { data[el.id] = el.value.trim(); });
     for (const [key, cls] of Object.entries(groups))
         data[key] = [...form.querySelectorAll('.' + cls + '-checks input:checked')].map(el => el.value);
-    const result=otherChoices.collect(collectExtensions(data));if(agendaSource)result.agendaEventId=agendaSource.id;return result;
+    const result=otherChoices.collect(collectExchange(collectExtensions(data)));if(agendaSource)result.agendaEventId=agendaSource.id;return result;
 }
 function output(id, value) {
     const el = document.getElementById(id);
@@ -79,6 +83,7 @@ function preview() {
     document.getElementById('reserveClassReport').style.display = reserve ? 'block' : 'none';
     document.getElementById('assistantsReport').style.display = 'none';
     for(const el of document.querySelectorAll('article.report .report-section>p[id]'))if(['pAreas','pProjects','pCommittees','pGoal','pImplementation','pImpact','pRecommendations','pTarget'].includes(el.id))el.closest('.report-section').hidden=el.classList.contains('empty')||(isRecognition(d)&&['pAreas','pProjects','pCommittees','pGoal','pImplementation','pImpact','pRecommendations','pTarget'].includes(el.id));
+    updateExchange(raw);
     document.querySelector('.report-title').textContent = isRecognition(d)?d.recognition?.title||d.activity:'معاينة تقرير ' + d.type;
 }
 function previewPhotos() {
@@ -101,6 +106,7 @@ function previewPhotos() {
     previewExisting();
 }
 function restore(data) {
+    if(isExchange(data))data={...data,type:EXCHANGE_TYPE};
     data={...data,executingEntity:data.executingEntity??data.executingAgency??'',reportSupervisors:selectedSupervisors(data)};
     if(editId){for(const el of fields.filter(el=>el.tagName==='SELECT'))if(data[el.id]&&!Array.from(el.options).some(o=>o.value===String(data[el.id]))){const o=element('option',String(data[el.id]));o.value=String(data[el.id]);el.append(o);}
     for(const [key,cls]of Object.entries(groups))for(const value of data[key]||[])if(!Array.from(form.querySelectorAll('.'+cls+'-checks input')).some(i=>i.value===value)){const label=element('label'),input=element('input');input.type='checkbox';input.value=value;label.append(input,document.createTextNode(value));form.querySelector('.'+cls+'-checks')?.append(label);}}
@@ -109,7 +115,7 @@ function restore(data) {
     });
     for (const [key, cls] of Object.entries(groups))
         form.querySelectorAll('.' + cls + '-checks input').forEach(el => { el.checked = data[key]?.includes(el.value) || false; });
-    restoreExtensions(data);otherChoices.restore(data);preview();
+    restoreExtensions(data);restoreExchange(data);otherChoices.restore(data);preview();
 }
 function persist(snapshot) {
     const copy = structuredClone(snapshot);
@@ -147,7 +153,7 @@ images.addEventListener('change', () => {
 });
 saveButton.addEventListener('click', async () => {
     if (!ready || saving) return;
-    const details=collect();try{validateOtherChoices(details);validateNewDetails(details);}catch(e){message(e.message,true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات غير صالح.',true);return;}
+    const details=collect();try{validateExchange(details);validateOtherChoices(details);validateNewDetails(details);}catch(e){message(e.message,true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات غير صالح.',true);return;}
     if (!collect().activity) {
         message('اكتبي اسم الفعالية أو النشاط.', true);
         document.getElementById('activity').focus();
@@ -213,6 +219,7 @@ try {
     if(agendaId&&!editId){agendaSource=await agendaEvent(agendaId);if(agendaSource.report_id){location.replace('report.html?id='+encodeURIComponent(agendaSource.report_id));throw new Error('جار فتح التقرير الأصلي.');}}
     draftKey=editId?user.id+':report:'+editId:agendaSource?user.id+':agenda:'+agendaSource.id:user.id;
     await loadExtensionAccess();
+    await loadExchange(client,user);
     const {data:programs,error:programError}=await client.from('support_programs').select('id,title,starts_at,status,workshop_type,executing_agency,hosting_entity').order('starts_at',{ascending:false});
     if(!programError){centerPrograms=(programs||[]).filter(p=>p.status!=='cancelled');for(const p of centerPrograms){const option=element('option',p.title);option.value=p.id;document.getElementById('centerProgramId').append(option);}}
     if(editId){

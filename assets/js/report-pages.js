@@ -1,3 +1,5 @@
+import {isExchangeReport as isExchange} from './exchange-visit-model.js';
+import {exchangeCanvases} from './exchange-visit-pdf.js';
 import {appendAttachments} from './pdf-attachments.js?v=20261023-embedded';
 import {attachmentCanvases} from './pdf-attachment-preview.js?v=20261025-flow';
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
@@ -12,6 +14,7 @@ const overflow=()=>new Error('تعذر توزيع أحد عناصر التقري
 function wrap(g,value,width){const lines=[];for(const para of String(value).split('\n')){let line='';for(const word of para.split(/\s+/)){let part='';for(const ch of word){if(part&&g.measureText(part+ch).width>width){if(line){lines.push(line);line='';}lines.push(part);part=ch;}else part+=ch;}const next=line?line+' '+part:part;if(line&&g.measureText(next).width>width){lines.push(line);line=part;}else line=next;}lines.push(line);}return lines;}
 export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]}){
  if(!PAGE_MODES.includes(mode))throw Error('تنسيق الصفحات غير صالح.');
+ if(isExchange(record.data))return exchangeCanvases(record,{createCanvas,logo,photos});
  const d=record.data;
  const fields=[['المرفقات',(record.attachment_files||[]).map(f=>f.name)],...(isRecognition(d)?reportFields(d):[['النوع / القسم',[d.type,d.department]],['المنفذة / التاريخ',[d.executor,d.date,d.location]],...reportFields(d)])];
  if(!isRecognition(d)&&d.type==='ورشة تدريبية'&&!d.executionScope){fields.push(['نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':''],['الجهة المنفذة',d.executingAgency]);}if(!isRecognition(d)&&d.type==='ورشة تدريبية')fields.push(['المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'':String(d.trainingBeneficiaries)]);
