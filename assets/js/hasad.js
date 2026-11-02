@@ -1,5 +1,5 @@
 import {loadHasad,rpc,client,prepareEvidence,uploadFiles,signedFiles} from './hasad-data.js?v=20261021-hasad';
-import {element} from './portal-data.js?v=20261021-unified';
+import {element,fetchRecords,normalize} from './portal-data.js?v=20261021-unified';
 import {writeDraft,readDraft,removeDraft} from './draft-store.js';
 import {STATES,EMPTY_MESSAGE,stats,filterAwards,publicGroups} from './hasad-model.js?v=20261021-hasad';
 import {exportHasad,reportSections} from './hasad-report.js?v=20261021-hasad';
@@ -36,3 +36,30 @@ async function register(print){const rows=filterAwards(data.records,adminFilters
 async function load(){if(loading)return;loading=true;try{data=await loadHasad();const depts=[...new Set(data.board.flatMap(r=>[r.department,r.award_department]).filter(Boolean))].sort();options('boardDept',depts,'كل الأقسام');options('boardCategory',data.categories,'كل الفئات');options('boardYear',[...new Set(data.board.map(a=>a.academic_year))].sort().reverse(),'كل الأعوام');const canCreate=data.ctx.admin||data.ctx.categories.length>0;$('newAward').hidden=!canCreate;$('manageLink').hidden=!canCreate;$('management').hidden=!canCreate;personal();board();if(canCreate){const staffDepts=[...new Set(data.staff.map(s=>s.department).filter(Boolean))].sort();options('recipientDept',staffDepts,'كل الأقسام');options('filterCat',data.categories,'كل الفئات');options('filterDept',[...new Set(data.records.map(a=>a.department))].filter(Boolean).sort(),'كل الأقسام');options('filterYear',[...new Set(data.records.map(a=>a.academic_year))].sort().reverse(),'كل الأعوام');$('rewardsSection').hidden=!data.ctx.admin;$('membersSection').hidden=!data.ctx.admin;$('delegateSection').hidden=!data.ctx.principal;management();if(data.ctx.admin){options('memberUser',data.staff.map(s=>({id:s.id,title:s.name})));options('memberCat',data.categories);$('membersList').replaceChildren();for(const m of data.members)$('membersList').append(element('p',(data.staff.find(s=>s.id===m.user_id)?.name||'')+' · '+catName(m.category_id)+' · '+(m.active?'مفعّلة':'معطّلة')));}}status('تم تحميل حصاد الدانات.');}catch(e){status(e.message,true);if(e.message.includes('تسجيل الدخول'))location.replace('login.html');}finally{loading=false;}}
 async function init(){await load();if(!data)return;for(const id of ['boardName','boardDept','boardCategory','boardMonth','boardYear'])$(id).addEventListener('input',board);for(const id of ['filterCat','filterDept','filterFrom','filterTo','filterSemester','filterYear','filterState'])$(id).addEventListener('input',management);$('refresh').addEventListener('click',()=>run(load));$('newAward').addEventListener('click',()=>run(()=>editor()));$('awardForm').addEventListener('submit',e=>{e.preventDefault();void save();});$('saveSubmit').addEventListener('click',()=>void save(true));$('category').addEventListener('change',categoryChanged);$('level').addEventListener('change',rules);$('awardForm').addEventListener('input',queueDraft);$('awardForm').addEventListener('change',queueDraft);$('recipientSearch').addEventListener('input',recipientChoices);$('recipientDept').addEventListener('change',recipientChoices);$('selectDepartment').addEventListener('click',()=>{const dept=$('recipientDept').value;if(!dept){status('اختاري قسمًا لإضافة عضواته.',true);return;}data.staff.filter(p=>p.department===dept).forEach(p=>selected.add(p.id));$('awardDepartment').value=dept;recipientChoices();selectedList();queueDraft();});$('closeEditor').addEventListener('click',async()=>{await persist();$('editorPanel').hidden=true;});$('evidence').addEventListener('change',()=>run(async()=>{for(const file of $('evidence').files){const f=await prepareEvidence(file);pending.push({...f,id:crypto.randomUUID()});}$('evidence').value='';await showFiles();queueDraft();}));$('clearDept').addEventListener('click',()=>{$('filterDept').value='';management();});$('closeDetail').addEventListener('click',()=>$('detailDialog').close());$('printDetail').addEventListener('click',()=>run(()=>exportDetail(true)));$('pdfDetail').addEventListener('click',()=>run(()=>exportDetail(false)));$('certificate').addEventListener('click',()=>run(()=>exportDetail(true,true)));$('printRegister').addEventListener('click',()=>run(()=>register(true)));$('pdfRegister').addEventListener('click',()=>run(()=>register(false)));for(const [id,enabled]of [['enableMember',true],['disableMember',false]])$(id).addEventListener('click',()=>run(async()=>{await rpc('manage_member',{uid:$('memberUser').value,cat:$('memberCat').value,enabled});await load();}));for(const [id,enabled]of [['enableDelegate',true],['disableDelegate',false]])$(id).addEventListener('click',()=>run(async()=>{const hessa=data.ctx.delegates?.[0];if(!hessa)throw Error('تعذر تحديد حساب المساعدة المخولة.');if(confirm(enabled?'تفويض الاعتماد النهائي لأ. حصه سند الفضاله؟':'إلغاء تفويض الاعتماد النهائي؟')){await rpc('delegate',{uid:hessa.id,enabled});await load();status('تم تحديث التفويض الصريح.');}}));const draft=await readDraft(draftKey()).catch(()=>null);if(draft&&(data.ctx.admin||data.ctx.categories.length)&&confirm('توجد مسودة حصاد الدانات غير مكتملة على هذا الجهاز. استعادتها؟'))await editor(null,draft);const aid=new URLSearchParams(location.search).get('award');if(aid){const a=data.mine.find(a=>a.id===aid)||data.records.find(a=>a.id===aid);if(a)await openDetail(a);}window.addEventListener('focus',()=>{if($('editorPanel').hidden&&!$('detailDialog').open)void load();});pollTimer=setInterval(()=>{if(!document.hidden&&$('editorPanel').hidden&&!$('detailDialog').open)void load();},30000);pollTimer.unref?.();}
 if(typeof document!=='undefined')void init();
+
+let documentationLoading=false;
+async function loadDocumentations(){
+ const root=$('hasadDocumentationList'),notice=$('hasadDocumentationStatus');
+ if(!root||documentationLoading)return;
+ documentationLoading=true;
+ try{
+  const rows=(await fetchRecords()).filter(row=>normalize(row).data.projects.includes('حصاد الدانات'));
+  root.replaceChildren();
+  for(const row of rows){
+   const d=normalize(row).data,card=element('article',undefined,'card');
+   const link=element('a',d.activity);link.href='report.html?id='+encodeURIComponent(String(row.id));
+   card.append(link,element('p',[d.date,d.department,d.executor].filter(Boolean).join(' — ')));
+   root.append(card);
+  }
+  notice.textContent=rows.length?'عدد التوثيقات: '+rows.length:'لا توجد توثيقات محفوظة لحصاد الدانات ضمن صلاحياتكِ.';
+ }catch{notice.textContent='تعذر تحميل توثيقات حصاد الدانات؛ اضغطي تحديث لإعادة المحاولة.';}
+ finally{documentationLoading=false;}
+}
+if(typeof document!=='undefined'){
+ void loadDocumentations();
+ $('refresh')?.addEventListener('click',()=>void loadDocumentations());
+ window.addEventListener('focus',()=>void loadDocumentations());
+ window.addEventListener('pageshow',e=>{if(e.persisted)void loadDocumentations();});
+ const documentationTimer=setInterval(()=>{if(!document.hidden)void loadDocumentations();},30000);
+ documentationTimer.unref?.();
+}
