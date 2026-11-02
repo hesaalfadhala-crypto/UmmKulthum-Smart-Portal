@@ -1,3 +1,4 @@
+import {isHappiness,happinessFields,HAPPINESS_TITLE} from './happiness-model.js?v=20261102-happiness';
 import {isValuesReport} from './values-project-model.js?v=20261101-values';
 import {valuesProjectCanvases} from './values-project-report.js?v=20261101-values';
 import {isExchangeReport as isExchange} from './exchange-visit-model.js';
@@ -5,7 +6,7 @@ import {exchangeCanvases} from './exchange-visit-pdf.js';
 import {appendAttachments} from './pdf-attachments.js?v=20261023-embedded';
 import {attachmentCanvases} from './pdf-attachment-preview.js?v=20261025-flow';
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
-import {drawSignatures} from './report-signatures.js?v=20261021-spacing';
+import {drawSignatures} from './report-signatures.js?v=20261102-happiness';
 import {extraSections,isRecognition,reportFields} from './recognition-model.js?v=20261021-unified';
 import {packPDF} from './pdf-export.js?v=20261021-spacing';
 // Canvas pixels scale to A4 at 0.48 pt/px: 14px ≈ 6.7pt; 12px ≈ 5.8pt; 22px ≈ 10.6pt.
@@ -18,11 +19,11 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
  if(!PAGE_MODES.includes(mode))throw Error('تنسيق الصفحات غير صالح.');
  if(isValuesReport(record.data))return valuesProjectCanvases(record,{createCanvas,logo,photos});
  if(isExchange(record.data))return exchangeCanvases(record,{createCanvas,logo,photos});
- const d=record.data;
- const fields=[['المرفقات',(record.attachment_files||[]).map(f=>f.name)],...(isRecognition(d)?reportFields(d):[['النوع / القسم',[d.type,d.department]],['المنفذة / التاريخ',[d.executor,d.date,d.location]],...reportFields(d)])];
- if(!isRecognition(d)&&d.type==='ورشة تدريبية'&&!d.executionScope){fields.push(['نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':''],['الجهة المنفذة',d.executingAgency]);}if(!isRecognition(d)&&d.type==='ورشة تدريبية')fields.push(['المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'':String(d.trainingBeneficiaries)]);
- if(!isRecognition(d)&&d.type==='مسابقة وإنجاز طلابي')fields.push(...[['نوع التوثيق',d.reportTypeLabel||'مسابقة'],['اسم المسابقة أو الإنجاز',d.docCompetitionName],['المدرسة أو الجهة الخارجية',d.externalSchool],['نوع المسابقة',d.docCompetitionType],['الجهة المنظمة',d.docCompetitionOrganizer],['الجهة المستضيفة',d.docCompetitionHost],['المستوى',d.docCompetitionLevel],['الطالبات المشاركات',d.docCompetitionStudents],['النتيجة / المركز',d.docCompetitionResult],['تفاصيل الإنجاز',d.docCompetitionDetails]]);
- if(!isRecognition(d)&&d.type==='حصة احتياط')fields.push(...[['الصف / الشعبة',d.reserveClass],['رقم الحصة',d.reservePeriod],['المعلمة الغائبة',d.originalTeacher],['ما تم تنفيذه',d.reserveImplementation]]);
+ const d=record.data,happy=isHappiness(d);
+ const fields=happy?happinessFields(d):[['المرفقات',(record.attachment_files||[]).map(f=>f.name)],...(isRecognition(d)?reportFields(d):[['النوع / القسم',[d.type,d.department]],['المنفذة / التاريخ',[d.executor,d.date,d.location]],...reportFields(d)])];
+ if(!happy&&!isRecognition(d)&&d.type==='ورشة تدريبية'&&!d.executionScope){fields.push(['نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':''],['الجهة المنفذة',d.executingAgency]);}if(!happy&&!isRecognition(d)&&d.type==='ورشة تدريبية')fields.push(['المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'':String(d.trainingBeneficiaries)]);
+ if(!happy&&!isRecognition(d)&&d.type==='مسابقة وإنجاز طلابي')fields.push(...[['نوع التوثيق',d.reportTypeLabel||'مسابقة'],['اسم المسابقة أو الإنجاز',d.docCompetitionName],['المدرسة أو الجهة الخارجية',d.externalSchool],['نوع المسابقة',d.docCompetitionType],['الجهة المنظمة',d.docCompetitionOrganizer],['الجهة المستضيفة',d.docCompetitionHost],['المستوى',d.docCompetitionLevel],['الطالبات المشاركات',d.docCompetitionStudents],['النتيجة / المركز',d.docCompetitionResult],['تفاصيل الإنجاز',d.docCompetitionDetails]]);
+ if(!happy&&!isRecognition(d)&&d.type==='حصة احتياط')fields.push(...[['الصف / الشعبة',d.reserveClass],['رقم الحصة',d.reservePeriod],['المعلمة الغائبة',d.originalTeacher],['ما تم تنفيذه',d.reserveImplementation]]);
 
  const measure=createCanvas(W,H).getContext('2d');
  const size=24,lh=Math.ceil(size*REPORT_SPACING.lineHeight),font='"Cairo", Tahoma, Arial';measure.font=size+'px '+font;
@@ -40,10 +41,11 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
  };
  const heading=value=>{addText(value,true);space(REPORT_SPACING.heading,true);};
 
- for(const [label,value]of fields){const s=Array.isArray(value)?value.filter(Boolean).join(' • '):value;if(s==null||!String(s).trim())continue;heading(label);addText(s);space(REPORT_SPACING.section);}
- if(photos.length){heading('صور التوثيق');const layout=record.photoLayout||'auto';for(let i=0;i<photos.length;){const im=photos[i],wide=im.width/im.height>=1.9,single=layout==='large'||photos.length-i===1||wide||(photos[i+1]&&photos[i+1].width/photos[i+1].height>=1.9);const columns=single?1:2,images=photos.slice(i,i+columns),bh=single?520:410;blocks.push({height:bh+48,images,offset:i,columns,imageHeight:bh});i+=columns;}}
+ const happyRow=cells=>{const width=(W-2*M-24)/2;for(const c of cells){measure.font='bold 26px '+font;c.head=wrap(measure,c.label,width);measure.font=size+'px '+font;c.lines=wrap(measure,c.value,width);}blocks.push({height:Math.max(...cells.map(c=>c.head.length*37+6+c.lines.length*lh))+12,happyCells:cells});};
+ let happyCells=[];for(const [label,value]of fields){const s=Array.isArray(value)?value.filter(Boolean).join(' • '):value;if(s==null||!String(s).trim())continue;if(happy&&!['منفذة الفعالية / القسم','وصف الفعالية'].includes(label)){happyCells.push({label,value:String(s)});if(happyCells.length===2){happyRow(happyCells);happyCells=[];}continue;}if(happyCells.length){happyRow(happyCells);happyCells=[];}heading(label);addText(s);space(REPORT_SPACING.section);}if(happyCells.length)happyRow(happyCells);
+ if(photos.length){heading('صور التوثيق');const layout=record.photoLayout||'auto';for(let i=0;i<photos.length;){const im=photos[i],wide=im.width/im.height>=1.9,single=layout==='large'||photos.length-i===1||wide||(photos[i+1]&&photos[i+1].width/photos[i+1].height>=1.9);const columns=single?1:2,images=photos.slice(i,i+columns),bh=single?(happy&&im.width>=im.height?360:520):410;blocks.push({height:bh+48,images,offset:i,columns,imageHeight:bh});i+=columns;}}
  measure.font='bold 36px '+font;
- const titleLines=wrap(measure,isRecognition(d)?d.activity:'تقرير '+(d.reportTypeLabel||d.type)+' — '+d.activity,W-2*M);
+ const titleLines=wrap(measure,happy?HAPPINESS_TITLE+'\n'+d.activity:isRecognition(d)?d.activity:'تقرير '+(d.reportTypeLabel||d.type)+' — '+d.activity,W-2*M);
  const top=190+titleLines.length*42+24;
  const signatureHeight=drawSignatures(measure,d,W,M,0,size,font,false)+30;
  // Flow at readable sizes, with no page-count ceiling. Keep headings with the first content lines.
@@ -60,9 +62,9 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
  flush();
  return pages.map((items,page)=>{const c=createCanvas(W,H),g=c.getContext('2d');g.fillStyle='white';g.fillRect(0,0,W,H);g.direction='rtl';g.textAlign='right';
  if(page===0){const scale=Math.min((W-2*M)/logo.width,115/logo.height);g.drawImage(logo,(W-logo.width*scale)/2,30,logo.width*scale,logo.height*scale);
- g.fillStyle='#18574D';g.font='bold 36px '+font;let ty=190;for(const line of titleLines){g.fillText(line,W-M,ty);ty+=42;}g.font='24px '+font;g.fillStyle='#000000';g.fillText('العام الدراسي '+(d.academicYear||'غير مسجل')+' · '+(d.semester||''),W-M,ty+8);
+ if(happy){g.font='22px '+font;g.fillStyle='#000000';g.fillText('مدرسة أم كلثوم الابتدائية الإعدادية للبنات',W-M,155);}g.fillStyle='#18574D';g.font='bold 36px '+font;let ty=190;for(const line of titleLines){g.fillText(line,W-M,ty);ty+=42;}g.font='24px '+font;g.fillStyle='#000000';if(!happy)g.fillText('العام الدراسي '+(d.academicYear||'غير مسجل')+' · '+(d.semester||''),W-M,ty+8);
  }else{g.fillStyle='#18574D';g.font='bold 26px '+font;g.fillText('تقرير التوثيق — تابع',W-M,75);}
- let y=pageTop(page);for(const b of items){if(b.text!==undefined){g.fillStyle=b.bold?'#18574D':'#000000';g.font=(b.bold?'bold ':'')+(b.bold?26:size)+'px '+font;if(b.bullet){g.beginPath();g.arc(W-M-7,y+size*.65,3,0,Math.PI*2);g.fill();}g.fillText(b.text,W-M-(b.indent||0),y+size);}if(b.images){const gap=20,columns=b.columns||2,bw=(W-2*M-gap*(columns-1))/columns,bh=b.imageHeight;b.images.forEach((im,i)=>{const x=W-M-bw-i*(bw+gap);g.fillStyle='#f2f5f3';g.fillRect(x,y,bw,bh);const r=Math.min(bw/im.width,bh/im.height);g.drawImage(im,x+(bw-im.width*r)/2,y+(bh-im.height*r)/2,im.width*r,im.height*r);g.fillStyle='#000000';g.font='20px '+font;g.fillText('الصورة '+(b.offset+i+1),x+bw,y+bh+24);});}if(b.signature)drawSignatures(g,d,W,M,y+10,size,font,true);y+=b.height;}
+ let y=pageTop(page);for(const b of items){if(b.happyCells){const width=(W-2*M-24)/2;b.happyCells.forEach((cell,i)=>{const x=W-M-i*(width+24);g.font='bold 26px '+font;g.fillStyle='#18574D';cell.head.forEach((line,j)=>g.fillText(line,x,y+26+j*37));g.font=size+'px '+font;g.fillStyle='#000000';cell.lines.forEach((line,j)=>g.fillText(line,x,y+cell.head.length*37+6+size+j*lh));});}if(b.text!==undefined){g.fillStyle=b.bold?'#18574D':'#000000';g.font=(b.bold?'bold ':'')+(b.bold?26:size)+'px '+font;if(b.bullet){g.beginPath();g.arc(W-M-7,y+size*.65,3,0,Math.PI*2);g.fill();}g.fillText(b.text,W-M-(b.indent||0),y+size);}if(b.images){const gap=20,columns=b.columns||2,bw=(W-2*M-gap*(columns-1))/columns,bh=b.imageHeight;b.images.forEach((im,i)=>{const x=W-M-bw-i*(bw+gap);g.fillStyle='#f2f5f3';g.fillRect(x,y,bw,bh);const r=Math.min(bw/im.width,bh/im.height);g.drawImage(im,x+(bw-im.width*r)/2,y+(bh-im.height*r)/2,im.width*r,im.height*r);g.fillStyle='#000000';g.font='20px '+font;g.fillText('الصورة '+(b.offset+i+1),x+bw,y+bh+24);});}if(b.signature)drawSignatures(g,d,W,M,y+10,size,font,true);y+=b.height;}
 
  g.fillStyle='#000000';g.font='20px '+font;g.textAlign='right';g.fillText('بوابة أم كلثوم الذكية · رقم التوثيق '+String(record.id),W-M,1680);g.textAlign='left';g.fillText('صفحة '+(page+1)+' من '+pages.length,M,1680);return c;});
 }
@@ -72,3 +74,4 @@ export function reportPDF(pages){return packPDF(pages.map(c=>Uint8Array.from(ato
 export async function outputReport(record,mode,print=false,{includeAttachments=true}={}){const reportPages=await prepareReport(record,mode),attached=includeAttachments&&!isValuesReport(record.data)?(record.attachment_files||[]):[];if(!print){const bytes=await appendAttachments(reportPDF(reportPages),attached);const u=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),a=document.createElement('a');a.href=u;a.download='تقرير-'+record.id+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(u),30000);return;}
  const pages=[...reportPages,...await attachmentCanvases(attached)];
  const frame=document.createElement('iframe');frame.title='طباعة التقرير';frame.style.cssText='position:fixed;width:1px;height:1px;left:-10000px';document.body.append(frame);const doc=frame.contentDocument;doc.open();doc.write('<!doctype html><html dir="rtl"><head><title>طباعة التقرير</title><style>@page{size:A4 portrait;margin:0}@page landscapePage{size:A4 landscape;margin:0}html,body{margin:0;padding:0}.page{width:210mm;height:297mm;box-sizing:border-box;break-after:page;page-break-after:always}.page:last-child{break-after:auto;page-break-after:auto}.page img{display:block;width:100%;height:100%;object-fit:contain;background:white}</style></head><body></body></html>');doc.close();for(const c of pages){const div=doc.createElement('div'),img=doc.createElement('img');div.className='page';if(c.width>c.height){div.style.width='297mm';div.style.height='210mm';div.style.page='landscapePage';}img.src=c.toDataURL('image/png');div.append(img);doc.body.append(div);}await Promise.all([...doc.images].map(im=>im.decode()));frame.contentWindow.addEventListener('afterprint',()=>frame.remove(),{once:true});frame.contentWindow.focus();frame.contentWindow.print();}
+

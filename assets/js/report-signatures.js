@@ -1,3 +1,4 @@
+import {isHappiness} from './happiness-model.js?v=20261102-happiness';
 // Shared signature data for previews and both PDF formats. Legacy records stay untouched.
 export const SUPERVISORS=[
  {id:'assistant',title:'المديرة المساعدة',name:'أ. حصه سند الفضاله'},
@@ -19,7 +20,7 @@ export function signatures(d={}) {
  const {assistants,services}=supervisionGroups(d),body=[];
  if(assistants.length)body.push(assistants.length>1?'المديرات المساعدات':'المديرة المساعدة',assistants.map(s=>s.name).join(' • '));
  if(services)body.push('رئيسة الخدمات',services.name);
- return [['معدّة التقرير',String(d.reportPreparedBy||d.reportPreparer||d.executor||'—').trim()],[body.length?'بإشراف':'',body.join('\n')],['مديرة المدرسة','أ. هيا محمد النعيمي']];
+ return [[isHappiness(d)?'إعداد التقرير من قبل الأستاذة':'معدّة التقرير',String(d.reportPreparedBy||d.reportPreparer||d.executor||'—').trim()],[body.length?'بإشراف':'',body.join('\n')],['مديرة المدرسة','أ. هيا محمد النعيمي']];
 }
 export function renderSignatures(container,d) {
  container.replaceChildren();container.classList.add('report-signatures');container.dir='rtl';
@@ -43,3 +44,4 @@ export function drawSignatures(ctx,d,width,margin,top,size=24,font='Cairo, Tahom
  if(groups.services){y+=text('رئيسة الخدمات',center,y,cw,true)+12;y+=text(groups.services.name,center,y,cw);}
  ctx.textAlign='right';return Math.max(height,y-top);
 }
+

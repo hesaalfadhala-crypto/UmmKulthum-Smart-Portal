@@ -1,3 +1,5 @@
+import {installHappiness,loadHappiness,collectHappiness,restoreHappiness,updateHappiness,renderHappinessPreview,lockHappiness} from './happiness-form.js?v=20261102-happiness';
+import {validateHappiness,isHappiness} from './happiness-model.js?v=20261102-happiness';
 import {canonicalProject} from './values-project-model.js?v=20261101-values';
 import {installValuesProject,collectValuesProject,restoreValuesProject,updateValuesProject,renderValuesPhotos,lockValuesProject,validateValuesForm} from './values-project-form.js?v=20261101-values';
 import {recoverDocumentationDraft,recoveredSubmissionMatches} from './documentation-recovery.js?v=20261101-unlock';
@@ -8,7 +10,7 @@ if(new URLSearchParams(location.search).get('meeting')==='1')location.replace('m
 import {appendReportText} from './report-text.js?v=20261021-spacing';
 import {suggestDepartment} from './staff-display.js?v=20261019-staff';
 import {agendaEvent} from './agenda-data.js';
-import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261021-spacing';
+import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261102-happiness';
 import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261101-exchange';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261101-values';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-spacing';
@@ -20,6 +22,7 @@ import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 installExtensions();
 installExchange();
 installValuesProject({state:()=>({files,retainedPhotos,existingPhotos,author:originalReport?normalize(originalReport).data.reportPreparedBy:profile?.full_name,department:profile?.department,locked:!ready||saving||!!pending}),add:picked=>{files=uniqueFiles(files,picked);},remove:f=>{if(f.path)retainedPhotos=retainedPhotos.filter(p=>p.path!==f.path);else files=files.filter(p=>localFileKey(p)!==localFileKey(f));},changed:()=>{previewPhotos();preview();void autosave();},message:(...args)=>message(...args)});
+installHappiness({state:()=>({author:profile?.full_name||'',department:profile?.department||'',photos:()=>[...document.querySelectorAll('#reportImages img')].map(img=>({url:img.src}))})});
 for(const label of ['مسابقة','إنجاز'])document.getElementById('type').add(new Option(label,label));
 const form = document.querySelector('.form');
 const otherChoices=installOtherChoices(form);
@@ -43,6 +46,7 @@ function message(text, error = false) {
     status.classList.toggle('error', error);status.classList.toggle('success',!error&&text==='تم حفظ التعديلات بنجاح');
 }
 function freeze() {
+    lockHappiness(!ready||saving||!!pending);
     lockValuesProject(!ready||saving||!!pending);
     fields.forEach(el => { el.disabled = !ready || saving || !!pending; });
     document.querySelectorAll('#recognitionStaff input,#recipientDetails input,#recipientDetails textarea').forEach(el=>el.disabled=!ready||saving||!!pending);
@@ -63,7 +67,7 @@ function collect() {
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => { data[el.id] = el.value.trim(); });
     for (const [key, cls] of Object.entries(groups))
         data[key] = [...form.querySelectorAll('.' + cls + '-checks input:checked')].map(el => el.value);
-    const result=otherChoices.collect(collectExchange(collectExtensions(data)));if(agendaSource)result.agendaEventId=agendaSource.id;return collectValuesProject(result);
+    const result=otherChoices.collect(collectExchange(collectExtensions(data)));if(agendaSource)result.agendaEventId=agendaSource.id;return collectHappiness(collectValuesProject(result));
 }
 function output(id, value) {
     const el = document.getElementById(id);
@@ -95,7 +99,7 @@ function preview() {
     for(const el of document.querySelectorAll('article.report .report-section>p[id]'))if(['pAreas','pProjects','pCommittees','pGoal','pImplementation','pImpact','pRecommendations','pTarget'].includes(el.id))el.closest('.report-section').hidden=el.classList.contains('empty')||(isRecognition(d)&&['pAreas','pProjects','pCommittees','pGoal','pImplementation','pImpact','pRecommendations','pTarget'].includes(el.id));
     updateExchange(raw);
     document.querySelector('.report-title').textContent = isRecognition(d)?d.recognition?.title||d.activity:'معاينة تقرير ' + d.type;
-    updateValuesProject(raw);
+    updateValuesProject(raw);updateHappiness(raw);
 }
 function previewPhotos() {
     previewUrls.forEach(url => URL.revokeObjectURL(url));
@@ -115,7 +119,7 @@ function previewPhotos() {
     });
     document.getElementById('imageCount').textContent = (retainedPhotos.length+files.length) ? (retainedPhotos.length+files.length) + ' / 10 صور مرفقة' : '0 / 10 صور مرفقة';
     previewExisting();
-    renderValuesPhotos(collect());
+    renderValuesPhotos(collect());renderHappinessPreview(collect());
 }
 function restore(data) {
     data={...data,type:canonicalProject(data.type),projects:(data.projects||[]).map(canonicalProject)};
@@ -128,7 +132,7 @@ function restore(data) {
     });
     for (const [key, cls] of Object.entries(groups))
         form.querySelectorAll('.' + cls + '-checks input').forEach(el => { el.checked = data[key]?.includes(el.value) || false; });
-    restoreExtensions(data);restoreExchange(data);restoreValuesProject(data);otherChoices.restore(data);preview();
+    restoreExtensions(data);restoreExchange(data);restoreValuesProject(data);restoreHappiness(data);otherChoices.restore(data);preview();
 }
 function persist(snapshot) {
     const copy = structuredClone(snapshot);
@@ -166,7 +170,7 @@ images.addEventListener('change', () => {
 });
 saveButton.addEventListener('click', async () => {
     if (!ready || saving) return;
-    const details=collect();try{validateValuesForm(details);validateExchange(details);validateOtherChoices(details);validateNewDetails(details);}catch(e){message(e.message,true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات غير صالح.',true);return;}
+    const details=collect();try{validateHappiness(details);validateValuesForm(details);validateExchange(details);validateOtherChoices(details);validateNewDetails(details);}catch(e){message(e.message,true);return;}if(details.type==='ورشة تدريبية'&&details.trainingBeneficiaries!==''&&(!Number.isInteger(Number(details.trainingBeneficiaries))||Number(details.trainingBeneficiaries)<0||Number(details.trainingBeneficiaries)>10000)){message('عدد المستفيدات غير صالح.',true);return;}
     if (!collect().activity) {
         message('اكتبي اسم الفعالية أو النشاط.', true);
         document.getElementById('activity').focus();
@@ -229,7 +233,7 @@ clearButton.addEventListener('click', async () => {
         document.querySelectorAll('#recognitionStaff input,#recipientDetails input,#recipientDetails textarea').forEach(i=>i.checked=false);
         files = [];attachments=[];document.getElementById('attachments').value=''; pending = null; verifyOriginalOnSave=false; requestId = crypto.randomUUID(); images.value = '';
         document.getElementById('reportPreparedBy').value=profile?.full_name||user.user_metadata?.full_name||'';
-        suggestDepartment(document.getElementById('department'),profile);preview(); previewPhotos(); message('ابدئي توثيقًا جديدًا.');
+        restoreHappiness({});suggestDepartment(document.getElementById('department'),profile);preview(); previewPhotos(); message('ابدئي توثيقًا جديدًا.');
     } catch (e) { message(e.message, true); }
     finally { saving = false; freeze(); }
 });
@@ -248,6 +252,7 @@ try {
     if(agendaId&&!editId){agendaSource=await agendaEvent(agendaId);if(agendaSource.report_id){location.replace('report.html?id='+encodeURIComponent(agendaSource.report_id));throw new Error('جار فتح التقرير الأصلي.');}}
     draftKey=editId?user.id+':report:'+editId:agendaSource?user.id+':agenda:'+agendaSource.id:user.id;
     await loadExtensionAccess();
+    await loadHappiness(client);
     await loadExchange(client,user);
     const {data:programs,error:programError}=await client.from('support_programs').select('id,title,starts_at,status,workshop_type,executing_agency,hosting_entity').order('starts_at',{ascending:false});
     if(!programError){centerPrograms=(programs||[]).filter(p=>p.status!=='cancelled');for(const p of centerPrograms){const option=element('option',p.title);option.value=p.id;document.getElementById('centerProgramId').append(option);}}
@@ -300,3 +305,4 @@ function previewExisting(){
  attachmentOrder.forEach((key,index)=>{const old=retainedAttachments.find(f=>f.path===key),file=old||attachments.find(f=>'new:'+localFileKey(f)===key);if(!file)return;const row=element('div'),a=element('a','معاينة '+file.name);row.className='photo-actions';let url;if(old){a.href='#';a.onclick=async ev=>{ev.preventDefault();try{const {data,error}=await client.storage.from(old.bucket||'school-report-files').download(old.path);if(error)throw error;const u=URL.createObjectURL(data);attachmentPreviewUrls.push(u);let frame=row.querySelector('iframe');if(!frame){frame=element('iframe');frame.title='معاينة '+file.name;frame.style.cssText='width:100%;height:420px;border:1px solid #d2ded8';row.append(frame);}frame.src=u;}catch(e){message(e.message,true);}};}else{url=URL.createObjectURL(file);attachmentPreviewUrls.push(url);a.href=url;}a.target='_blank';a.rel='noopener';row.append(element('span','المرفق '+(index+1)+': '),a,item('المرفق '+file.name,()=>{if(old)retainedAttachments=retainedAttachments.filter(f=>f.path!==key);else attachments=attachments.filter(f=>'new:'+localFileKey(f)!==key);}),replacementButton('المرفق '+file.name,'.pdf',f=>replacePDF(key,f)));for(const [label,delta]of [['تقديم المرفق',-1],['تأخير المرفق',1]]){const button=element('button',label);button.type='button';button.disabled=saving||!!pending||index+delta<0||index+delta>=attachmentOrder.length;button.onclick=()=>{[attachmentOrder[index],attachmentOrder[index+delta]]=[attachmentOrder[index+delta],attachmentOrder[index]];previewExisting();void autosave();};row.append(button);}box.append(row);});
  document.getElementById('attachmentCount').textContent=(retainedAttachments.length+attachments.length)+' ملفات PDF مرفقة';
 }
+
