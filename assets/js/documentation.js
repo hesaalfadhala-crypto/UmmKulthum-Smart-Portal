@@ -35,6 +35,53 @@ const saveButton = document.getElementById('save');
 const clearButton = document.getElementById('clear');
 const editButton = document.getElementById('editDraft');
 const status = document.getElementById('saveStatus');
+const newDraftButton=element('button','بدء توثيق جديد مع الاحتفاظ بالمسودة السابقة');
+newDraftButton.type='button';newDraftButton.className='secondary';
+document.getElementById('pendingRecovery').append(newDraftButton);
+const parkedDraftsBox=element('section');parkedDraftsBox.setAttribute('aria-label','المسودات السابقة المحفوظة');
+document.getElementById('pendingRecovery').after(parkedDraftsBox);
+let parkedDrafts=[];
+async function renderParkedDrafts(){
+ parkedDraftsBox.replaceChildren();
+ if(editId||agendaId)return;
+ parkedDrafts=await readDraft(user.id+':parked-documentation')||[];
+ for(const [index,snapshot] of parkedDrafts.entries()){
+  const button=element('button','استكمال المسودة السابقة: '+(snapshot.data?.activity||'توثيق'));
+  button.type='button';button.className='secondary';button.disabled=saving;
+  button.onclick=async()=>{
+   if(saving||!ready)return;
+   saving=true;freeze();
+   try{
+    await writeQueue.catch(()=>{});
+    const current=draft();
+    // Keep both drafts recoverable even if a later write or navigation fails.
+    const next=parkedDrafts.filter((_,i)=>i!==index);
+    if(current.pending||current.data.activity||current.files.length||current.attachments.length)next.push(current);
+    await writeDraft(user.id+':parked-documentation',[...next,snapshot]);
+    await writeDraft(draftKey,snapshot);
+    await writeDraft(user.id+':parked-documentation',next);
+    location.assign('documentation.html');
+   }catch(e){message(e.message,true);}
+   finally{saving=false;freeze();}
+  };
+  parkedDraftsBox.append(button);
+ }
+}
+newDraftButton.addEventListener('click',async()=>{
+ if(!ready||saving||editId||agendaId)return;
+ saving=true;freeze();
+ try{
+  await writeQueue.catch(()=>{});
+  const snapshot=draft(),key=user.id+':parked-documentation';
+  const previous=await readDraft(key)||[];
+  const next=previous.filter(s=>s.requestId!==snapshot.requestId);
+  next.push(snapshot);
+  await writeDraft(key,next);
+  await removeDraft(draftKey);
+  location.assign('documentation.html');
+ }catch(e){message('تعذر الاحتفاظ بالمسودة السابقة؛ لم يتم مسحها. '+e.message,true);}
+ finally{saving=false;freeze();}
+});
 const groups = { areas: 'areas', projects: 'project', committees: 'committee', targets: 'target', reportSupervisors:'supervisor' };
 const editId=new URLSearchParams(location.search).get('edit');
 if(editId){saveButton.classList.add('save-edits');document.body.classList.add('editing-report');}
@@ -57,6 +104,8 @@ function freeze() {
     images.disabled = !ready || saving || !!pending;document.getElementById('attachments').disabled=images.disabled;
     saveButton.disabled = !ready || saving;
     clearButton.disabled = !ready || saving || !!pending?.sent;
+    newDraftButton.hidden=!!editId||!!agendaId;newDraftButton.disabled=!ready||saving;
+    parkedDraftsBox.querySelectorAll('button').forEach(b=>b.disabled=!ready||saving);
     document.querySelectorAll('#retainedFiles button').forEach(b=>b.disabled=!ready||saving||!!pending);
     editButton.hidden = !pending;
     editButton.disabled=!ready||saving;
@@ -286,6 +335,7 @@ try {
     if(!saved&&new URLSearchParams(location.search).get('project')==='recognition'){document.querySelector('#recognitionProjectOption input').checked=true;document.getElementById('type').value='فعالية';preview();}
     if(!saved&&!editId&&!agendaSource){suggestDepartment(document.getElementById('department'),profile);preview();}
     previewPhotos(); ready = true; freeze();
+    await renderParkedDrafts();
     if(pending)await resumePendingDraft();
 } catch (e) {
     if(e.redirect){}else{message(e.message, true);
