@@ -2,7 +2,7 @@ import {isSession} from './professional-session-model.js?v=20261103-session';
 import {sessionCanvases} from './professional-session-report.js?v=20261103-session';
 import {isPostDialogue} from './post-dialogue-model.js?v=20261103-dialogue';
 import {postDialogueCanvases} from './post-dialogue-report.js?v=20261103-dialogue';
-import {isHappiness,happinessFields,HAPPINESS_TITLE} from './happiness-model.js?v=20261102-happiness';
+import {isHappiness,happinessFields,HAPPINESS_TITLE} from './happiness-model.js?v=20261104-audit';
 import {isValuesReport} from './values-project-model.js?v=20261101-values';
 import {valuesProjectCanvases} from './values-project-report.js?v=20261101-values';
 import {isExchangeReport as isExchange} from './exchange-visit-model.js';
@@ -25,7 +25,7 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
  if(isPostDialogue(record.data))return postDialogueCanvases(record,{createCanvas,logo});
  if(isValuesReport(record.data))return valuesProjectCanvases(record,{createCanvas,logo,photos});
  if(isExchange(record.data))return exchangeCanvases(record,{createCanvas,logo,photos});
- const d=record.data,happy=isHappiness(d);
+ const d=record.data,happy=isHappiness(d)&&d.happiness?.schemaVersion===1;
  const fields=happy?happinessFields(d):[['المرفقات',(record.attachment_files||[]).map(f=>f.name)],...(isRecognition(d)?reportFields(d):[['النوع / القسم',[d.type,d.department]],['المنفذة / التاريخ',[d.executor,d.date,d.location]],...reportFields(d)])];
  if(!happy&&!isRecognition(d)&&d.type==='ورشة تدريبية'&&!d.executionScope){fields.push(['نوع الورشة',d.workshopType==='external'?'خارجية':d.workshopType==='internal'?'داخلية':''],['الجهة المنفذة',d.executingAgency]);}if(!happy&&!isRecognition(d)&&d.type==='ورشة تدريبية')fields.push(['المشاركات الفعلية',d.trainingBeneficiaries==null||d.trainingBeneficiaries===''?'':String(d.trainingBeneficiaries)]);
  if(!happy&&!isRecognition(d)&&d.type==='مسابقة وإنجاز طلابي')fields.push(...[['نوع التوثيق',d.reportTypeLabel||'مسابقة'],['اسم المسابقة أو الإنجاز',d.docCompetitionName],['المدرسة أو الجهة الخارجية',d.externalSchool],['نوع المسابقة',d.docCompetitionType],['الجهة المنظمة',d.docCompetitionOrganizer],['الجهة المستضيفة',d.docCompetitionHost],['المستوى',d.docCompetitionLevel],['الطالبات المشاركات',d.docCompetitionStudents],['النتيجة / المركز',d.docCompetitionResult],['تفاصيل الإنجاز',d.docCompetitionDetails]]);
