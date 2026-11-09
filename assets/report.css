@@ -9,3 +9,5 @@ article{background:#fff;color:#000000;font:400 11.5pt/1.65 Cairo,Tahoma,Arial,sa
 
 
 .attachment-previews{margin-top:24px;color:#000;font-family:Cairo,Tahoma,Arial,sans-serif}.attachment-previews section{background:#fff;padding:18px;margin:20px 0}.attachment-previews h2{color:#18574D;font-weight:700}.attachment-previews canvas{display:block;width:100%;height:auto;margin:14px auto;background:white;box-shadow:0 1px 6px #0002}.attachment-previews button{display:block;margin-top:12px}@media print{.attachment-previews section{padding:0;break-before:page}.attachment-previews h2,.attachment-previews button{display:none}.attachment-previews canvas{box-shadow:none;max-width:100%;height:auto;break-after:page;break-inside:avoid}}
+
+.report-classification{width:100%;border-collapse:collapse;margin:10px 0 14px;break-inside:avoid}.report-classification th,.report-classification td{border:1px solid #dce6e2;padding:6px 9px;vertical-align:top}.report-classification th{width:32%;text-align:start}

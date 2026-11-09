@@ -1,4 +1,5 @@
-import {client,requireUser,fetchRecords,element,academicYear} from './portal-data.js?v=20261024-meetings';
+import {TEACHING_CONTENTS_LABEL,teachingContentLabels} from './teaching-contents.js';
+import {client,requireUser,fetchRecords,element,academicYear,normalize} from './portal-data.js?v=20261024-meetings';
 import {departmentReports,teacherGroups} from './department-reports-model.js?v=20261031';
 const $=id=>document.getElementById(id);let context,records=[],busy=false;
 const link=(text,href)=>{const a=element('a',text,'button');a.href=href;return a;};
@@ -11,7 +12,7 @@ function render(){
   const details=element('details',undefined,'teacher-reports'),summary=element('summary');summary.append(element('strong',p.name),element('span',String(p.reports.length)+' تقرير'));details.append(summary);
   if(p.job_title)details.append(element('p',p.job_title));
   if(!p.reports.length)details.append(element('p','لا توجد تقارير منشورة مطابقة للفلاتر.'));
-  for(const r of p.reports){const card=element('article',undefined,'report-item');card.append(element('h3',r.activity||r.details?.activity||'تقرير'),element('p',[r.activity_type,r.activity_date||String(r.created_at).slice(0,10),academicYear(r)].filter(Boolean).join(' · ')));const meeting=r.activity_type==='اجتماع',href=(meeting?'meeting.html':'report.html')+'?id='+encodeURIComponent(r.id),actions=element('div',undefined,'actions');actions.append(link('عرض التقرير',href),link('طباعة',href+'&action=print'),link('تنزيل PDF',href+'&action=pdf'));card.append(actions);details.append(card);}box.append(details);
+  for(const r of p.reports){const card=element('article',undefined,'report-item');card.append(element('h3',r.activity||r.details?.activity||'تقرير'),element('p',[r.activity_type,r.activity_date||String(r.created_at).slice(0,10),academicYear(r)].filter(Boolean).join(' · ')));const contents=teachingContentLabels(normalize(r).data);if(contents.length)card.append(element('p',TEACHING_CONTENTS_LABEL+' — '+contents.join(' • ')));const meeting=r.activity_type==='اجتماع',href=(meeting?'meeting.html':'report.html')+'?id='+encodeURIComponent(r.id),actions=element('div',undefined,'actions');actions.append(link('عرض التقرير',href),link('طباعة',href+'&action=print'),link('تنزيل PDF',href+'&action=pdf'));card.append(actions);details.append(card);}box.append(details);
  }
  if(!box.children.length)box.append(element('p','لا توجد مستخدمات أو تقارير للقسم المحدد.'));
 }

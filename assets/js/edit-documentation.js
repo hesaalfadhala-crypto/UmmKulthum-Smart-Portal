@@ -1,6 +1,6 @@
 import {validateExchange} from './exchange-visit-model.js';
 import {orderedAttachmentRefs} from './report-media.js?v=20261025-flow';
-import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js?v=20261101-exchange';
+import {databaseRecord,preparePhoto,PHOTO_BUCKET} from './save-documentation.js?v=20261109-teaching';
 import {validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
 import {validateNewDetails} from './recognition-model.js?v=20261021-unified';
 

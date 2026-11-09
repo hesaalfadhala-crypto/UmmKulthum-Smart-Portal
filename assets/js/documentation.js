@@ -11,16 +11,17 @@ import {installExchange,loadExchange,collectExchange,restoreExchange,updateExcha
 import {validateExchange,isExchange,EXCHANGE_TYPE} from './exchange-visit-model.js';
 import {localFileKey,uniqueFiles,attachmentKeys,syncAttachmentOrder} from './report-media.js?v=20261025-flow';
 if(new URLSearchParams(location.search).get('meeting')==='1')location.replace('meeting.html');
+import {TEACHING_AREA,TEACHING_CONTENTS,teachingContentIds,teachingContentLabels} from './teaching-contents.js';
 import {appendReportText} from './report-text.js?v=20261021-spacing';
 import {suggestDepartment} from './staff-display.js?v=20261019-staff';
 import {agendaEvent} from './agenda-data.js';
 import {renderSignatures,selectedSupervisors} from './report-signatures.js?v=20261102-happiness';
-import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261101-exchange';
+import {editContext,editableData,saveReportEdit} from './edit-documentation.js?v=20261109-teaching';
 import {installOtherChoices,displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261101-values';
 import {installExtensions,loadExtensionAccess,collectExtensions,updateExtensions,restoreExtensions} from './documentation-extensions.js?v=20261021-spacing';
 import {isRecognition,validateNewDetails} from './recognition-model.js?v=20261021-unified';
 import { client, requireUser, element, fetchRecord, normalize, loadPhotos } from './portal-data.js?v=20261101-values';
-import { checkSaveSchema, saveSubmission, databaseRecord } from './save-documentation.js?v=20261101-exchange';
+import { checkSaveSchema, saveSubmission, databaseRecord } from './save-documentation.js?v=20261109-teaching';
 import { readDraft, writeDraft, removeDraft } from './draft-store.js';
 
 installExtensions();
@@ -32,6 +33,16 @@ installPostDialogue({state:()=>({author:profile?.full_name||'',jobTitle:profile?
 for(const label of ['مسابقة','إنجاز'])document.getElementById('type').add(new Option(label,label));
 const form = document.querySelector('.form');
 const otherChoices=installOtherChoices(form);
+const teachingContentsField = document.getElementById('teachingContentsField');
+const teachingChecks = teachingContentsField.querySelector('.teaching-content-checks');
+for (const item of TEACHING_CONTENTS) {
+    const label = element('label',undefined,'check');
+    const input = element('input');
+    input.type = 'checkbox';
+    input.value = item.id;
+    label.append(input,document.createTextNode(item.label));
+    teachingChecks.append(label);
+}
 const fields = [...form.querySelectorAll('input:not([type=file]),select,textarea')];
 const images = document.getElementById('images');
 const saveButton = document.getElementById('save');
@@ -85,7 +96,7 @@ newDraftButton.addEventListener('click',async()=>{
  }catch(e){message('تعذر الاحتفاظ بالمسودة السابقة؛ لم يتم مسحها. '+e.message,true);}
  finally{saving=false;freeze();}
 });
-const groups = { areas: 'areas', projects: 'project', committees: 'committee', targets: 'target', reportSupervisors:'supervisor' };
+const groups = { areas: 'areas', teachingContents: 'teaching-content', projects: 'project', committees: 'committee', targets: 'target', reportSupervisors:'supervisor' };
 const editId=new URLSearchParams(location.search).get('edit');
 if(editId){saveButton.classList.add('save-edits');document.body.classList.add('editing-report');}
 let originalReport=null, retainedPhotos=[], retainedAttachments=[], existingPhotos=[], attachmentOrder=[], draftKey;
@@ -123,6 +134,7 @@ function collect() {
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => { data[el.id] = el.value.trim(); });
     for (const [key, cls] of Object.entries(groups))
         data[key] = [...form.querySelectorAll('.' + cls + '-checks input:checked')].map(el => el.value);
+    data.teachingContents = teachingContentIds(data);
     const result=otherChoices.collect(collectExchange(collectExtensions(data)));if(agendaSource)result.agendaEventId=agendaSource.id;return collectSession(collectPostDialogue(collectHappiness(collectValuesProject(result))));
 }
 function output(id, value) {
@@ -144,6 +156,9 @@ function preview() {
         docCompetitionResult: 'pCompetitionResult', docCompetitionDetails: 'pCompetitionDetails',
         reserveClass: 'pReserveClass', reservePeriod: 'pReservePeriod', originalTeacher: 'pOriginalTeacher',
         reserveImplementation: 'pReserveImplementation' })) output(id, d[key]);
+    teachingContentsField.hidden = !raw.areas?.includes(TEACHING_AREA);
+    output('pTeachingContents',teachingContentLabels(d));
+    document.getElementById('pTeachingContents').closest('.report-section').hidden = !teachingContentIds(d).length;
     output('pTarget', [...d.targets, d.target].filter(Boolean).join(' • '));
     const competition = !isRecognition(d)&&d.type === 'مسابقة وإنجاز طلابي', reserve = !isRecognition(d)&&d.type === 'حصة احتياط';
     document.getElementById('trainingDocumentationFields').hidden=d.type!=='ورشة تدريبية';updateExtensions(raw);
@@ -181,6 +196,7 @@ function restore(data) {
     data={...data,type:canonicalProject(data.type),projects:(data.projects||[]).map(canonicalProject)};
     if(isExchange(data))data={...data,type:EXCHANGE_TYPE};
     data={...data,executingEntity:data.executingEntity??data.executingAgency??'',reportSupervisors:selectedSupervisors(data)};
+    data.teachingContents = teachingContentIds(data);
     if(editId){for(const el of fields.filter(el=>el.tagName==='SELECT'))if(data[el.id]&&!Array.from(el.options).some(o=>o.value===String(data[el.id]))){const o=element('option',String(data[el.id]));o.value=String(data[el.id]);el.append(o);}
     for(const [key,cls]of Object.entries(groups))for(const value of data[key]||[])if(!Array.from(form.querySelectorAll('.'+cls+'-checks input')).some(i=>i.value===value)){const label=element('label'),input=element('input');input.type='checkbox';input.value=value;label.append(input,document.createTextNode(value));form.querySelector('.'+cls+'-checks')?.append(label);}}
     fields.filter(el => el.id && el.type !== 'checkbox').forEach(el => {

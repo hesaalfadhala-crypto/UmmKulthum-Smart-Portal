@@ -1,3 +1,4 @@
+import {teachingContentIds} from './teaching-contents.js';
 import {validateExchange} from './exchange-visit-model.js';
 import {orderedAttachmentRefs} from './report-media.js?v=20261025-flow';
 import {displayChoices,validateOtherChoices} from './documentation-choices.js?v=20261021-recognition';
@@ -19,6 +20,9 @@ export async function findSubmission(client, userId, requestId) {
 }
 
 export function databaseRecord(userId, submission) {
+    const {teachingContents,...details} = submission.data;
+    const ids = teachingContentIds(submission.data);
+    if (ids.length) details.teachingContents = ids;
     const d = displayChoices(submission.data);
     return {
         execution_scope:d.executionScope||null,organizing_entity:d.executionScope==='external'?d.organizingEntity||null:null,hosting_entity:d.executionScope==='external'?d.hostingEntity||null:null,
@@ -42,7 +46,7 @@ export function databaseRecord(userId, submission) {
         workshop_type:d.type==='ورشة تدريبية'?(d.workshopType||null):null,executing_agency:d.type==='ورشة تدريبية'&&d.workshopType==='external'?(d.executingAgency||null):null,
         support_program_id: d.type==='ورشة تدريبية'?(d.centerProgramId||null):null,
         training_beneficiaries: d.type==='ورشة تدريبية'&&d.trainingBeneficiaries!=null&&d.trainingBeneficiaries!==''?Number(d.trainingBeneficiaries):null,
-        attachment_files:orderedAttachmentRefs(submission),details: submission.data, photo_files: submission.uploaded || []
+        attachment_files:orderedAttachmentRefs(submission),details, photo_files: submission.uploaded || []
     };
 }
 
