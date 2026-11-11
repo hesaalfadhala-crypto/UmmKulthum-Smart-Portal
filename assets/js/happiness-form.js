@@ -1,5 +1,5 @@
 import {HAPPINESS,HAPPINESS_ACTIVITIES,isHappiness,happinessData} from './happiness-model.js?v=20261102-happiness';
-import {renderHappinessReport} from './happiness-report.js?v=20261102-happiness';
+import {renderHappinessReport} from './happiness-report.js?v=20261111-filenames';
 let canManage=false,api,staff=[],legacy={},active=false;const $=id=>document.getElementById(id);
 const chosen=()=>[...document.querySelectorAll('#hStaff input:checked')].map(i=>i.value);
 export function installHappiness(provider){api=provider;const type=$('type');if(![...type.options].some(o=>o.value===HAPPINESS))type.add(new Option(HAPPINESS,HAPPINESS));document.querySelectorAll('.committee-checks input').forEach(i=>{if(i.value===HAPPINESS)i.closest('label').remove();});

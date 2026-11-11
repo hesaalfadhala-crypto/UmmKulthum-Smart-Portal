@@ -1,5 +1,5 @@
 import {POST_DIALOGUE,isPostDialogue,currentAcademicYear,dialogueDay} from './post-dialogue-model.js?v=20261103-dialogue';
-import {renderPostDialogue} from './post-dialogue-report.js?v=20261103-dialogue';
+import {renderPostDialogue} from './post-dialogue-report.js?v=20261111-filenames';
 import {SUPERVISORS} from './report-signatures.js?v=20261102-happiness';
 const $=id=>document.getElementById(id);let api,staff=[],owner,canManage=false,active=false,timer;
 export function installPostDialogue(provider){api=provider;if(![...$('type').options].some(o=>o.value===POST_DIALOGUE))$('type').add(new Option(POST_DIALOGUE,POST_DIALOGUE));const box=document.createElement('section');box.id='postDialogueInputs';box.hidden=true;

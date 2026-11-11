@@ -1,8 +1,9 @@
+import {saveReportPDF} from './report-filename.js';
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
 import {drawSignatures} from './report-signatures.js?v=20261021-spacing';
 import {appendAttachments} from './pdf-attachments.js?v=20261017-edit-complete';
 import {extraSections} from './recognition-model.js?v=20261021-unified';
-import {packPDF} from './pdf-export.js?v=20261021-spacing';
+import {packPDF} from './pdf-export.js?v=20261111-filenames';
 async function image(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('تعذر تحميل صور التقرير. أعيدي المحاولة.');const src=URL.createObjectURL(await r.blob());try{const img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('تعذر قراءة صورة التقرير.'));img.src=src;});return img;}finally{URL.revokeObjectURL(src);}}
 export async function renderOnePagePDF(record){await ensureReportFonts();
  await document.fonts.ready;
@@ -31,4 +32,4 @@ export async function renderOnePagePDF(record){await ensureReportFonts();
  g.fillStyle='#fff';g.fillRect(0,0,W,H);layout(size,true);g.strokeStyle='#dce5e3';g.beginPath();g.moveTo(M,1640);g.lineTo(W-M,1640);g.stroke();g.fillStyle='#000000';g.font='18px "Cairo", Tahoma, Arial';g.textAlign='right';g.fillText('بوابة أم كلثوم الذكية · رقم التوثيق '+String(record.id),W-M,1675);g.textAlign='left';g.fillText('صفحة 1 من 1',M,1675);
  return packPDF([Uint8Array.from(atob(c.toDataURL('image/jpeg',.96).split(',')[1]),x=>x.charCodeAt(0))]);
 }
-export async function exportOnePagePDF(record){const bytes=await appendAttachments(await renderOnePagePDF(record),record.attachment_files),url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),a=document.createElement('a');a.href=url;a.download='تقرير-صفحة-واحدة-'+String(record.id)+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),20000);}
+export async function exportOnePagePDF(record){const bytes=await appendAttachments(await renderOnePagePDF(record),record.attachment_files);saveReportPDF(bytes,record);}

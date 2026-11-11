@@ -1,5 +1,5 @@
 import {SESSION,SESSION_GOALS,isSession,currentAcademicYear,dialogueDay} from './professional-session-model.js?v=20261103-session';
-import {renderSession} from './professional-session-report.js?v=20261103-session';
+import {renderSession} from './professional-session-report.js?v=20261111-filenames';
 import {SUPERVISORS} from './report-signatures.js?v=20261102-happiness';
 const $=id=>document.getElementById(id);let api,staff=[],owner,canManage=false,timer;
 export function installSession(provider){api=provider;if(![...$('type').options].some(o=>o.value===SESSION))$('type').add(new Option(SESSION,SESSION));const box=document.createElement('section');box.id='sessionInputs';box.hidden=true;

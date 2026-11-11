@@ -1,7 +1,7 @@
 import {meetingRPC,requireUser,prepareMeetingFile,uploadMeetingFiles,signedMeetingFiles,downloadMeetingFile} from './meeting-data.js?v=20261024-meetings';
 import {MEETING_KINDS,MEETING_AREAS,ATTENDANCE,ACTION_STATES,today,academicYear,inDepartment,addParticipant,attendanceCounts,editPayload,meetingHref} from './meeting-model.js?v=20261024-meetings';
 import {SUPERVISORS} from './report-signatures.js?v=20261021-spacing';
-import {renderMeeting,previewMeetingPDF,outputMeeting} from './meeting-report.js?v=20261024-meetings';
+import {renderMeeting,previewMeetingPDF,outputMeeting} from './meeting-report.js?v=20261111-filenames';
 const $=id=>document.getElementById(id),el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 let catalog,user,bundle=null,current=null,participants=[],agenda=[],recommendations=[],retained=[],pending=[],req=crypto.randomUUID(),frozen=null,busy=false,previewing=false,previewToken=0,urls=[];
 const note=(text,error=false)=>{$('status').textContent=text;$('status').className=error?'status error':'status';};

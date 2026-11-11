@@ -1,3 +1,4 @@
+import {saveReportPDF} from './report-filename.js';
 import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
 import {drawSignatures} from './report-signatures.js?v=20261021-spacing';
 import {appendAttachments} from './pdf-attachments.js?v=20261017-edit-complete';
@@ -163,4 +164,4 @@ export async function renderPDF(record) {await ensureReportFonts();
     const pages = canvases.map(c => Uint8Array.from(atob(c.toDataURL('image/jpeg', .94).split(',')[1]), x => x.charCodeAt(0)));
     return packPDF(pages);
 }
-export async function exportPDF(record) { const bytes = await appendAttachments(await renderPDF(record),record.attachment_files); const blob = new Blob([bytes], { type: 'application/pdf' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'تقرير-' + record.data.activity.replace(/[\\/:*?"<>|]/g, '').slice(0, 70) + '-' + String(record.id).slice(0, 8) + '.pdf'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 20000); }
+export async function exportPDF(record) { const bytes = await appendAttachments(await renderPDF(record),record.attachment_files); saveReportPDF(bytes,record); }

@@ -1,5 +1,5 @@
 import {VALUES_PROJECT,isValuesType,canonicalProject,validateValuesProject} from './values-project-model.js?v=20261101-values';
-import {renderValuesReport} from './values-project-report.js?v=20261101-values';
+import {renderValuesReport} from './values-project-report.js?v=20261111-filenames';
 import {localFileKey} from './report-media.js?v=20261025-flow';
 let api,phases=new Map(),urls=[],active=false,labels;
 const $=id=>document.getElementById(id),key=f=>f.path||'new:'+localFileKey(f);

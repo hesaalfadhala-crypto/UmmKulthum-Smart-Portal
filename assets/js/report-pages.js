@@ -1,10 +1,11 @@
+import {saveReportPDF} from './report-filename.js';
 import {isSession} from './professional-session-model.js?v=20261103-session';
-import {sessionCanvases} from './professional-session-report.js?v=20261103-session';
+import {sessionCanvases} from './professional-session-report.js?v=20261111-filenames';
 import {isPostDialogue} from './post-dialogue-model.js?v=20261103-dialogue';
-import {postDialogueCanvases} from './post-dialogue-report.js?v=20261103-dialogue';
+import {postDialogueCanvases} from './post-dialogue-report.js?v=20261111-filenames';
 import {isHappiness,happinessFields,HAPPINESS_TITLE} from './happiness-model.js?v=20261104-audit';
 import {isValuesReport} from './values-project-model.js?v=20261101-values';
-import {valuesProjectCanvases} from './values-project-report.js?v=20261101-values';
+import {valuesProjectCanvases} from './values-project-report.js?v=20261111-filenames';
 import {isExchangeReport as isExchange} from './exchange-visit-model.js';
 import {exchangeCanvases} from './exchange-visit-pdf.js';
 import {appendAttachments} from './pdf-attachments.js?v=20261023-embedded';
@@ -13,7 +14,7 @@ import {ensureReportFonts} from './report-fonts.js?v=20261019-cairo';
 import {drawSignatures} from './report-signatures.js?v=20261102-happiness';
 import {extraSections,isRecognition,reportFields} from './recognition-model.js?v=20261109-teaching';
 import {TEACHING_CONTENTS_LABEL,teachingContentIds} from './teaching-contents.js';
-import {packPDF} from './pdf-export.js?v=20261021-spacing';
+import {packPDF} from './pdf-export.js?v=20261111-filenames';
 // Canvas pixels scale to A4 at 0.48 pt/px: 14px ≈ 6.7pt; 12px ≈ 5.8pt; 22px ≈ 10.6pt.
 export const REPORT_SPACING=Object.freeze({lineHeight:1.4,paragraph:6,heading:6,section:12});
 export const PAGE_MODES=['auto','one','two'];
@@ -80,7 +81,7 @@ export function reportCanvases(record,mode='auto',{createCanvas,logo,photos=[]})
 async function image(url){const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('تعذر تحميل صورة؛ أعيدي المحاولة قبل الطباعة.');const u=URL.createObjectURL(await response.blob());try{const im=new Image();im.src=u;await im.decode();return im;}finally{URL.revokeObjectURL(u);}}
 export async function prepareReport(record,mode){await ensureReportFonts();await document.fonts.load('26px "Cairo"');await document.fonts.load('bold 26px "Cairo"');await document.fonts.ready;const [logo,...photos]=await Promise.all([image('school-logo.png'),...record.photos.map(p=>image(p.url))]);return reportCanvases(record,mode,{logo,photos,createCanvas:(w,h)=>{const c=Object.assign(document.createElement('canvas'),{width:w*2,height:h*2});c.getContext('2d').scale(2,2);return c;}});}
 export function reportPDF(pages){return packPDF(pages.map(c=>Uint8Array.from(atob(c.toDataURL('image/jpeg',.96).split(',')[1]),c=>c.charCodeAt(0))),pages[0]?.width||W,pages[0]?.height||H);}
-export async function outputReport(record,mode,print=false,{includeAttachments=true}={}){const reportPages=await prepareReport(record,mode),attached=includeAttachments&&!isValuesReport(record.data)&&!isPostDialogue(record.data)&&!isSession(record.data)?(record.attachment_files||[]):[];if(!print){const bytes=await appendAttachments(reportPDF(reportPages),attached);const u=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'})),a=document.createElement('a');a.href=u;a.download='تقرير-'+record.id+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(u),30000);return;}
+export async function outputReport(record,mode,print=false,{includeAttachments=true}={}){const reportPages=await prepareReport(record,mode),attached=includeAttachments&&!isValuesReport(record.data)&&!isPostDialogue(record.data)&&!isSession(record.data)?(record.attachment_files||[]):[];if(!print){const bytes=await appendAttachments(reportPDF(reportPages),attached);saveReportPDF(bytes,record);return;}
  const pages=[...reportPages,...await attachmentCanvases(attached)];
  const frame=document.createElement('iframe');frame.title='طباعة التقرير';frame.style.cssText='position:fixed;width:1px;height:1px;left:-10000px';document.body.append(frame);const doc=frame.contentDocument;doc.open();doc.write('<!doctype html><html dir="rtl"><head><title>طباعة التقرير</title><style>@page{size:A4 portrait;margin:0}@page landscapePage{size:A4 landscape;margin:0}html,body{margin:0;padding:0}.page{width:210mm;height:297mm;box-sizing:border-box;break-after:page;page-break-after:always}.page:last-child{break-after:auto;page-break-after:auto}.page img{display:block;width:100%;height:100%;object-fit:contain;background:white}</style></head><body></body></html>');doc.close();for(const c of pages){const div=doc.createElement('div'),img=doc.createElement('img');div.className='page';if(c.width>c.height){div.style.width='297mm';div.style.height='210mm';div.style.page='landscapePage';}img.src=c.toDataURL('image/png');div.append(img);doc.body.append(div);}await Promise.all([...doc.images].map(im=>im.decode()));frame.contentWindow.addEventListener('afterprint',()=>frame.remove(),{once:true});frame.contentWindow.focus();frame.contentWindow.print();}
 
