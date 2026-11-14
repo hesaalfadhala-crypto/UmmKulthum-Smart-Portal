@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>استيراد الزيارات من PDF | بوابة أم كلثوم</title><link rel="stylesheet" href="assets/visits.css"><link rel="stylesheet" href="assets/report-fonts.css"><link rel="stylesheet" href="assets/visit-import.css"></head>
+<body><header><img src="school-logo.png" alt="هوية مدرسة أم كلثوم"><p>مدرسة أم كلثوم الابتدائية الإعدادية للبنات</p></header><main><nav><a href="visits.html">الزيارات الصفية</a><a href="visit-analysis.html">التحليل والتقارير</a><span id="identity"></span></nav>
+<h1>استيراد الزيارات من PDF</h1><p class="hint">ارفعي الاستمارات، راجعي البيانات بجانب الأصل، ثم اعتمدي كل استمارة. استمارة كل زائرة مستقلة حتى عند حضور الحصة نفسها.</p>
+<p id="status" class="status" role="status" aria-live="polite">جار التحقق من الصلاحيات…</p>
+<section id="workspace" hidden><section class="panel"><h2>١. رفع الاستمارات</h2>
+<form id="uploadForm"><div class="grid"><label>ملف الاستمارات PDF — حتى ٥٠ ميجابايت و١٠٠ صفحة<input id="pdfFile" type="file" accept="application/pdf,.pdf" required></label><label>عدد صفحات كل استمارة<select id="pagesPerForm"><option value="2">صفحتان: التقييم والمحاور البعدية</option><option value="1">صفحة واحدة</option></select></label></div>
+<p class="hint">احتفظي بصفحات كل استمارة متتابعة في الملف. تُرسل نسخة إلى خدمة القراءة التلقائية لاستخراج البيانات، وتبقى المراجعة مطلوبة قبل حفظ أي زيارة.</p><button id="upload" class="primary">رفع الملف وقراءة الاستمارات</button></form>
+<p id="serviceStatus" class="hint"></p><div id="progress" aria-live="polite"></div>
+<div class="toolbar"><button id="resumeExtraction" hidden>استكمال قراءة الملف</button><button id="manual" hidden>إضافة استمارة للمراجعة يدويًا</button></div></section>
+<section class="panel"><h2>الملفات المحفوظة</h2><div id="history"></div></section>
+<section id="reviewSection" hidden><h2>٢. مراجعة الاستمارات واعتمادها</h2><p id="summary" aria-live="polite"></p><div class="import-layout"><aside class="panel"><h3>الاستمارات</h3><div id="items"></div></aside><section class="panel"><div id="review"></div></section><section class="panel source"><h3>الاستمارة الأصلية</h3><a id="openSource" target="_blank" rel="noopener">فتح الأصل في نافذة مستقلة</a><iframe id="source" title="الاستمارة الأصلية بصيغة PDF"></iframe></section></div></section>
+</section></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script><script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script><script type="module" src="assets/js/visit-import-ui.js?v=20261115"></script></body></html>
